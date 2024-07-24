@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
-import {getTranslation, TransText} from 'react-native-translation';
+import { useTranslation } from 'react-i18next';
 // import {Icon as ElementIcon} from '@rneui/base';
 import {connect} from 'react-redux';
 import {
@@ -48,7 +48,7 @@ class SettingsComponent extends Component {
                     leftContent={
                         <Pressable onPress={() => this._closeModal()}>
                             <Icon
-                                name="ios-close-outline"
+                                name="close-outline"
                                 size={32}
                                 color="white"
                             />
@@ -279,10 +279,11 @@ class SettingsComponent extends Component {
 
                     {this.props.deleteAccountError !== '' ? (
                         <View>
-                            <TransText
+                            <Text
                                 style={styles.wrongPasswordText}
-                                dictionary={`${lang}.${this.props.deleteAccountError}`}
-                            />
+                            >
+                                useTranslation(`${lang}.${this.props.deleteAccountError}`)
+                            </Text>
                         </View>
                     ) : (
                         ''
@@ -367,30 +368,31 @@ class SettingsComponent extends Component {
                     {/*    size={40}*/}
                     {/*    containerStyle={styles.iconContainer}*/}
                     {/*/>*/}
-                    <TransText
+                    <Text
                         style={styles.innerModalHeader}
-                        dictionary={
+                    >
+                        useTranslation({
                             success
                                 ? `${lang}.settings.success`
                                 : `${lang}.settings.error`
-                        }
-                    />
-                    <TransText
-                        dictionary={
+                        })
+                    </Text>
+                    <Text>
+                        useTranslation({
                             success
                                 ? `${lang}.settings.value-updated`
                                 : `${lang}.settings.value-not-updated`
-                        }
-                    />
+                        })
+                    </Text>
                     <TouchableHighlight
                         style={styles.successButton}
                         activeOpacity={0.9}
                         underlayColor="#00aced"
-                        onPress={() => this._goBack()}>
-                        <TransText
-                            style={styles.buttonText}
-                            dictionary={`${lang}.settings.go-back`}
-                        />
+                        onPress={() => this._goBack()}
+                    >
+                        <Text style={styles.buttonText}>
+                            useTranslation(`${lang}.settings.go-back`)
+                        </Text>
                     </TouchableHighlight>
                 </View>
             );
@@ -411,15 +413,15 @@ class SettingsComponent extends Component {
      * eg Edit Name
      */
     _getHeaderName() {
-        const text = getTranslation(
+        const text = useTranslation(
             `${this.props.lang}.${this.props.dataToEdit.title}`
         );
 
         if (this.props.dataToEdit.key === 'delete-account') {
-            return getTranslation(`${this.props.lang}.settings.warning`);
+            return useTranslation(`${this.props.lang}.settings.warning`);
         }
 
-        const edit = getTranslation(`${this.props.lang}.settings.edit`);
+        const edit = useTranslation(`${this.props.lang}.settings.edit`);
 
         return edit + ' ' + text;
     }

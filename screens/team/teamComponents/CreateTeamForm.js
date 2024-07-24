@@ -74,7 +74,7 @@ class CreateTeamForm extends Component {
                                             marginBottom: 20
                                         }}>
                                         <Icon
-                                            name="ios-information-circle-sharp"
+                                            name="information-circle-sharp"
                                             style={{ marginRight: 8 }}
                                             size={18}
                                             color={Colors.muted}

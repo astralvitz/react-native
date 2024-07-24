@@ -1,12 +1,12 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { View, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { connect } from 'react-redux';
-import { getTranslation } from 'react-native-translation';
-import * as actions from '../../../actions';
-import { Colors, SubTitle, CustomTextInput, Caption } from '../../components';
+import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from "react-i18next";
+import { Colors, SubTitle, CustomTextInput } from '../../components';
 import { StatusMessage } from '.';
+import { sendResetPasswordRequest} from "../../../reducers/auth_reducer";
 
 /**
  * Form field validation with keys for translation
@@ -18,78 +18,75 @@ const ForgotPasswordSchema = Yup.object().shape({
         .required('enter-email')
 });
 
-class ForgotPasswordForm extends Component {
-    state = {
-        isPasswordVisible: false
-    };
-    render() {
-        // translation text
-        const { lang, serverStatusText, isSubmitting } = this.props;
-        const emailTranslation = getTranslation(`${lang}.auth.email-address`);
+const ForgotPasswordForm = () => {
 
-        return (
-            <Formik
-                initialValues={{ email: '' }}
-                validationSchema={ForgotPasswordSchema}
-                onSubmit={values => {
-                    this.props.sendResetPasswordRequest(values.email);
-                }}>
-                {({
-                    handleSubmit,
-                    setFieldValue,
-                    values,
-                    errors,
-                    touched,
-                    handleChange
-                }) => (
-                    <View style={{ flex: 1, justifyContent: 'center' }}>
-                        {/* email input */}
-                        <CustomTextInput
-                            onChangeText={e =>
-                                setFieldValue(
-                                    'email',
-                                    e.trim().toLocaleLowerCase()
-                                )
-                            }
-                            value={values.email}
-                            name="email"
-                            error={
-                                errors.email &&
-                                `${this.props.lang}.auth.${errors.email}`
-                            }
-                            touched={touched.email}
-                            placeholder={emailTranslation}
-                            leftIconName="ios-mail"
-                            keyboardType="email-address"
-                            returnKeyType="done"
-                            multiline
-                        />
-                        <StatusMessage
-                            isSubmitting={isSubmitting}
-                            serverStatusText={serverStatusText}
-                        />
+    const dispatch = useDispatch();
 
-                        <Pressable
-                            disabled={isSubmitting}
-                            onPress={handleSubmit}
-                            style={[styles.buttonStyle]}>
-                            {isSubmitting ? (
-                                <ActivityIndicator color="white" />
-                            ) : (
-                                <SubTitle
-                                    color="accentLight"
-                                    dictionary={`${
-                                        this.props.lang
-                                    }.auth.forgot-password`}>
-                                    Create Account
-                                </SubTitle>
-                            )}
-                        </Pressable>
-                    </View>
-                )}
-            </Formik>
-        );
-    }
+    const { serverStatusText, isSubmitting } = useSelector(state => state.auth);
+
+    const { t } = useTranslation();
+    const emailTranslation = t('auth.email-address');
+    const emailErrorTranslation = t('auth.email-error');
+
+    return (
+        <Formik
+            initialValues={{ email: '' }}
+            validationSchema={ForgotPasswordSchema}
+            onSubmit={values => {
+                dispatch(sendResetPasswordRequest(values.email));
+            }}>
+            {({
+                handleSubmit,
+                setFieldValue,
+                values,
+                errors,
+                touched,
+            }) => (
+                <View style={{ flex: 1, justifyContent: 'center' }}>
+                    {/* email input */}
+                    <CustomTextInput
+                        onChangeText={e =>
+                            setFieldValue(
+                                'email',
+                                e.trim().toLocaleLowerCase()
+                            )
+                        }
+                        value={values.email}
+                        name="email"
+                        error={
+                            errors.email && emailErrorTranslation
+                        }
+                        touched={touched.email}
+                        placeholder={emailTranslation}
+                        leftIconName="mail"
+                        keyboardType="email-address"
+                        returnKeyType="done"
+                        multiline
+                    />
+
+                    <StatusMessage
+                        serverStatusText={serverStatusText}
+                    />
+
+                    <Pressable
+                        disabled={isSubmitting}
+                        onPress={handleSubmit}
+                        style={[styles.buttonStyle]}>
+                        {isSubmitting ? (
+                            <ActivityIndicator color="white" />
+                        ) : (
+                            <SubTitle
+                                color="accentLight"
+                                dictionary={'auth.forgot-password'}
+                            >
+                                Create Account
+                            </SubTitle>
+                        )}
+                    </Pressable>
+                </View>
+            )}
+        </Formik>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -112,19 +109,4 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = state => {
-    return {
-        lang: state.auth.lang,
-        serverStatusText: state.auth.serverStatusText,
-        success: state.auth.success,
-        user: state.auth.user,
-        username: state.auth.username,
-        isSubmitting: state.auth.isSubmitting
-    };
-};
-
-// bind all action creators to AuthScreen
-export default connect(
-    mapStateToProps,
-    actions
-)(ForgotPasswordForm);
+export default ForgotPasswordForm;

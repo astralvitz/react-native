@@ -10,7 +10,7 @@ import {
     Switch,
     View
 } from 'react-native';
-import {getTranslation} from 'react-native-translation';
+import { useTranslation } from 'react-i18next';
 import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as actions from '../../actions';
@@ -47,7 +47,7 @@ class SettingsScreen extends Component {
                         <Pressable
                             onPress={() => this.props.navigation.goBack()}>
                             <Icon
-                                name="ios-chevron-back-outline"
+                                name="chevron-back-outline"
                                 color={Colors.white}
                                 size={24}
                             />
@@ -226,7 +226,8 @@ class SettingsScreen extends Component {
 
                 <ActionSheet
                     closeOnTouchBackdrop={false}
-                    ref={this.actionSheetRef}>
+                    ref={this.actionSheetRef}
+                >
                     <View
                         style={{
                             height: 300,
@@ -389,7 +390,7 @@ class SettingsScreen extends Component {
             case 'delete-account':
                 return (
                     <Icon
-                        name="ios-chevron-forward-outline"
+                        name="chevron-forward-outline"
                         color={Colors.muted}
                         size={24}
                     />
@@ -410,12 +411,12 @@ class SettingsScreen extends Component {
     _toggleSwitch(id, key) {
         const lang = this.props.lang;
 
-        // const alert = getTranslation(`${lang}.settings.alert`);
+        // const alert = useTranslation(`${lang}.settings.alert`);
         let title = '';
         let subtitle = '';
 
-        const ok = getTranslation(`${lang}.settings.ok`);
-        const cancel = getTranslation(`${lang}.settings.cancel`);
+        const ok = useTranslation(`${lang}.settings.ok`);
+        const cancel = useTranslation(`${lang}.settings.cancel`);
 
         // Needs translation
         if (key === 'enable_admin_tagging') {

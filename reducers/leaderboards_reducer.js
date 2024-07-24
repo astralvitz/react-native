@@ -1,21 +1,56 @@
-import {produce} from 'immer';
+import axios from 'axios';
+import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk } from "@reduxjs/toolkit";
 
-const INITIAL_STATE = {
+const initialState = {
     paginated: {
         users: []
     }
 };
 
-export default function (state = INITIAL_STATE, action) {
-    return produce(state, draft => {
-        switch (action.type) {
-            case 'UPDATE_LEADERBOARDS':
-                draft.paginated = action.payload;
+const getLeaderboardData = createAsyncThunk(
+    'leaderboard/fetchLeaderboardData',
+    async (leaderboardData, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`${URL}/global/leaderboard?timeFilter=${leaderboardData}`, {
+                headers: {
+                    Accept: 'application/json'
+                }
+            });
 
-                break;
-
-            default:
-                return draft;
+            if (response.data.success) {
+                return response.data;
+            } else {
+                return rejectWithValue("Error");
+            }
+        } catch (error) {
+            return rejectWithValue(error.response.data);
         }
-    });
-}
+    }
+);
+
+const leaderboardsSlice = createSlice({
+
+    name: 'leaderboards',
+
+    initialState,
+
+    extraReducers: (builder) => {
+
+        builder
+
+            .addCase(getLeaderboardData.pending, (state, action) => {
+                // no action yet
+            })
+            .addCase(getLeaderboardData.fulfilled, (state, action) => {
+                state.paginated = action.payload;
+            })
+            .addCase(getLeaderboardData.rejected, (state, action) => {
+                // no action yet
+            })
+    }
+});
+
+export const { updateLeaderboards } = leaderboardsSlice.actions;
+
+export default leaderboardsSlice.reducer;

@@ -1,7 +1,6 @@
 import React, {PureComponent} from 'react';
 import {Dimensions, StyleSheet, View} from 'react-native';
-// @ts-ignore
-import {getTranslation} from 'react-native-translation';
+import { useTranslation } from 'react-i18next';
 import {Picker} from '@react-native-picker/picker';
 import {connect, ConnectedProps} from 'react-redux';
 
@@ -36,10 +35,11 @@ class LitterPickerWheels extends PureComponent<LitterPickerWheelsProps> {
                     selectedValue={this.props.item}
                     onValueChange={item => this.props.changeItem(item)}>
                     {this.props.items.map((item: any, i: number) => {
-                        const x = getTranslation(
+                        const x = useTranslation(
                             `${this.props.lang}.litter.${this.props.category.title}.${item}`
                         );
 
+                        // @ts-ignore
                         return <Picker.Item label={x} value={item} key={i} />;
                     })}
                 </Picker>

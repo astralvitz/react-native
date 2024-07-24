@@ -1,69 +1,58 @@
-import React, {Component} from 'react';
-import {AppState, Image, Linking, Platform, Pressable, StyleSheet, View} from 'react-native';
-import {connect} from 'react-redux';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+    AppState,
+    Image,
+    Linking,
+    Platform,
+    Pressable,
+    StyleSheet,
+    View
+} from 'react-native';
+import { connect } from 'react-redux';
 import * as actions from '../../actions';
-import {Body, Colors, Title} from '../components';
+import { Body, Colors, Title } from '../components';
 import {
     checkAccessMediaLocation,
     checkCameraRollPermission,
     requestCameraRollPermission
 } from '../../utils/permissions';
 import * as Sentry from '@sentry/react-native';
-import {check} from 'react-native-permissions';
 
-class GalleryPermissionScreen extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            appState: AppState.currentState
-        };
-    }
+const GalleryPermissionScreen = ({ navigation }) => {
+    const [appState, setAppState] = useState(AppState.currentState);
 
-    componentDidMount() {
-        /**
-         * App state event listner to check if app is in foreground/active
-         * or in background/inactive
-         */
-        AppState.addEventListener('change', this.handleAppStateChange);
-    }
-
-    componentWillUnmount() {
-        /**
-         * remove appState subscription
-         */
-        // deprecated in react-native 0.65+
-        // AppState.removeEventListener('change', this.handleAppStateChange);
-
-        const subscription = AppState.addEventListener('change', this.handleAppStateChange);
-        subscription.remove();
-    }
-
-    /**
-     * fn that is called when app state changes
-     *
-     * if app comes back from inactive/background to active state
-     * {@link GalleryPermissionScreen.checkGalleryPermission} gallery permission is again checked
-     * @param {"active" | "background" | "inactive"} nextAppState
-     * "inactive" is IOS only
-     */
-    handleAppStateChange = nextAppState => {
-        if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-            this.checkGalleryPermission();
+    const handleAppStateChange = useCallback((nextAppState) => {
+        if (appState.match(/inactive|background/) && nextAppState === 'active') {
+            checkGalleryPermission();
         }
-        this.setState({appState: nextAppState});
-    };
+        setAppState(nextAppState);
+    }, [appState]);
 
-    /**
-     * fn to check for cameraroll/gallery permissions
-     * if permissions granted go back to home, else do nothing
-     */
-    async checkGalleryPermission() {
+    useEffect(() => {
+        const handleAppStateChange = (nextAppState) => {
+            if (AppState.currentState.match(/inactive|background/) && nextAppState === 'active') {
+                checkGalleryPermission();
+            }
+        };
+
+        const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+        return () => subscription.remove();
+    }, []); // Note: This effect does not depend on `appState`.
+
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+        return () => subscription.remove();
+    }, [handleAppStateChange]);
+
+    const checkGalleryPermission = async () => {
         const result = await checkCameraRollPermission();
 
         if (result.toLowerCase() === 'granted') {
-            this.props.navigation.navigate('HOME');
+            navigation.navigate('HOME');
         } else {
-            Sentry.captureException(JSON.stringify('Gallery Permission Error ', null, 2), {
+            Sentry.captureException(new Error(`Gallery Permission Error ${result}`), {
                 level: 'error',
                 tags: {
                     section: 'checkGalleryPermission',
@@ -71,33 +60,24 @@ class GalleryPermissionScreen extends Component {
                 }
             });
         }
-    }
+    };
 
-    /**
-     * fn to request permission for accessing gallery/cameraroll
-     *
-     * if asked earlier and user denied / ("BLOCKED")
-     * it then take user to app setting
-     *
-     * if user granted access go back
-     */
-    async requestGalleryPermission() {
+    const requestGalleryPermission = async () => {
         const result = await requestCameraRollPermission();
 
-        if (result === 'granted') {
-            this.props.navigation.navigate('HOME');
-
+        if (result === 'granted' || result === 'limited') {
             if (Platform.OS === 'android' && Platform.Version >= 33) {
-                // double check we have mediaLocation permissions
                 const accessMediaLocation = await checkAccessMediaLocation();
-
                 console.log('GalleryPermissionScreen.accessMediaLocation', accessMediaLocation);
             }
+
+            navigation.navigate('HOME');
         } else {
-            Sentry.captureException(JSON.stringify('Gallery Permission Error ' + result, null, 2), {
+            Sentry.captureException(new Error(`Gallery Permission Error ${result}`), {
                 level: 'error',
                 tags: {
-                    section: 'requestGalleryPermission: ' + Platform.OS
+                    section: 'requestGalleryPermission',
+                    platform: Platform.OS
                 }
             });
 
@@ -105,45 +85,35 @@ class GalleryPermissionScreen extends Component {
                 ? await Linking.openURL('app-settings:')
                 : await Linking.openSettings();
         }
-    }
-
-    render() {
-        const {navigation, lang} = this.props;
-
-        return (
-            <View style={styles.container}>
-                <Image
-                    source={require('../../assets/illustrations/gallery_permission.png')}
-                    style={styles.imageStyle}
-                />
-                <Title dictionary={`${lang}.permission.allow-gallery-access`} />
-                <Body
-                    color="muted"
-                    style={styles.bodyText}
-                    dictionary={`${lang}.permission.gallery-body`}>
-                    Please provide us access to your gallery, which is required if you want to
-                    upload geotagged images from gallery.
-                </Body>
-                <Pressable
-                    style={styles.buttonStyle}
-                    onPress={() => this.requestGalleryPermission()}>
-                    <Body color="white" dictionary={`${lang}.permission.allow-gallery-access`} />
-                </Pressable>
-                <Pressable onPress={() => navigation.navigate('HOME')}>
-                    <Body dictionary={`${lang}.permission.not-now`} />
-                </Pressable>
-            </View>
-        );
-    }
-}
-
-const mapStateToProps = state => {
-    return {
-        lang: state.auth.lang
     };
-};
 
-export default connect(mapStateToProps, actions)(GalleryPermissionScreen);
+    return (
+        <View style={styles.container}>
+            <Image
+                source={require('../../assets/illustrations/gallery_permission.png')}
+                style={styles.imageStyle}
+            />
+            <Title dictionary={'permission.allow-gallery-access'} />
+            <Body
+                color="muted"
+                style={styles.bodyText}
+                dictionary={'permission.gallery-body'}
+            >
+                Please provide us access to your gallery, which is required if you want to
+                upload geotagged images from gallery.
+            </Body>
+            <Pressable
+                style={styles.buttonStyle}
+                onPress={requestGalleryPermission}
+            >
+                <Body color="white" dictionary={'permission.allow-gallery-access'} />
+            </Pressable>
+            <Pressable onPress={() => navigation.navigate('HOME')}>
+                <Body dictionary={'permission.not-now'} />
+            </Pressable>
+        </View>
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -168,3 +138,9 @@ const styles = StyleSheet.create({
         marginVertical: 32
     }
 });
+
+const mapStateToProps = state => ({
+    lang: state.auth.lang
+});
+
+export default connect(mapStateToProps, actions)(GalleryPermissionScreen);

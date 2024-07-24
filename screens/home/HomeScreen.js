@@ -1,59 +1,129 @@
-import React, {PureComponent} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Dimensions,
     Modal,
     Platform,
+    StyleSheet,
     Text,
     TouchableWithoutFeedback,
     View
 } from 'react-native';
 
-import {TransText} from 'react-native-translation';
+import { useDispatch, useSelector } from 'react-redux';
+import { setModel } from '../../reducers/settings_reducer';
+import { cancelUpload, checkAppVersion, startUploading } from '../../reducers/shared_reducer';
+import { getUntaggedImages, uploadImage, uploadTagsToWebImage } from '../../reducers/images_reducer';
+import { getPhotosFromCameraroll } from "../../reducers/gallery_reducer";
 
 // import {Button} from '@rneui/themed';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {Body, Colors, Header, Title} from '../components';
+import { Body, Colors, Header, Title } from '../components';
 
-import {connect} from 'react-redux';
-import * as actions from '../../actions';
-import {checkCameraRollPermission} from '../../utils/permissions';
-import {isGeotagged} from '../../utils/isGeotagged';
+import { checkCameraRollPermission } from '../../utils/permissions';
+import { isGeotagged } from '../../utils/isGeotagged';
+
 // Components
-import {ActionButton, UploadButton, UploadImagesGrid} from './homeComponents';
+import { ActionButton , UploadButton, UploadImagesGrid } from './homeComponents';
 import DeviceInfo from 'react-native-device-info';
-import {isTagged} from '../../utils/isTagged';
+import { isTagged } from '../../utils/isTagged';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-class HomeScreen extends PureComponent {
-    constructor(props) {
-        super(props);
+const HomeScreen = ({ navigation }) => {
 
-        this.state = {
-            isUploadCancelled: false,
-            total: 0, // total number of images to upload
-            uploaded: 0, // total number of tagged images uploaded
-            uploadFailed: 0,
-            tagged: 0, // total number of images tagged successfully
-            taggedFailed: 0,
+    const dispatch = useDispatch();
 
-            failedCounts: {
-                alreadyUploaded: 0,
-                invalidCoordinates: 0,
-                unknown: 0
-            }
+    const [isUploadCancelled, setIsUploadCancelled] = useState(false);
+    const [total, setTotal] = useState(0); // total number of images to upload
+    const [uploaded, setUploaded] = useState(0); // total number of tagged images uploaded
+    const [uploadFailed, setUploadFailed] = useState(0);
+    const [tagged, setTagged] = useState(0);  // total number of images tagged successfully
+    const [taggedFailed, setTaggedFailed] = useState(0);
+    const [failedCounts, setFailedCounts] = useState({
+        alreadyUploaded: 0,
+        invalidCoordinates: 0,
+        unknown: 0
+    });
+
+    const {
+        appVersion,
+        images,
+        isSelecting,
+        lang,
+        showModal,
+        model,
+        selected,
+        showThankYouMessages,
+        token,
+        user,
+        uniqueValue
+    } = useSelector(state => ({
+        appVersion: state.shared.appVersion,
+        images: state.images.imagesArray,
+        isSelecting: state.images.isSelecting,
+        lang: state.auth.lang,
+        showModal: state.shared.showModal,
+        model: state.settings.model,
+        selected: state.images.selected,
+        showThankYouMessages: state.shared.showThankYouMessages,
+        token: state.auth.token,
+        user: state.auth.user,
+        uniqueValue: state.shared.uniqueValue
+    }));
+
+    useEffect(() => {
+        const getModel = () => {
+            const model = DeviceInfo.getModel();
+
+            dispatch(setModel(model));
         };
 
-        // Bind any functions that call props
-        this.toggleSelecting = this.toggleSelecting.bind(this);
-        this.deleteImages = this.deleteImages.bind(this);
+        getModel();
 
-        const model = DeviceInfo.getModel();
+        if (!user?.enable_admin_tagging) {
+            dispatch(getUntaggedImages(token));
+        }
 
-        // settings_actions, settings_reducer
-        this.props.setModel(model);
+        if (!__DEV__) {
+            checkNewVersion().then(r => console.log('New version', r));
+        }
+
+        checkGalleryPermission().then(r => console.log('Gallery permission', r));
+    }, []);
+
+    // useEffect(() => {
+    //     if (prevAppVersion !== appVersion) {
+    //         checkNewVersion().then(r => console.log('New version', r);
+    //     }
+    // }, [appVersion]);
+
+    const cancelUploadWrapper = () => {
+        dispatch(cancelUpload());
+
+        setIsUploadCancelled(true)
+    }
+
+    async function checkGalleryPermission () {
+        const result = await checkCameraRollPermission();
+
+        if (result === 'granted') {
+            getImagesFromCameraRoll();
+        } else {
+            navigation.navigate('PERMISSION', { screen: 'GALLERY_PERMISSION' });
+        }
+    }
+
+    async function checkNewVersion () {
+        const platform = Platform.OS;
+        const version = DeviceInfo.getVersion();
+
+        if (appVersion === null) {
+            dispatch(checkAppVersion());
+        } else if (appVersion[platform].version !== version) {
+            navigation.navigate('UPDATE', { url: appVersion[platform].url });
+        }
     }
 
     /**
@@ -61,249 +131,79 @@ class HomeScreen extends PureComponent {
      * INFO: these are images that were uploaded on website
      * but were not tagged and submitted
      */
-    async componentDidMount() {
-        // If enable_admin_tagging is False, the user wants to get and tag their uploads
-        if (!this.props.user?.enable_admin_tagging) {
-            // images_actions, images_reducer
-            await this.props.getUntaggedImages(this.props.token);
-        }
-
-        // if not in DEV mode check for new version
-        !__DEV__ && this.checkNewVersion();
-
-        await this.checkGalleryPermission();
-    }
-
-    componentDidUpdate(prevProps) {
-        if (prevProps.appVersion !== this.props.appVersion) {
-            this.checkNewVersion();
-        }
-    }
-
-    /**
-     * During upload, the user pressed cancel
-     */
-    cancelUpload() {
-        this.props.cancelUpload();
-
-        // cancel pending uploads
-        this.setState({isUploadCancelled: true});
-    }
-
-    /**
-     * Needs comment
-     */
-    async checkGalleryPermission() {
-        const result = await checkCameraRollPermission();
-
-        console.log('Home.checkGalleryPermission', result);
-
-        if (result === 'granted') {
-            this.getImagesFromCameraRoll();
-        } else {
-            this.props.navigation.navigate('PERMISSION', {
-                screen: 'GALLERY_PERMISSION'
-            });
-        }
-    }
-
-    /**
-     * Needs comment
-     */
-    async checkNewVersion() {
-        const version = DeviceInfo.getVersion();
-
-        const platform = Platform.OS;
-
-        if (this.props.appVersion === null) {
-            this.props.checkAppVersion();
-        } else if (this.props.appVersion[platform].version !== version) {
-            this.props.navigation.navigate('UPDATE', {
-                url: this.props.appVersion[platform].url
-            });
-        }
-    }
+    // async componentDidMount() {
+    //     // If enable_admin_tagging is False, the user wants to get and tag their uploads
+    //     if (!user?.enable_admin_tagging) {
+    //         // images_actions, images_reducer
+    //         await getUntaggedImages(token);
+    //     }
+    //
+    //     // if not in DEV mode check for new version
+    //     !__DEV__ && this.checkNewVersion();
+    //
+    //     await this.checkGalleryPermission();
+    // }
+    //
+    // componentDidUpdate(prevProps) {
+    //     if (prevProps.appVersion !== appVersion) {
+    //         this.checkNewVersion();
+    //     }
+    // }
 
     /**
      * Dispatch action that will get the images from the camera roll
      */
-    getImagesFromCameraRoll() {
-        this.props.getPhotosFromCameraroll();
-    }
-
-    render() {
-        const lang = this.props.lang;
-
-        return (
-            <>
-                <Header
-                    leftContent={<Title color="white" dictionary={`${lang}.leftpage.upload`} />}
-                    rightContent={this.renderDeleteButton()}
-                />
-                <View style={styles.container}>
-                    {/* INFO: modal thats shown during image upload */}
-                    <Modal animationType="slide" transparent={true} visible={this.props.showModal}>
-                        {/* Waiting spinner to show during upload */}
-                        {this.props.isUploading && (
-                            <View style={styles.modal}>
-                                <TransText
-                                    style={styles.uploadText}
-                                    dictionary={`${lang}.leftpage.please-wait-uploading`}
-                                />
-
-                                <ActivityIndicator style={{marginBottom: 10}} />
-
-                                <Text style={styles.uploadCount}>
-                                    {this.state.uploaded} / {this.state.total}
-                                </Text>
-
-                                {/*<Button*/}
-                                {/*    onPress={this.cancelUpload.bind(this)}*/}
-                                {/*    title="Cancel"*/}
-                                {/*/>*/}
-                            </View>
-                        )}
-
-                        {/* Thank You + Messages */}
-                        {this.props.showThankYouMessages && (
-                            <View style={styles.modal}>
-                                <View style={styles.thankYouModalInner}>
-                                    <TransText
-                                        style={{
-                                            fontSize: SCREEN_HEIGHT * 0.03,
-                                            marginBottom: 5
-                                        }}
-                                        dictionary={`${lang}.leftpage.thank-you`}
-                                    />
-
-                                    {/* Upload success */}
-                                    {this.state.uploaded > 0 && (
-                                        <TransText
-                                            style={{
-                                                fontSize: SCREEN_HEIGHT * 0.02,
-                                                marginBottom: 5
-                                            }}
-                                            dictionary={`${lang}.leftpage.you-have-uploaded`}
-                                            values={{
-                                                count: this.state.uploaded
-                                            }}
-                                        />
-                                    )}
-
-                                    {/* Tagged success */}
-                                    {this.state.tagged > 0 && (
-                                        <TransText
-                                            style={{
-                                                fontSize: SCREEN_HEIGHT * 0.02,
-                                                marginBottom: 5
-                                            }}
-                                            dictionary={`${lang}.leftpage.you-have-tagged`}
-                                            values={{
-                                                count: this.state.tagged
-                                            }}
-                                        />
-                                    )}
-
-                                    {this.state.uploadFailed > 0 && (
-                                        <View>
-                                            <Text
-                                                style={{
-                                                    fontSize: SCREEN_HEIGHT * 0.02,
-                                                    marginBottom: 5
-                                                }}>
-                                                {this.state.uploadFailed} uploads failed
-                                            </Text>
-
-                                            {this.state.failedCounts.alreadyUploaded > 0 && (
-                                                <Text>
-                                                    {this.state.failedCounts.alreadyUploaded}{' '}
-                                                    already uploaded
-                                                </Text>
-                                            )}
-
-                                            {this.state.failedCounts.invalidCoordinates > 0 && (
-                                                <Text>
-                                                    {this.state.failedCounts.invalidCoordinates}{' '}
-                                                    invalid coordinates (lat=0, lon=0)
-                                                </Text>
-                                            )}
-
-                                            {this.state.failedCounts.unknown > 0 && (
-                                                <Text>
-                                                    {this.state.failedCounts.unknown} unknown)
-                                                </Text>
-                                            )}
-                                        </View>
-                                    )}
-
-                                    {this.state.taggedFailed > 0 && (
-                                        <Text
-                                            style={{
-                                                fontSize: SCREEN_HEIGHT * 0.02,
-                                                marginBottom: 5
-                                            }}>
-                                            {this.state.taggedFailed} tags failed
-                                        </Text>
-                                    )}
-
-                                    <View style={{flexDirection: 'row'}}>
-                                        <TouchableWithoutFeedback
-                                            onPress={this.hideThankYouMessages.bind(this)}>
-                                            <View style={styles.thankYouButton}>
-                                                <TransText
-                                                    style={styles.normalWhiteText}
-                                                    dictionary={`${lang}.leftpage.close`}
-                                                />
-                                            </View>
-                                        </TouchableWithoutFeedback>
-                                    </View>
-                                </View>
-                            </View>
-                        )}
-                    </Modal>
-                    {/* Grid to display images -- 3 columns */}
-                    <UploadImagesGrid
-                        navigation={this.props.navigation}
-                        photos={this.props.images}
-                        lang={this.props.lang}
-                        uniqueValue={this.props.uniqueValue}
-                        isSelecting={this.props.isSelecting}
-                    />
-
-                    <View style={styles.bottomContainer}>{this.renderHelperMessage()}</View>
-                </View>
-                {this.renderActionButton()}
-
-                {this.renderUploadButton()}
-            </>
-        );
+    const getImagesFromCameraRoll = ()  => {
+        dispatch(getPhotosFromCameraroll());
     }
 
     /**
      * Navigate to album screen
-     *
      */
-    loadGallery = async () => {
-        this.props.navigation.navigate('ALBUM', {screen: 'GALLERY'});
+    const loadGallery = async () => {
+        navigation.navigate('ALBUM', { screen: 'GALLERY' });
     };
+
+    /**
+     * fn to determine the state of FAB
+     */
+    const renderActionButton = () => {
+        let status = 'NO_IMAGES';
+        let fabFunction = loadGallery;
+
+        if (images.length === 0) {
+            status = 'NO_IMAGES';
+            fabFunction = loadGallery;
+        }
+
+        if (isSelecting) {
+            status = 'SELECTING';
+            if (selected > 0) {
+                status = 'SELECTED';
+                fabFunction = deleteImages;
+            }
+        }
+
+        return <ActionButton status={status} onPress={fabFunction} />;
+    }
 
     /**
      * Render helper text when delete button is clicked
      */
-    renderHelperMessage() {
-        if (this.props.isSelecting) {
-            if (this.props.selected === 0) {
+    const renderHelperMessage = () => {
+        if (isSelecting) {
+            if (selected === 0) {
                 return (
                     <View style={styles.helperContainer}>
                         <Icon
                             color={Colors.muted}
-                            name="ios-information-circle-outline"
+                            name="information-circle-outline"
                             size={32}
                         />
                         <Body
                             style={{marginLeft: 10}}
                             color="muted"
-                            dictionary={`${this.props.lang}.leftpage.select-to-delete`}
+                            dictionary={'leftpage.select-to-delete'}
                         />
                     </View>
                 );
@@ -316,14 +216,14 @@ class HomeScreen extends PureComponent {
      *
      * ... if images exist and at least 1 image has a tag
      */
-    renderUploadButton() {
-        if (this.props.images?.length === 0 || this.props.isSelecting) {
+    const renderUploadButton = () => {
+        if (images?.length === 0 || isSelecting) {
             return;
         }
 
         let hasTags = false;
 
-        this.props.images.map(img => {
+        images.map(img => {
             let tagged = isTagged(img);
 
             if (tagged) {
@@ -335,30 +235,32 @@ class HomeScreen extends PureComponent {
             return;
         }
 
-        return <UploadButton lang={this.props.lang} onPress={this.uploadPhotos} />;
+        return <UploadButton lang={lang} onPress={uploadPhotos} />;
     }
 
     /**
      * Render Delete / Cancel Header Button
      */
-    renderDeleteButton() {
-        if (this.props.isSelecting) {
+    const renderDeleteButton = () => {
+        if (isSelecting) {
             return (
-                <TransText
+                <Text
                     style={styles.normalWhiteText}
-                    onPress={this.toggleSelecting}
-                    dictionary={`${this.props.lang}.leftpage.cancel`}
-                />
+                    onPress={toggleSelecting}
+                >
+                    useTranslation('leftpage.cancel')
+                </Text>
             );
         }
 
-        if (this.props.images.length > 0) {
+        if (images.length > 0) {
             return (
-                <TransText
+                <Text
                     style={styles.normalWhiteText}
                     onPress={this.toggleSelecting}
-                    dictionary={`${this.props.lang}.leftpage.delete`}
-                />
+                >
+                    t('leftpage.delete')
+                </Text>
             );
         }
 
@@ -368,9 +270,9 @@ class HomeScreen extends PureComponent {
     /**
      * Toggle Selecting - header right
      */
-    toggleSelecting() {
-        this.props.deselectAllImages();
-        this.props.toggleSelecting();
+    const toggleSelecting = () => {
+        deselectAllImages();
+        toggleSelecting();
     }
 
     /**
@@ -380,39 +282,37 @@ class HomeScreen extends PureComponent {
      * else
      * delete images from state based on id
      */
-    deleteImages() {
-        this.props.images.map(image => {
+    const deleteImages = () => {
+        images.map(image => {
             if (image.selected) {
                 if (image.type === 'web' && image.uploaded) {
-                    this.props.deleteWebImage(
-                        this.props.token,
+                    deleteWebImage(
+                        token,
                         image.id,
-                        this.props.user.enable_admin_tagging
+                        user.enable_admin_tagging
                     );
                 } else {
-                    this.props.deleteImage(image.id);
+                    deleteImage(image.id);
                 }
             }
         });
 
-        // this.props.deleteSelectedImages();
-        this.props.toggleSelecting();
+        // deleteSelectedImages();
+        toggleSelecting();
     }
 
     // reset state after cancel button pressed
-    resetAfterUploadCancelled = () => {
-        this.setState({
-            total: 0,
-            uploaded: 0,
-            uploadFailed: 0,
-            isUploadCancelled: false,
-            tagged: 0,
-            taggedFailed: 0,
-            failedCounts: {
-                alreadyUploaded: 0,
-                invalidCoordinates: 0,
-                unknown: 0
-            }
+    const resetAfterUploadCancelled = () => {
+        setTotal(0);
+        setUploaded(0);
+        setUploadFailed(0);
+        setIsUploadCancelled(false);
+        setTagged(0);
+        setTaggedFailed(0);
+        setFailedCounts({
+            alreadyUploaded: 0,
+            invalidCoordinates: 0,
+            unknown: 0
         });
     };
 
@@ -423,46 +323,38 @@ class HomeScreen extends PureComponent {
      * - fix progress bar percentComplete
      * - Consider: Auto-upload any tagged images in the background once the user has pressed Confirm
      */
-    uploadPhotos = async () => {
+    const uploadPhotos = async () => {
         // Reset upload count
-        this.setState({
-            // Images to upload
-            uploaded: 0,
-            uploadFailed: 0,
-
-            // Images that are uploaded, now being tagged
-            tagged: 0,
-            taggedFailed: 0,
-
-            failedCounts: {
-                alreadyUploaded: 0,
-                invalidCoordinates: 0,
-                unknown: 0
-            }
+        setUploaded(0);
+        setUploadFailed(0);
+        setTagged(0);
+        setTaggedFailed(0);
+        setFailedCounts({
+            alreadyUploaded: 0,
+            invalidCoordinates: 0,
+            unknown: 0
         });
 
         // The model of the users device
-        const model = this.props.model;
+        // const model = model;
 
-        let imagesCount = this.props.images.length;
+        let imagesCount = images.length;
 
-        this.setState({
-            total: imagesCount
-        });
+        setTotal(imagesCount);
 
         // shared.js
         // showModal = true;
         // isUploading = true;
-        this.props.startUploading();
+        startUploading();
 
         if (imagesCount > 0) {
             // async loop
-            for (const img of this.props.images) {
+            for (const img of images) {
                 console.log(img);
 
                 // break loop if cancel button is pressed
-                if (this.state.isUploadCancelled) {
-                    this.resetAfterUploadCancelled();
+                if (isUploadCancelled) {
+                    resetAfterUploadCancelled();
                     return;
                 }
 
@@ -498,11 +390,11 @@ class HomeScreen extends PureComponent {
                     }
 
                     // Upload image
-                    const response = await this.props.uploadImage(
-                        this.props.token,
+                    const response = await uploadImage(
+                        token,
                         ImageData,
                         img.id,
-                        this.props.user.enable_admin_tagging,
+                        user.enable_admin_tagging,
                         isItemTagged
                     );
 
@@ -547,16 +439,12 @@ class HomeScreen extends PureComponent {
                      *
                      * We can also update 'picked_up' value here
                      */
-                    const response = await this.props.uploadTagsToWebImage(this.props.token, img);
+                    const response = await uploadTagsToWebImage(token, img);
 
                     if (response && response.success) {
-                        this.setState(previousState => ({
-                            tagged: previousState.tagged + 1
-                        }));
+                        setTagged(tagged + 1);
                     } else {
-                        this.setState(previousState => ({
-                            taggedFailed: previousState.taggedFailed + 1
-                        }));
+                        setTaggedFailed(taggedFailed + 1);
                     }
                 }
                 // else if (!isgeotagged)
@@ -568,39 +456,165 @@ class HomeScreen extends PureComponent {
             }
         }
 
-        this.props.showThankYouMessagesAfterUpload();
+        showThankYouMessagesAfterUpload();
     };
 
     /**
      *
      */
-    hideThankYouMessages() {
-        this.props.closeThankYouMessages();
+    const hideThankYouMessages = () => {
+        closeThankYouMessages();
     }
 
-    /**
-     * fn to determine the state of FAB
-     */
-    renderActionButton() {
-        let status = 'NO_IMAGES';
-        let fabFunction = this.loadGallery;
-        if (this.props.images.length === 0) {
-            status = 'NO_IMAGES';
-            fabFunction = this.loadGallery;
-        }
-        if (this.props.isSelecting) {
-            status = 'SELECTING';
-            if (this.props.selected > 0) {
-                status = 'SELECTED';
-                fabFunction = this.deleteImages;
-            }
-        }
 
-        return <ActionButton status={status} onPress={fabFunction} />;
-    }
+    return (
+        <>
+            <Header
+                leftContent={<Title color="white" dictionary={'leftpage.upload'} />}
+                rightContent={renderDeleteButton()}
+            />
+            <View style={styles.container}>
+                {/* INFO: modal thats shown during image upload */}
+                <Modal animationType="slide" transparent={true} visible={showModal}>
+                    {/* Waiting spinner to show during upload */}
+                    {isUploading && (
+                        <View style={styles.modal}>
+                            <Text style={styles.uploadText}>
+                                useTranslation({'leftpage.please-wait-uploading'})
+                            </Text>
+
+                            <ActivityIndicator style={{marginBottom: 10}} />
+
+                            <Text style={styles.uploadCount}>
+                                {uploaded} / {total}
+                            </Text>
+
+                            {/*<Button*/}
+                            {/*    onPress={cancelUploadWrapper)}*/}
+                            {/*    title="Cancel"*/}
+                            {/*/>*/}
+                        </View>
+                    )}
+
+                    {/* Thank You + Messages */}
+                    {showThankYouMessages && (
+                        <View style={styles.modal}>
+                            <View style={styles.thankYouModalInner}>
+                                <Text
+                                    style={{
+                                        fontSize: SCREEN_HEIGHT * 0.03,
+                                        marginBottom: 5
+                                    }}
+                                >
+                                    useTranslation({'leftpage.thank-you'})
+                                </Text>
+
+                                {/* Upload success */}
+                                {uploaded > 0 && (
+                                    <Text
+                                        style={{
+                                            fontSize: SCREEN_HEIGHT * 0.02,
+                                            marginBottom: 5
+                                        }}
+                                        values={{
+                                            count: uploaded
+                                        }}
+                                    >
+                                        useTranslation({'leftpage.you-have-uploaded'})
+                                    </Text>
+                                )}
+
+                                {/* Tagged success */}
+                                {tagged > 0 && (
+                                    <Text
+                                        style={{
+                                            fontSize: SCREEN_HEIGHT * 0.02,
+                                            marginBottom: 5
+                                        }}
+                                        values={{
+                                            count: tagged
+                                        }}
+                                    >
+                                        useTranslation({'leftpage.you-have-tagged'})
+                                    </Text>
+                                )}
+
+                                {uploadFailed > 0 && (
+                                    <View>
+                                        <Text
+                                            style={{
+                                                fontSize: SCREEN_HEIGHT * 0.02,
+                                                marginBottom: 5
+                                            }}>
+                                            {uploadFailed} uploads failed
+                                        </Text>
+
+                                        {failedCounts.alreadyUploaded > 0 && (
+                                            <Text>
+                                                {failedCounts.alreadyUploaded}{' '}
+                                                already uploaded
+                                            </Text>
+                                        )}
+
+                                        {failedCounts.invalidCoordinates > 0 && (
+                                            <Text>
+                                                {failedCounts.invalidCoordinates}{' '}
+                                                invalid coordinates (lat=0, lon=0)
+                                            </Text>
+                                        )}
+
+                                        {failedCounts.unknown > 0 && (
+                                            <Text>
+                                                {failedCounts.unknown} unknown)
+                                            </Text>
+                                        )}
+                                    </View>
+                                )}
+
+                                {taggedFailed > 0 && (
+                                    <Text
+                                        style={{
+                                            fontSize: SCREEN_HEIGHT * 0.02,
+                                            marginBottom: 5
+                                        }}>
+                                        {taggedFailed} tags failed
+                                    </Text>
+                                )}
+
+                                <View style={{flexDirection: 'row'}}>
+                                    <TouchableWithoutFeedback
+                                        onPress={hideThankYouMessages}>
+                                        <View style={styles.thankYouButton}>
+                                            <Text style={styles.normalWhiteText}>
+                                                useTranslation({'leftpage.close'})
+                                            </Text>
+                                        </View>
+                                    </TouchableWithoutFeedback>
+                                </View>
+                            </View>
+                        </View>
+                    )}
+                </Modal>
+
+                {/* Grid to display images -- 3 columns */}
+                <UploadImagesGrid
+                    navigation={navigation}
+                    photos={images}
+                    lang={lang}
+                    uniqueValue={uniqueValue}
+                    isSelecting={isSelecting}
+                />
+
+                <View style={styles.bottomContainer}>{renderHelperMessage}</View>
+            </View>
+
+            {renderActionButton}
+            {renderUploadButton}
+        </>
+    );
 }
 
-const styles = {
+const styles = StyleSheet.create({
     bottomContainer: {
         position: 'absolute',
         bottom: 0,
@@ -699,24 +713,6 @@ const styles = {
         fontWeight: 'bold',
         marginBottom: 10
     }
-};
+});
 
-const mapStateToProps = state => {
-    return {
-        appVersion: state.shared.appVersion,
-        images: state.images.imagesArray,
-        isSelecting: state.images.isSelecting,
-        lang: state.auth.lang,
-        showModal: state.shared.showModal,
-        model: state.settings.model,
-        selected: state.images.selected,
-        showThankYouMessages: state.shared.showThankYouMessages,
-        token: state.auth.token,
-        totalImagesToUpload: state.shared.totalImagesToUpload,
-        isUploading: state.shared.isUploading,
-        uniqueValue: state.shared.uniqueValue,
-        user: state.auth.user
-    };
-};
-
-export default connect(mapStateToProps, actions)(HomeScreen);
+export default HomeScreen;

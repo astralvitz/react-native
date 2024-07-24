@@ -1,4 +1,3 @@
-import React from 'react';
 import {
     CLOSE_SECOND_SETTING_MODAL,
     LOGOUT,
@@ -20,54 +19,54 @@ export const closeSecondSettingModal = () => {
         type: CLOSE_SECOND_SETTING_MODAL
     };
 };
-
-/**
- * The user wants to delete their password
- *
- * @param password
- * @param token
- * @returns {{payload, type: string}}
- */
-export const deleteAccount = (password, token) => {
-    return async dispatch => {
-        dispatch({
-            type: 'START_DELETE_ACCOUNT'
-        });
-
-        await axios(URL + '/api/settings/delete-account/', {
-            method: 'POST',
-            headers: {
-                Authorization: 'Bearer ' + token,
-                'content-type': 'application/json'
-            },
-            data: {
-                password,
-                token
-            }
-        })
-            .then(response => {
-                console.log('DELETE_ACCOUNT', response.data);
-
-                if (!response.data.success) {
-                    if (response.data.msg === 'password does not match') {
-                        dispatch({
-                            type: 'SET_DELETE_ACCOUNT_ERROR',
-                            payload: 'settings.password-incorrect'
-                        });
-                    }
-                } else {
-                    AsyncStorage.clear();
-
-                    dispatch({
-                        type: LOGOUT
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('ERROR DELETE_ACCOUNT', error);
-            });
-    };
-};
+//
+// /**
+//  * The user wants to delete their password
+//  *
+//  * @param password
+//  * @param token
+//  * @returns {{payload, type: string}}
+//  */
+// export const deleteAccount = (password, token) => {
+//     return async dispatch => {
+//         dispatch({
+//             type: 'START_DELETE_ACCOUNT'
+//         });
+//
+//         await axios(URL + '/api/settings/delete-account/', {
+//             method: 'POST',
+//             headers: {
+//                 Authorization: 'Bearer ' + token,
+//                 'content-type': 'application/json'
+//             },
+//             data: {
+//                 password,
+//                 token
+//             }
+//         })
+//             .then(response => {
+//                 console.log('DELETE_ACCOUNT', response.data);
+//
+//                 if (!response.data.success) {
+//                     if (response.data.msg === 'password does not match') {
+//                         dispatch({
+//                             type: 'SET_DELETE_ACCOUNT_ERROR',
+//                             payload: 'settings.password-incorrect'
+//                         });
+//                     }
+//                 } else {
+//                     AsyncStorage.clear();
+//
+//                     dispatch({
+//                         type: LOGOUT
+//                     });
+//                 }
+//             })
+//             .catch(error => {
+//                 console.error('ERROR DELETE_ACCOUNT', error);
+//             });
+//     };
+// };
 
 /**
  * Initialize settings edit value to update
@@ -91,168 +90,168 @@ export const setModel = model => {
         payload: model
     };
 };
+//
+// /**
+//  * Update a specific setting (Name, Username or Email)
+//  */
+// export const saveSettings = (data, value, token) => {
+//     return async dispatch => {
+//         dispatch({
+//             type: START_UPDATING_SETTINGS
+//         });
+//
+//         // This needs to be refactored. We should use the same keys everywhere.
+//         let key = '';
+//         switch (data.key) {
+//             case 'name':
+//                 key = 'Name';
+//                 break;
+//             case 'username':
+//                 key = 'Username';
+//                 break;
+//             case 'email':
+//                 key = 'Email';
+//                 break;
+//             case 'picked_up':
+//                 key = 'picked_up';
+//                 break;
+//             case 'global_flag':
+//                 key = 'global_flag';
+//                 break;
+//
+//             case 'enable_admin_tagging':
+//                 key = 'enable_admin_tagging';
+//                 break;
+//         }
+//
+//         await axios(URL + '/api/settings/update/', {
+//             method: 'POST',
+//             headers: {
+//                 Authorization: 'Bearer ' + token,
+//                 'content-type': 'application/json'
+//             },
+//             data: {
+//                 key,
+//                 value
+//             }
+//         })
+//         .then(async response => {
+//             console.log('saveSettings', response.data);
+//
+//             if (response.data.success) {
+//                 // Get user and parse json to Object
+//                 let user = await AsyncStorage.getItem('user');
+//                 user = JSON.parse(user);
+//
+//                 // update user object
+//                 user[data.key] = value;
+//
+//                 // save updated user data
+//                 await AsyncStorage.setItem('user', JSON.stringify(user));
+//
+//                 dispatch({
+//                     type: UPDATE_USER_OBJECT,
+//                     payload: user
+//                 });
+//
+//                 // then show success message
+//                 dispatch({
+//                     type: SETTINGS_UPDATE_STATUS_MESSAGE,
+//                     payload: 'SUCCESS'
+//                 });
+//
+//                 if (key === 'enable_admin_tagging') {
+//                     // value is what we just applied
+//                     if (value) {
+//                         dispatch({
+//                             type: 'CLEAR_UPLOADED_WEB_IMAGES'
+//                         });
+//                     }
+//                 }
+//             } else {
+//                 console.log(
+//                     'ERROR updating settings. Todo - inform the user'
+//                 );
+//
+//                 // show error message
+//                 dispatch({
+//                     type: SETTINGS_UPDATE_STATUS_MESSAGE,
+//                     payload: 'ERROR'
+//                 });
+//             }
+//         })
+//         .catch(error => {
+//             console.log('saveSettings', error);
+//
+//             // show error message
+//             dispatch({
+//                 type: SETTINGS_UPDATE_STATUS_MESSAGE,
+//                 payload: 'ERROR'
+//             });
+//         });
+//     };
+// };
 
-/**
- * Update a specific setting (Name, Username or Email)
- */
-export const saveSettings = (data, value, token) => {
-    return async dispatch => {
-        dispatch({
-            type: START_UPDATING_SETTINGS
-        });
-
-        // This needs to be refactored. We should use the same keys everywhere.
-        let key = '';
-        switch (data.key) {
-            case 'name':
-                key = 'Name';
-                break;
-            case 'username':
-                key = 'Username';
-                break;
-            case 'email':
-                key = 'Email';
-                break;
-            case 'picked_up':
-                key = 'picked_up';
-                break;
-            case 'global_flag':
-                key = 'global_flag';
-                break;
-
-            case 'enable_admin_tagging':
-                key = 'enable_admin_tagging';
-                break;
-        }
-
-        await axios(URL + '/api/settings/update/', {
-            method: 'POST',
-            headers: {
-                Authorization: 'Bearer ' + token,
-                'content-type': 'application/json'
-            },
-            data: {
-                key,
-                value
-            }
-        })
-            .then(async response => {
-                console.log('saveSettings', response.data);
-
-                if (response.data.success) {
-                    // Get user and parse json to Object
-                    let user = await AsyncStorage.getItem('user');
-                    user = JSON.parse(user);
-
-                    // update user object
-                    user[data.key] = value;
-
-                    // save updated user data
-                    await AsyncStorage.setItem('user', JSON.stringify(user));
-
-                    dispatch({
-                        type: UPDATE_USER_OBJECT,
-                        payload: user
-                    });
-
-                    // then show success message
-                    dispatch({
-                        type: SETTINGS_UPDATE_STATUS_MESSAGE,
-                        payload: 'SUCCESS'
-                    });
-
-                    if (key === 'enable_admin_tagging') {
-                        // value is what we just applied
-                        if (value) {
-                            dispatch({
-                                type: 'CLEAR_UPLOADED_WEB_IMAGES'
-                            });
-                        }
-                    }
-                } else {
-                    console.log(
-                        'ERROR updating settings. Todo - inform the user'
-                    );
-
-                    // show error message
-                    dispatch({
-                        type: SETTINGS_UPDATE_STATUS_MESSAGE,
-                        payload: 'ERROR'
-                    });
-                }
-            })
-            .catch(error => {
-                console.log('saveSettings', error);
-
-                // show error message
-                dispatch({
-                    type: SETTINGS_UPDATE_STATUS_MESSAGE,
-                    payload: 'ERROR'
-                });
-            });
-    };
-};
-
-export const saveSocialAccounts = (data, value, token) => {
-    let response = {};
-    return async dispatch => {
-        dispatch({
-            type: START_UPDATING_SETTINGS
-        });
-
-        try {
-            response = await axios(URL + '/api/settings', {
-                method: 'PATCH',
-                headers: {
-                    Authorization: 'Bearer ' + token,
-                    'content-type': 'application/json'
-                },
-                data: {
-                    ...value
-                }
-            });
-        } catch (error) {
-            console.log('saveSettings', error);
-            // show error message
-            dispatch({
-                type: SETTINGS_UPDATE_STATUS_MESSAGE,
-                payload: 'ERROR'
-            });
-        }
-
-        if (response?.data?.message === 'success') {
-            // Get user and parse json to Object
-            let user = await AsyncStorage.getItem('user');
-            user = JSON.parse(user);
-
-            // update user object
-            user.settings = value;
-            // save updated user data
-            await AsyncStorage.setItem('user', JSON.stringify(user));
-
-            dispatch({
-                type: UPDATE_USER_OBJECT,
-                payload: user
-            });
-            // then show success message
-
-            dispatch({
-                type: SETTINGS_UPDATE_STATUS_MESSAGE,
-                payload: 'SUCCESS'
-            });
-
-            // close modals - done from settings update success
-        } else {
-            console.log('ERROR updating settings. Todo - inform the user');
-
-            // show error message
-            dispatch({
-                type: SETTINGS_UPDATE_STATUS_MESSAGE,
-                payload: 'ERROR'
-            });
-        }
-    };
-};
+// export const saveSocialAccounts = (data, value, token) => {
+//     let response = {};
+//     return async dispatch => {
+//         dispatch({
+//             type: START_UPDATING_SETTINGS
+//         });
+//
+//         try {
+//             response = await axios(URL + '/api/settings', {
+//                 method: 'PATCH',
+//                 headers: {
+//                     Authorization: 'Bearer ' + token,
+//                     'content-type': 'application/json'
+//                 },
+//                 data: {
+//                     ...value
+//                 }
+//             });
+//         } catch (error) {
+//             console.log('saveSettings', error);
+//             // show error message
+//             dispatch({
+//                 type: SETTINGS_UPDATE_STATUS_MESSAGE,
+//                 payload: 'ERROR'
+//             });
+//         }
+//
+//         if (response?.data?.message === 'success') {
+//             // Get user and parse json to Object
+//             let user = await AsyncStorage.getItem('user');
+//             user = JSON.parse(user);
+//
+//             // update user object
+//             user.settings = value;
+//             // save updated user data
+//             await AsyncStorage.setItem('user', JSON.stringify(user));
+//
+//             dispatch({
+//                 type: UPDATE_USER_OBJECT,
+//                 payload: user
+//             });
+//             // then show success message
+//
+//             dispatch({
+//                 type: SETTINGS_UPDATE_STATUS_MESSAGE,
+//                 payload: 'SUCCESS'
+//             });
+//
+//             // close modals - done from settings update success
+//         } else {
+//             console.log('ERROR updating settings. Todo - inform the user');
+//
+//             // show error message
+//             dispatch({
+//                 type: SETTINGS_UPDATE_STATUS_MESSAGE,
+//                 payload: 'ERROR'
+//             });
+//         }
+//     };
+// };
 
 /**
  * Toggle the modal and turn one of these options for updating
@@ -264,86 +263,86 @@ export const toggleSettingsModal = (id, title, key) => {
     };
 };
 
-/**
- * The user wants to change one of these settings (<Switch />)
- *
- * Privacy settings
- */
-export const toggleSettingsSwitch = (id, token) => {
-    let endUrl = '';
-
-    if (id === 4) {
-        endUrl = 'maps/name';
-    }
-    if (id === 5) {
-        endUrl = 'maps/username';
-    }
-    if (id === 6) {
-        endUrl = 'leaderboard/name';
-    }
-    if (id === 7) {
-        endUrl = 'leaderboard/username';
-    }
-    if (id === 8) {
-        endUrl = 'createdby/name';
-    }
-    if (id === 9) {
-        endUrl = 'createdby/username';
-    }
-    if (id === 10) {
-        endUrl = 'toggle-previous-tags';
-    }
-
-    return async dispatch => {
-        dispatch({
-            type: TOGGLE_SETTINGS_WAIT
-        });
-
-        await axios(URL + '/api/settings/privacy/' + endUrl, {
-            method: 'POST',
-            headers: {
-                Authorization: 'Bearer ' + token,
-                'content-type': 'application/json'
-            }
-        })
-            .then(async response => {
-                console.log('Response: toggleSettingsSwitch', response.data);
-
-                if (response.status === 200) {
-                    const key = Object.keys(response.data)[0];
-                    let value = Object.values(response.data)[0];
-
-                    //  INFO: show_name and show_username have boolean values
-                    //  rest have 0 & 1
-
-                    if (key !== 'show_name' && key !== 'show_username') {
-                        value = value === false ? 0 : 1;
-                    }
-
-                    let user = await AsyncStorage.getItem('user');
-
-                    // transform user json string into an object
-                    user = JSON.parse(user);
-
-                    user[key] = value;
-
-                    await AsyncStorage.setItem('user', JSON.stringify(user));
-
-                    dispatch({
-                        type: UPDATE_USER_OBJECT,
-                        payload: user
-                    });
-
-                    dispatch({
-                        type: TOGGLE_SETTINGS_WAIT
-                    });
-                }
-            })
-            .catch(error => {
-                console.log('Error: toggleSettingsSwitch', error);
-            });
-    };
-};
+// /**
+//  * The user wants to change one of these settings (<Switch />)
+//  *
+//  * Privacy settings
+//  */
+// export const toggleSettingsSwitch = (id, token) => {
+//     let endUrl = '';
+//
+//     if (id === 4) {
+//         endUrl = 'maps/name';
+//     }
+//     if (id === 5) {
+//         endUrl = 'maps/username';
+//     }
+//     if (id === 6) {
+//         endUrl = 'leaderboard/name';
+//     }
+//     if (id === 7) {
+//         endUrl = 'leaderboard/username';
+//     }
+//     if (id === 8) {
+//         endUrl = 'createdby/name';
+//     }
+//     if (id === 9) {
+//         endUrl = 'createdby/username';
+//     }
+//     if (id === 10) {
+//         endUrl = 'toggle-previous-tags';
+//     }
+//
+//     return async dispatch => {
+//         dispatch({
+//             type: TOGGLE_SETTINGS_WAIT
+//         });
+//
+//         await axios(URL + '/api/settings/privacy/' + endUrl, {
+//             method: 'POST',
+//             headers: {
+//                 Authorization: 'Bearer ' + token,
+//                 'content-type': 'application/json'
+//             }
+//         })
+//             .then(async response => {
+//                 console.log('Response: toggleSettingsSwitch', response.data);
+//
+//                 if (response.status === 200) {
+//                     const key = Object.keys(response.data)[0];
+//                     let value = Object.values(response.data)[0];
+//
+//                     //  INFO: show_name and show_username have boolean values
+//                     //  rest have 0 & 1
+//
+//                     if (key !== 'show_name' && key !== 'show_username') {
+//                         value = value === false ? 0 : 1;
+//                     }
+//
+//                     let user = await AsyncStorage.getItem('user');
+//
+//                     // transform user json string into an object
+//                     user = JSON.parse(user);
+//
+//                     user[key] = value;
+//
+//                     await AsyncStorage.setItem('user', JSON.stringify(user));
+//
+//                     dispatch({
+//                         type: UPDATE_USER_OBJECT,
+//                         payload: user
+//                     });
+//
+//                     dispatch({
+//                         type: TOGGLE_SETTINGS_WAIT
+//                     });
+//                 }
+//             })
+//             .catch(error => {
+//                 console.log('Error: toggleSettingsSwitch', error);
+//             });
+//     };
+// };
 
 /**
  * After the users password error is shown,

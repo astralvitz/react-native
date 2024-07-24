@@ -1,10 +1,8 @@
-import { produce } from 'immer';
-// import AsyncStorage from '@react-native-community/async-storage';
+import axios from "axios";
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { STATS_REQUEST_SUCCESS, STATS_REQUEST_ERROR } from '../actions/types';
-
-const INITIAL_STATE = {
+const initialState = {
     statsErrorMessage: null,
     totalLitter: 0,
     totalPhotos: 0,
@@ -17,13 +15,47 @@ const INITIAL_STATE = {
     }
 };
 
-export default function(state = INITIAL_STATE, action) {
-    return produce(state, draft => {
-        switch (action.type) {
-            /**
-             *
-             */
-            case STATS_REQUEST_SUCCESS:
+export const getStats = createAsyncThunk(
+    'stats/getStats',
+    async (_, { rejectWithValue }) => {
+        try
+        {
+            const response = await axios({
+                url: `${URL}/api/global/stats-data`,
+                method: 'GET',
+                headers: {
+                    Accept: 'application/json'
+                }
+            });
+
+            return response.data;
+        }
+        catch (error)
+        {
+            return (error.response)
+                ? rejectWithValue('Something went wrong, please try again')
+                : rejectWithValue('Network Error, please try again');
+        }
+    }
+);
+
+const statsSlice = createSlice({
+
+    name: 'stats',
+
+    initialState,
+
+    reducers: {},
+
+    extraReducers: (builder) => {
+
+        builder
+
+            .addCase(getStats.pending, (state) => {
+                state.statsErrorMessage = null;
+            })
+            .addCase(getStats.fulfilled, (state, action) => {
+
                 const totalLitter = action.payload?.total_litter;
                 const totalPhotos = action.payload?.total_photos;
                 const totalUsers = action.payload?.total_users;
@@ -50,23 +82,19 @@ export default function(state = INITIAL_STATE, action) {
                     })
                 );
 
-                draft.totalLitter = totalLitter;
-                draft.totalPhotos = totalPhotos;
-                draft.totalUsers = totalUsers;
-                draft.totalLittercoin = totalLittercoin;
-                draft.litterTarget = litterTarget;
-                draft.targetPercentage = targetPercentage;
-                draft.statsErrorMessage = null;
+                state.totalLitter = totalLitter;
+                state.totalPhotos = totalPhotos;
+                state.totalUsers = totalUsers;
+                state.totalLittercoin = totalLittercoin;
+                state.litterTarget = litterTarget;
+                state.targetPercentage = targetPercentage;
+                state.statsErrorMessage = null;
+            })
+            .addCase(getStats.rejected, (state, action) => {
+                state.statsErrorMessage = action.payload;
+            });
+    }
+});
 
-                break;
-
-            case STATS_REQUEST_ERROR:
-                draft.statsErrorMessage = action.payload;
-
-                break;
-
-            default:
-                return draft;
-        }
-    });
-}
+export const {  } = statsSlice.actions;
+export default statsSlice.reducer;

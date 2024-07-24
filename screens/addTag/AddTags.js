@@ -256,7 +256,7 @@ class AddTags extends Component {
                             prevButton={
                                 <View style={styles.slideButtonStyle}>
                                     <Icon
-                                        name="ios-chevron-back"
+                                        name="chevron-back"
                                         color={Colors.accent}
                                         size={32}
                                     />
@@ -265,7 +265,7 @@ class AddTags extends Component {
                             nextButton={
                                 <View style={styles.slideButtonStyle}>
                                     <Icon
-                                        name="ios-chevron-forward"
+                                        name="chevron-forward"
                                         color={Colors.accent}
                                         size={32}
                                     />
@@ -308,7 +308,7 @@ class AddTags extends Component {
                                 }
                                 style={styles.closeButton}>
                                 <Icon
-                                    name="ios-close-outline"
+                                    name="close-outline"
                                     color="black"
                                     size={24}
                                 />

@@ -38,7 +38,7 @@ class UserTeamsList extends Component {
                                 <View style={{ height: 24, width: 24 }}>
                                     {activeTeam === team.id && (
                                         <Icon
-                                            name="ios-star-sharp"
+                                            name="star-sharp"
                                             size={24}
                                             color={Colors.accent}
                                         />

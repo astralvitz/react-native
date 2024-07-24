@@ -93,7 +93,7 @@ class UserStatsScreen extends Component {
                 value: user?.xp_redis || this.state.xpStart,
                 startValue: this.state.xpStart,
                 title: `${lang}.user.XP`,
-                icon: 'ios-medal-outline',
+                icon: 'medal-outline',
                 color: '#14B8A6',
                 bgColor: '#CCFBF1'
             },
@@ -101,7 +101,7 @@ class UserStatsScreen extends Component {
                 value: user?.position || this.state.positionStart,
                 startValue: this.state.positionStart,
                 title: `${lang}.user.rank`,
-                icon: 'ios-podium-outline',
+                icon: 'podium-outline',
                 color: '#A855F7',
                 bgColor: '#F3E8FF',
                 ordinal: true
@@ -110,7 +110,7 @@ class UserStatsScreen extends Component {
                 value: user?.total_images || this.state.totalImagesStart,
                 startValue: this.state.totalImagesStart,
                 title: `${lang}.user.photos`,
-                icon: 'ios-images-outline',
+                icon: 'images-outline',
                 color: '#F59E0B',
                 bgColor: '#FEF9C3'
             },
@@ -118,7 +118,7 @@ class UserStatsScreen extends Component {
                 value: user?.totalTags || this.state.totalTagsStart,
                 startValue: this.state.totalTagsStart,
                 title: `${lang}.user.tags`,
-                icon: 'ios-pricetags-outline',
+                icon: 'pricetags-outline',
                 color: '#0EA5E9',
                 bgColor: '#E0F2FE'
             }
@@ -139,7 +139,7 @@ class UserStatsScreen extends Component {
                     rightContent={
                         <Pressable>
                             <Icon
-                                name="ios-settings-outline"
+                                name="settings-outline"
                                 color="white"
                                 size={24}
                                 onPress={() => {

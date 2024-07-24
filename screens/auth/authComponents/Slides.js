@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import {Dimensions, Image, ScrollView, StyleSheet, View} from 'react-native';
-import PageControl from 'react-native-page-control';
-import {getLanguage} from 'react-native-translation';
+// import PageControl from 'react-native-page-control';
 import {Body, Colors, Title} from '../../components';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -18,9 +17,9 @@ class Slides extends Component {
     getInnerTextContainer() {
         let flexDirection = 'row';
 
-        if (getLanguage() === 'nl') {
-            flexDirection = 'column';
-        }
+        // if (getLanguage() === 'nl') {
+        //     flexDirection = 'column';
+        // }
 
         return {flexDirection: flexDirection, alignSelf: 'center'};
     }
@@ -42,12 +41,12 @@ class Slides extends Component {
                         <View style={this.getInnerTextContainer()}>
                             <Title
                                 style={styles.slideTitle}
-                                dictionary={`${lang}.welcome.its`}
+                                dictionary={'welcome.its'}
                             />
                             <Title
                                 color="accent"
                                 style={[styles.slideTitle, {marginLeft: 6}]}
-                                dictionary={`${lang}.${slide.title}`}
+                                dictionary={slide.title}
                             />
                         </View>
                         <Body
@@ -55,22 +54,22 @@ class Slides extends Component {
                                 textAlign: 'center',
                                 paddingHorizontal: 30,
                             }}
-                            dictionary={`${lang}.${slide.text}`}
+                            dictionary={slide.text}
                         />
                     </View>
 
-                    <PageControl
-                        style={styles.pageControl}
-                        numberOfPages={this.props.data.length}
-                        currentPage={slide.id - 1}
-                        // hidesForSinglePage
-                        pageIndicatorTintColor="white"
-                        currentPageIndicatorTintColor={`${Colors.accent}`}
-                        indicatorStyle={{borderRadius: 15}}
-                        currentIndicatorStyle={{borderRadius: 5}}
-                        indicatorSize={styles.indicatorSize}
-                        onPageIndicatorPress={this.onItemTap}
-                    />
+                    {/*<PageControl*/}
+                    {/*    style={styles.pageControl}*/}
+                    {/*    numberOfPages={this.props.data.length}*/}
+                    {/*    currentPage={slide.id - 1}*/}
+                    {/*    // hidesForSinglePage*/}
+                    {/*    pageIndicatorTintColor="white"*/}
+                    {/*    currentPageIndicatorTintColor={`${Colors.accent}`}*/}
+                    {/*    indicatorStyle={{borderRadius: 15}}*/}
+                    {/*    currentIndicatorStyle={{borderRadius: 5}}*/}
+                    {/*    indicatorSize={styles.indicatorSize}*/}
+                    {/*    onPageIndicatorPress={this.onItemTap}*/}
+                    {/*/>*/}
                 </View>
             );
         });

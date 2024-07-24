@@ -98,7 +98,6 @@ class UploadImagesGrid extends PureComponent {
     };
 
     render() {
-        const lang = this.props.lang;
         // Show empty state illustration when no images
         if (this.props.photos.length === 0) {
             return (
@@ -114,11 +113,11 @@ class UploadImagesGrid extends PureComponent {
                     />
                     <SubTitle
                         style={styles.exptyStateText}
-                        dictionary={`${lang}.leftpage.no-images`}
+                        dictionary={'leftpage.no-images'}
                     />
                     <Body
                         style={styles.exptyStateText}
-                        dictionary={`${lang}.leftpage.take-photo`}
+                        dictionary={'leftpage.take-photo'}
                     />
                 </View>
             );

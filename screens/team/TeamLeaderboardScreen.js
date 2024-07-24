@@ -49,7 +49,7 @@ class TeamLeaderboardScreen extends Component {
                         <Pressable
                             onPress={() => this.props.navigation.goBack()}>
                             <Icon
-                                name="ios-chevron-back-outline"
+                                name="chevron-back-outline"
                                 color={Colors.white}
                                 size={24}
                             />

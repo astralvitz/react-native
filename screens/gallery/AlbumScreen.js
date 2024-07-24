@@ -15,8 +15,8 @@ class AlbumScreen extends Component {
         };
     }
 
-    componentDidMount() {
-        this.checkGalleryPermission();
+    async componentDidMount() {
+        await this.checkGalleryPermission();
     }
 
     /**
@@ -26,7 +26,7 @@ class AlbumScreen extends Component {
 
     async checkGalleryPermission() {
         const result = await checkCameraRollPermission();
-        if (result === 'granted') {
+        if (result === 'granted' || result === 'limited') {
             this.setState({hasPermission: true, loading: false});
         } else {
             this.props.navigation.navigate('PERMISSION', {
@@ -44,11 +44,7 @@ class AlbumScreen extends Component {
                             onPress={() => {
                                 this.props.navigation.goBack();
                             }}>
-                            <Icon
-                                name="ios-chevron-back-outline"
-                                size={24}
-                                color="white"
-                            />
+                            <Icon name="chevron-back-outline" size={24} color="white" />
                         </Pressable>
                     }
                     centerContent={<SubTitle color="white">Album</SubTitle>}

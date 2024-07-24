@@ -1,3 +1,5 @@
+import { combineReducers } from '@reduxjs/toolkit';
+
 import auth from './auth_reducer';
 import camera from './camera_reducer';
 import gallery from './gallery_reducer';
@@ -10,7 +12,7 @@ import stats from './stats_reducer';
 import teams from './team_reducer';
 import web from './web_reducer';
 
-export default {
+export const rootReducer = combineReducers({
     auth,
     camera,
     gallery,
@@ -22,4 +24,4 @@ export default {
     stats,
     teams,
     web
-};
+});

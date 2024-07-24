@@ -9,13 +9,13 @@ const ActionButton = ({navigation, status, onPress}) => {
     const disabled = status === 'SELECTING';
     switch (status) {
         case 'NO_IMAGES':
-            iconName = 'ios-images-outline';
+            iconName = 'images-outline';
             break;
         case 'SELECTING':
-            iconName = 'ios-trash-outline';
+            iconName = 'trash-outline';
             break;
         case 'SELECTED':
-            iconName = 'ios-trash-outline';
+            iconName = 'trash-outline';
             break;
         default:
             iconName = 'camera-outline';

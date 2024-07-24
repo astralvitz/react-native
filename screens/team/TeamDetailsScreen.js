@@ -55,21 +55,21 @@ class TeamDetailsScreen extends Component {
             {
                 value: selectedTeam?.total_images || 0,
                 title: `${lang}.stats.total-photos`,
-                icon: 'ios-images-outline',
+                icon: 'images-outline',
                 color: '#A855F7',
                 bgColor: '#F3E8FF'
             },
             {
                 value: selectedTeam?.total_litter || 0,
                 title: `${lang}.stats.total-litter`,
-                icon: 'ios-trash-outline',
+                icon: 'trash-outline',
                 color: '#14B8A6',
                 bgColor: '#CCFBF1'
             },
             {
                 value: selectedTeam?.members || 0,
                 title: `${lang}.team.total-members`,
-                icon: 'ios-person-outline',
+                icon: 'person-outline',
                 color: '#F59E0B',
                 bgColor: '#FEF9C3'
             }
@@ -82,7 +82,7 @@ class TeamDetailsScreen extends Component {
                         <Pressable
                             onPress={() => this.props.navigation.goBack()}>
                             <Icon
-                                name="ios-chevron-back-outline"
+                                name="chevron-back-outline"
                                 color={Colors.white}
                                 size={24}
                             />

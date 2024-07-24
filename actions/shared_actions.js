@@ -1,7 +1,4 @@
-import React from 'react';
 import {
-    CANCEL_UPLOAD,
-    CHECK_APP_VERSION,
     CLOSE_THANK_YOU_MESSAGES,
     DECREMENT_SELECTED,
     INCREMENT_SELECTED,
@@ -15,42 +12,7 @@ import {
     URL,
     WEB_NOT_TAGGED
 } from './types';
-import axios from 'axios';
 
-/**
- *
- */
-export const cancelUpload = () => {
-    return {
-        type: CANCEL_UPLOAD
-    };
-}
-
-/**
- * check for new app version
- *
- */
-export const checkAppVersion = () => {
-    return async dispatch => {
-        try {
-            const response = await axios({
-                url: URL + '/api/mobile-app-version',
-                method: 'GET',
-                headers: {
-                    Accept: 'application/json'
-                }
-            });
-            if (response.data) {
-                dispatch({
-                    type: CHECK_APP_VERSION,
-                    payload: response.data
-                });
-            }
-        } catch (error) {
-            console.log('appversion check ' + error);
-        }
-    };
-};
 
 /**
  * After uploading,
@@ -87,12 +49,6 @@ export const showFailedTaggedUploads = () => {
 export const showThankYouMessagesAfterUpload = () => {
     return {
         type: SHOW_THANK_YOU_MESSAGES_AFTER_UPLOAD
-    };
-}
-
-export const startUploading = () => {
-    return {
-        type: START_UPLOADING
     };
 }
 

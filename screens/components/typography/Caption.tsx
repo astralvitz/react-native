@@ -28,7 +28,8 @@ const Caption: React.FC<CaptionProps> = ({
             color={color}
             values={values}
             dictionary={dictionary}
-            {...rest}>
+            {...rest}
+        >
             {children}
         </StyledText>
     );

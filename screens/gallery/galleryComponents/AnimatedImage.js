@@ -49,7 +49,7 @@ const AnimatedImage = ({ image, isImageGeotagged, selected, onPress }) => {
                     {/* Selected check mark icon */}
                     <View style={[styles.selectedIcon, styles.iconBorderStyle]}>
                         <Icon
-                            name="ios-checkmark-outline"
+                            name="checkmark-outline"
                             size={20}
                             color="white"
                         />

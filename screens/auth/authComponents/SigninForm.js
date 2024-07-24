@@ -1,13 +1,12 @@
-import React, {Component} from 'react';
-import {ActivityIndicator, Pressable, StyleSheet, View} from 'react-native';
-import {Formik} from 'formik';
+import React, { useState, useRef } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Formik } from 'formik';
 import * as Yup from 'yup';
+import { useDispatch, useSelector } from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {connect} from 'react-redux';
-import {getTranslation} from 'react-native-translation';
-import {userLogin} from '../../../actions';
-import {Body, Colors, CustomTextInput, SubTitle} from '../../components';
-import StatusMessage from './StatusMessage';
+import { useTranslation } from "react-i18next";
+import { userLogin } from '../../../reducers/auth_reducer';
+import { Body, Colors, CustomTextInput, SubTitle } from '../../components';
 
 /**
  * Form field validation with keys for translation
@@ -18,66 +17,75 @@ const SigninSchema = Yup.object().shape({
     password: Yup.string().required('enter-password')
 });
 
-class SigninForm extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            isPasswordVisible: false
+const SigninForm = ({ changeFormType }) => {
+
+    const dispatch = useDispatch();
+    const { serverStatusText, isSubmitting } = useSelector(state => state.auth);
+
+    const emailRef = useRef(null);
+    const passwordRef = useRef(null);
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const [hasSubmitted, setHasSubmitted] = useState(false);
+
+    const { t } = useTranslation();
+    const emailTranslation = t('auth.email-address');
+    const passwordTranslation = t('auth.password');
+
+    const handlePasswordVisibility = () => setIsPasswordVisible(prev => !prev);
+
+    const handleFormSubmit = (handleSubmit) => {
+        return () => {
+            setHasSubmitted(true);
+            handleSubmit();
         };
+    };
 
-        this.emailRef = React.createRef();
-        this.passwordRef = React.createRef();
-    }
+    let infoMessage = "";
 
-    render() {
-        // translation text
-        const {lang, serverStatusText, isSubmitting} = this.props;
+    return (
+        <Formik
+            initialValues={{ email: '', password: '' }}
+            validationSchema={SigninSchema}
+            onSubmit={({ email, password }) => {
+                setHasSubmitted(true);
+                dispatch(userLogin({ email, password }));
+            }}
+        >
+            {({
+                handleChange,
+                setFieldValue,
+                handleSubmit,
+                values,
+                errors,
+                touched
+            }) => {
 
-        const emailTranslation = getTranslation(`${lang}.auth.email-address`);
-        const passwordTranslation = getTranslation(`${lang}.auth.password`);
+                if (serverStatusText !== "") {
+                    infoMessage = serverStatusText
+                } else if (errors?.username) {
+                    infoMessage = t(`auth.${errors.username}`);
+                } else if (errors?.email) {
+                    infoMessage = t(`auth.${errors.email}`);
+                } else if (errors?.password) {
+                    infoMessage = t(`auth.${errors.password}`);
+                }
 
-        return (
-            <Formik
-                initialValues={{email: '', password: ''}}
-                validationSchema={SigninSchema}
-                onSubmit={({email, password}) => {
-                    this.props.userLogin({
-                        email,
-                        password
-                    });
-                }}>
-                {({
-                    handleChange,
-                    handleBlur,
-                    setFieldValue,
-                    handleSubmit,
-                    values,
-                    errors,
-                    touched
-                }) => (
-                    <View style={{flex: 1, justifyContent: 'center'}}>
+                const hasErrors = Object.keys(errors).length > 0;
+
+                return (
+                    <View style={{ flex: 1, justifyContent: 'center' }}>
                         {/* email input */}
                         <CustomTextInput
-                            ref={this.emailRef}
-                            style={{marginBottom: 10}}
-                            onSubmitEditing={() =>
-                                this.passwordRef.current.focus()
-                            }
-                            onChangeText={e =>
-                                setFieldValue(
-                                    'email',
-                                    e.trim().toLocaleLowerCase()
-                                )
-                            }
+                            ref={emailRef}
+                            style={{ marginBottom: 10 }}
+                            onSubmitEditing={() => passwordRef?.current?.focus()}
+                            onChangeText={e => setFieldValue('email', e.trim().toLowerCase())}
                             value={values.email}
                             name="email"
-                            error={
-                                errors.email &&
-                                `${this.props.lang}.auth.${errors.email}`
-                            }
-                            touched={touched.email}
+                            error={errors?.email}
+                            touched={touched?.email}
                             placeholder={emailTranslation}
-                            leftIconName="ios-mail"
+                            leftIconName="mail-outline"
                             // returnKeyType="next"
                             keyboardType="email-address"
                             multiline
@@ -85,58 +93,55 @@ class SigninForm extends Component {
 
                         {/* password input */}
                         <CustomTextInput
-                            ref={this.passwordRef}
+                            ref={passwordRef}
                             onChangeText={handleChange('password')}
                             style={{marginBottom: 10}}
                             value={values.password}
                             name="password"
-                            error={
-                                errors.password &&
-                                `${this.props.lang}.auth.${errors.password}`
-                            }
-                            touched={touched.password}
+                            error={errors?.password}
+                            touched={touched?.password}
                             placeholder={passwordTranslation}
-                            leftIconName="ios-key"
-                            secureTextEntry={!this.state.isPasswordVisible}
+                            leftIconName="key-outline"
+                            secureTextEntry={!isPasswordVisible}
                             returnKeyType="done"
-                            // eye icon --> display/hide
                             rightContent={
                                 <Pressable
-                                    onPress={() =>
-                                        this.setState(prevState => ({
-                                            isPasswordVisible:
-                                                !prevState.isPasswordVisible
-                                        }))
-                                    }>
+                                    onPress={handlePasswordVisibility}>
                                     <Icon
-                                        style={styles.textfieldIcon}
-                                        name={
-                                            this.state.isPasswordVisible
-                                                ? 'ios-eye'
-                                                : 'ios-eye-off'
-                                        }
+                                        style={styles.textFieldIcon}
+                                        name={isPasswordVisible ? 'eye' : 'eye-off'}
                                         size={28}
                                         color={Colors.muted}
                                     />
                                 </Pressable>
                             }
                         />
+
                         <Pressable
                             style={{alignItems: 'flex-end'}}
-                            onPress={() => this.props.changeFormType('reset')}>
+                            onPress={() => changeFormType('reset')}>
                             <Body
                                 color="white"
-                                dictionary={`${lang}.auth.forgot-password`}
+                                dictionary={'auth.forgot-password'}
                             />
                         </Pressable>
-                        <StatusMessage
-                            isSubmitting={isSubmitting}
-                            serverStatusText={serverStatusText}
-                        />
+
+                        {
+                            hasSubmitted && hasErrors && (
+                                <Text style={styles.statusMessageTempFix}>
+                                    { infoMessage }
+                                </Text>
+                            )
+                        }
+
+                        {/*<StatusMessage*/}
+                        {/*    showError={hasSubmitted}*/}
+                        {/*    serverStatusText={infoMessage}*/}
+                        {/*/>*/}
 
                         <Pressable
                             disabled={isSubmitting}
-                            onPress={handleSubmit}
+                            onPress={handleFormSubmit(handleSubmit)}
                             style={[
                                 styles.buttonStyle,
                                 isSubmitting && styles.buttonDisabled
@@ -146,16 +151,17 @@ class SigninForm extends Component {
                             ) : (
                                 <SubTitle
                                     color="accentLight"
-                                    dictionary={`${this.props.lang}.auth.login`}>
+                                    dictionary={'auth.login'}
+                                >
                                     Create Account
                                 </SubTitle>
                             )}
                         </Pressable>
                     </View>
-                )}
-            </Formik>
-        );
-    }
+                )
+            }}
+        </Formik>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -170,21 +176,17 @@ const styles = StyleSheet.create({
         width: '100%',
         marginTop: 20
     },
-    textfieldIcon: {
+    textFieldIcon: {
         padding: 10
     },
     buttonDisabled: {
         opacity: 0.8
+    },
+    statusMessageTempFix: {
+        color: 'white',
+        textAlign: 'center',
+        paddingTop: 10
     }
 });
 
-const mapStateToProps = state => {
-    return {
-        lang: state.auth.lang,
-        isSubmitting: state.auth.isSubmitting,
-        serverStatusText: state.auth.serverStatusText
-    };
-};
-
-// bind all action creators to AuthScreen
-export default connect(mapStateToProps, {userLogin})(SigninForm);
+export default SigninForm;

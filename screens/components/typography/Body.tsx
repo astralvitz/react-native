@@ -28,7 +28,8 @@ const Body: React.FC<BodyProps> = ({
             color={color}
             dictionary={dictionary}
             values={values}
-            {...rest}>
+            {...rest}
+        >
             {children}
         </StyledText>
     );

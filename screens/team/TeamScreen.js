@@ -71,7 +71,7 @@ class TeamScreen extends Component {
                             <Icon
                                 color={Colors.white}
                                 size={32}
-                                name="ios-add-outline"
+                                name="add-outline"
                             />
                         </Pressable>
                     }

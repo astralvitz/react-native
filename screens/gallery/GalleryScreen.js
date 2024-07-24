@@ -1,14 +1,13 @@
-import React, {Component} from 'react';
-import {ActivityIndicator, FlatList, Pressable, SafeAreaView, StyleSheet, View} from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ActivityIndicator, FlatList, Pressable, SafeAreaView, StyleSheet, View } from 'react-native';
 import moment from 'moment';
 import _ from 'lodash';
-
-import {connect} from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as actions from '../../actions';
-import {Body, Caption, Colors, Header, SubTitle} from '../components';
-import {isGeotagged} from '../../utils/isGeotagged';
-import {checkCameraRollPermission} from '../../utils/permissions';
+import { Body, Caption, Colors, Header, SubTitle } from '../components';
+import { isGeotagged } from '../../utils/isGeotagged';
+import { checkCameraRollPermission } from '../../utils/permissions';
 import AnimatedImage from './galleryComponents/AnimatedImage';
 
 /**
@@ -38,176 +37,151 @@ export const placeInTime = date => {
     }
 };
 
-class GalleryScreen extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            selectedImages: [],
-            sortedData: [],
-            loading: false,
-            hasPermission: false
-        };
-    }
+export default function GalleryScreen ({ navigation }) {
 
-    async componentDidMount() {
-        await this.checkGalleryPermission();
-    }
+    const [selectedImages, setSelectedImages] = useState([]);
+    const [sortedData, setSortedData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [hasPermission, setHasPermission] = useState(false);
 
-    componentDidUpdate(prevProps) {
-        if (prevProps.geotaggedImages?.length < this.props.geotaggedImages?.length) {
-            this.splitIntoRows(this.props.geotaggedImages);
+    const geotaggedImages = useSelector(state => state.gallery.geotaggedImages);
+    const { user } = useSelector(state => state.auth);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        checkGalleryPermission();
+    }, []);
+
+    useEffect(() => {
+        if (geotaggedImages.length) {
+            splitIntoRows(geotaggedImages);
         }
-    }
+    }, [geotaggedImages]);
 
-    /**
-     * fn to check for cameraroll/gallery permissions
-     * if permissions granted setState, else navigate to GalleryPermissionScreen
-     */
+    const checkGalleryPermission = async () => {
 
-    async checkGalleryPermission() {
         const result = await checkCameraRollPermission();
 
-        if (result === 'granted') {
-            await this.props.getPhotosFromCameraroll();
+        if (result === 'granted' || result === 'limited')
+        {
+            dispatch(actions.getPhotosFromCameraroll());
 
-            await this.splitIntoRows(this.props.geotaggedImages);
+            await splitIntoRows(geotaggedImages);
 
-            this.setState({hasPermission: true, loading: false});
-        } else {
-            this.props.navigation.navigate('PERMISSION', {
+            setHasPermission(true);
+
+            setLoading(false);
+        }
+        else
+        {
+            navigation.navigate('PERMISSION', {
                 screen: 'GALLERY_PERMISSION'
             });
         }
-    }
+    };
 
     /**
-     * fn to split images array based on date groups which they belong
-     * date groups are determined by {@link placeInTime}
-     * groups are "today", this "week", this "month",
-     * month name (if older than current month but belongs to current year),
-     * year
+     * Split images array based on date groups which they belong.
+     * Date groups are determined by {@link placeInTime}
+     * Groups are "today", this "week", this "month",
+     * month name (if older than current month but belongs to current year), year
      * @param {Array} images
      */
+    const splitIntoRows = async (images) => {
 
-    async splitIntoRows(images) {
         let temp = {};
-        // sort images based on date
+
         const sortedImages = _.orderBy(images, ['date'], ['asc']);
 
         sortedImages.map(image => {
             const dateOfImage = image.date * 1000;
-
             const placeInTimeOfImage = placeInTime(dateOfImage);
-            if (temp[placeInTimeOfImage] === undefined) {
+            if (!temp[placeInTimeOfImage]) {
                 temp[placeInTimeOfImage] = [];
             }
             temp[placeInTimeOfImage].unshift(image);
         });
+
         let final = [];
         let order = ['today', 'week', 'month'];
+        let allTimeTags = Object.keys(temp).map(prop => Number.isInteger(parseInt(prop)) ? parseInt(prop) : prop);
+        let allMonths = allTimeTags.filter(prop => Number.isInteger(prop) && prop < 12).sort((a, b) => b - a);
+        let allYears = allTimeTags.filter(prop => Number.isInteger(prop) && !allMonths.includes(prop)).sort((a, b) => b - a);
 
-        let allTimeTags = Object.keys(temp).map(prop => {
-            // converting temp object keys which are month numbers or years into number
-            if (Number.isInteger(parseInt(prop))) {
-                return parseInt(prop);
+        order = [...order, ...allMonths, ...allYears];
+
+        order.forEach(prop => {
+            if (temp[prop]) {
+                final.push({ title: prop, data: temp[prop] });
             }
-
-            return prop;
         });
 
-        let allMonths = allTimeTags.filter(prop => Number.isInteger(prop) && prop < 12);
-        allMonths = _.reverse(_.sortBy(allMonths));
-
-        let allYears = allTimeTags.filter(
-            prop => Number.isInteger(prop) && !allMonths.includes(prop)
-        );
-        allYears = _.reverse(_.sortBy(allYears));
-
-        order = _.concat(order, allMonths, allYears);
-
-        for (let prop of order) {
-            if (temp[prop]) {
-                let newObj = {title: prop, data: temp[prop]};
-                final.push(newObj);
-            }
-        }
-        this.setState({sortedData: final});
-    }
+        setSortedData(final);
+    };
 
     /**
      * fn that is called when "done" is pressed
      * sorts the array based on id
      * call action addImages to save selected images to state
      */
-    async handleDoneClick() {
-        const sortedArray = await this.state.selectedImages.sort((a, b) => a.id - b.id);
+    const handleDoneClick = async () => {
 
-        this.props.addImages(sortedArray, 'GALLERY', this.props.user.picked_up);
-    }
+        const sortedArray = selectedImages.sort((a, b) => a.id - b.id);
+
+        dispatch(actions.addImages(sortedArray, 'GALLERY', user.picked_up));
+
+        navigation.navigate('HOME');
+    };
 
     /**
      * fn to select and deselect image on tap
      *
      * @param  item - The image object
      */
-    selectImage(item) {
-        const selectedArray = this.state.selectedImages;
-        // check if item /image is already selected
-        const index = selectedArray.indexOf(item);
-        if (index !== -1) {
-            this.setState({
-                selectedImages: this.state.selectedImages.filter((_, i) => i !== index)
-            });
-        }
+    const selectImage = (item) => {
 
-        if (index === -1) {
-            this.setState(prevState => {
-                return {selectedImages: [...prevState.selectedImages, item]};
-            });
+        const index = selectedImages.indexOf(item);
+
+        if (index !== -1) {
+            setSelectedImages(selectedImages.filter((_, i) => i !== index));
+        } else {
+            setSelectedImages(prev => [...prev, item]);
         }
-    }
+    };
 
     /**
      * fn that returns the sections for flatlist to display
-     *
      */
-    renderSection({item, index}) {
+    const renderSection = ({ item }) => {
+
         let headerTitle = item?.title;
+
         if (Number.isInteger(headerTitle) && headerTitle < 12) {
             headerTitle = moment(headerTitle.toString(), 'MM').format('MMMM');
         }
 
-        if (headerTitle === 'today') {
-            headerTitle = 'Today';
-        }
-
-        if (headerTitle === 'week') {
-            headerTitle = 'This Week';
-        }
-
-        if (headerTitle === 'month') {
-            headerTitle = 'This Month';
-        }
+        const titleMap = {
+            today: 'Today',
+            week: 'This Week',
+            month: 'This Month'
+        };
+        headerTitle = titleMap[headerTitle] || headerTitle;
 
         return (
             <View>
                 <View style={styles.headerStyle}>
-                    <Body
-                        style={{
-                            color: '#aaaaaa'
-                        }}>
+                    <Body style={{ color: '#aaaaaa' }}>
                         {headerTitle}
                     </Body>
                 </View>
-                <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                     {item.data.map(image => {
-                        const selected = this.state.selectedImages.includes(image);
-
+                        const selected = selectedImages.includes(image);
                         const isImageGeotagged = isGeotagged(image);
                         return (
                             <AnimatedImage
                                 key={image.uri}
-                                onPress={() => isImageGeotagged && this.selectImage(image)}
+                                onPress={() => isImageGeotagged && selectImage(image)}
                                 image={image}
                                 isImageGeotagged={isImageGeotagged}
                                 selected={selected}
@@ -217,103 +191,72 @@ class GalleryScreen extends Component {
                 </View>
             </View>
         );
-    }
-
-    render() {
-        const {lang} = this.props;
-        return (
-            <>
-                <Header
-                    leftContent={
-                        <Pressable
-                            onPress={() => {
-                                this.props.navigation.navigate('HOME');
-                                // this.props.setImageLoading;
-                            }}>
-                            <Body color="white" dictionary={`${lang}.leftpage.cancel`} />
-                        </Pressable>
-                    }
-                    centerContent={
-                        <SubTitle color="white" dictionary={`${lang}.leftpage.geotagged`} />
-                    }
-                    centerContainerStyle={{flex: 2}}
-                    rightContent={
-                        <Pressable
-                            onPress={async () => {
-                                await this.handleDoneClick();
-                                this.props.navigation.navigate('HOME');
-                            }}>
-                            <View
-                                style={{
-                                    flexDirection: 'row',
-                                    justifyContent: 'center',
-                                    alignItems: 'center'
-                                }}>
-                                <Body color="white" dictionary={`${lang}.leftpage.next`} />
-                                <Body color="white">
-                                    {this.state.selectedImages?.length > 0 &&
-                                        ` : ${this.state.selectedImages?.length}`}
-                                </Body>
-                            </View>
-                        </Pressable>
-                    }
-                />
-                {this.state.hasPermission && !this.state.loading ? (
-                    <View style={{flex: 1}}>
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                marginTop: 4,
-                                justifyContent: 'center'
-                            }}>
-                            <Icon
-                                name="ios-information-circle-outline"
-                                style={{color: Colors.muted}}
-                                size={18}
-                            />
-                            <Caption>Only geotagged images can be selected</Caption>
-                        </View>
-
-                        <SafeAreaView
-                            style={{
-                                flexDirection: 'row',
-                                flex: 1
-                            }}>
-                            <FlatList
-                                contentContainerStyle={{paddingBottom: 40}}
-                                style={{flexDirection: 'column'}}
-                                alwaysBounceVertical={false}
-                                showsVerticalScrollIndicator={false}
-                                data={this.state.sortedData}
-                                renderItem={(item, index) => this.renderSection(item, index)}
-                                extraData={this.state.selectedImages}
-                                keyExtractor={item => `${item.title}`}
-                                onEndReached={() => {
-                                    this.props.getPhotosFromCameraroll('LOAD');
-                                }}
-                                onEndReachedThreshold={0.05}
-                            />
-                        </SafeAreaView>
-                    </View>
-                ) : (
-                    <View style={styles.container}>
-                        <ActivityIndicator color={Colors.accent} />
-                    </View>
-                )}
-            </>
-        );
-    }
-}
-
-const mapStateToProps = state => {
-    return {
-        geotaggedImages: state.gallery.geotaggedImages,
-        user: state.auth.user,
-        lang: state.auth.lang
     };
-};
 
-export default connect(mapStateToProps, actions)(GalleryScreen);
+    return (
+        <>
+            <Header
+                leftContent={
+                    <Pressable
+                        onPress={() => {
+                            this.props.navigation.navigate('HOME');
+                            // this.props.setImageLoading;
+                        }}>
+                        <Body color="white" dictionary={'leftpage.cancel'} />
+                    </Pressable>
+                }
+                centerContent={
+                    <SubTitle color="white" dictionary={'leftpage.geotagged'} />
+                }
+                centerContainerStyle={{ flex: 2 }}
+                rightContent={
+                    <Pressable
+                        onPress={handleDoneClick}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+                            <Body color="white" dictionary={'leftpage.next'} />
+                            <Body color="white">
+                                {selectedImages?.length > 0 && ` : ${selectedImages?.length}`}
+                            </Body>
+                        </View>
+                    </Pressable>
+                }
+            />
+
+            {hasPermission && !loading ? (
+                <View style={{ flex: 1 }}>
+                    <View
+                        style={{ flexDirection: 'row', marginTop: 4, justifyContent: 'center' }}>
+                        <Icon
+                            name="information-circle-outline"
+                            style={{color: Colors.muted}}
+                            size={18}
+                        />
+                        <Caption>Only geotagged images can be selected</Caption>
+                    </View>
+
+                    <SafeAreaView style={{ flexDirection: 'row',  flex: 1 }}>
+                        <FlatList
+                            contentContainerStyle={{paddingBottom: 40}}
+                            style={{flexDirection: 'column'}}
+                            alwaysBounceVertical={false}
+                            showsVerticalScrollIndicator={false}
+                            data={sortedData}
+                            renderItem={renderSection}
+                            extraData={selectedImages}
+                            keyExtractor={item => `${item.title}`}
+                            onEndReached={() => dispatch(actions.getPhotosFromCameraroll('LOAD'))}
+                            onEndReachedThreshold={0.05}
+                        />
+                    </SafeAreaView>
+                </View>
+            ) : (
+                <View style={styles.container}>
+                    <ActivityIndicator color={Colors.accent} />
+                </View>
+            )}
+        </>
+    );
+}
 
 const styles = StyleSheet.create({
     headerStyle: {

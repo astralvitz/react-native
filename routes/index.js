@@ -1,1 +1,1 @@
-export { default as MainRoutes } from './mainRoutes';
+export { default as MainRoutes } from './MainRoutes';

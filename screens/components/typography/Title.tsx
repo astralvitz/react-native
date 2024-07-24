@@ -28,7 +28,8 @@ const Title: React.FC<TitleProps> = ({
             color={color}
             dictionary={dictionary}
             values={values}
-            {...rest}>
+            {...rest}
+        >
             {children}
         </StyledText>
     );

@@ -119,7 +119,7 @@ class GlobalDataScreen extends Component<
                 value: totalLitter || this.state.litterStart,
                 startValue: this.state.litterStart,
                 title: `${lang}.stats.total-litter`,
-                icon: 'ios-trash-outline',
+                icon: 'trash-outline',
                 color: '#14B8A6',
                 bgColor: '#CCFBF1'
             },
@@ -127,7 +127,7 @@ class GlobalDataScreen extends Component<
                 value: totalPhotos || this.state.photosStart,
                 startValue: this.state.photosStart,
                 title: `${lang}.stats.total-photos`,
-                icon: 'ios-images-outline',
+                icon: 'images-outline',
                 color: '#A855F7',
                 bgColor: '#F3E8FF'
             },
@@ -135,7 +135,7 @@ class GlobalDataScreen extends Component<
                 value: totalLittercoin || this.state.littercoinStart,
                 startValue: this.state.littercoinStart,
                 title: `${lang}.stats.total-littercoin`,
-                icon: 'ios-server-outline',
+                icon: 'server-outline',
                 color: '#F59E0B',
                 bgColor: '#FEF9C3'
             },
@@ -143,7 +143,7 @@ class GlobalDataScreen extends Component<
                 value: totalUsers || this.state.usersStart,
                 startValue: this.state.usersStart,
                 title: `${lang}.stats.total-users`,
-                icon: 'ios-people-outline',
+                icon: 'people-outline',
                 color: '#0EA5E9',
                 bgColor: '#E0F2FE'
             }

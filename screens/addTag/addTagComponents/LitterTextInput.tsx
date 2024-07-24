@@ -1,7 +1,7 @@
 import React, {PureComponent} from 'react';
 import {Dimensions, FlatList, Pressable, StyleSheet, View} from 'react-native';
 // @ts-ignore
-import {getTranslation} from 'react-native-translation';
+import { useTranslation } from "react-i18next";
 import {connect} from 'react-redux';
 import {Body, Caption, Colors, CustomTextInput} from '../../components';
 import {
@@ -220,7 +220,7 @@ class LitterTextInput extends PureComponent<
 
     render() {
         const lang = this.props.lang;
-        const suggest = getTranslation(`${lang}.tag.type-to-suggest`);
+        const suggest = useTranslation(`${lang}.tag.type-to-suggest`);
 
         // @ts-ignore
         return (
@@ -233,6 +233,7 @@ class LitterTextInput extends PureComponent<
                     <CustomTextInput
                         autoCorrect={false}
                         style={styles.textFieldStyle}
+                        // @ts-ignore
                         placeholder={suggest}
                         placeholderTextColor={Colors.muted}
                         // @ts-ignore

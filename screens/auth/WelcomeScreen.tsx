@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React from 'react';
 import {
     Dimensions,
     Pressable,
@@ -7,21 +7,13 @@ import {
     StyleSheet,
     View
 } from 'react-native';
-import {LanguageFlags, Slides} from './authComponents';
-import {Body, Colors} from '../components';
-
-import {connect} from 'react-redux';
+import { LanguageFlags, Slides } from './authComponents';
+import { Body, Colors } from '../components';
+import { connect, ConnectedProps } from 'react-redux';
 import * as actions from '../../actions';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const SCREEN_WIDTH = Dimensions.get('window').width;
-
-interface WelcomeScreenProps {
-    navigation: any;
-    lang: string;
-}
-
-interface WelcomeScreenState {}
 
 const SLIDE_DATA = [
     {
@@ -44,78 +36,69 @@ const SLIDE_DATA = [
     }
 ];
 
-class WelcomeScreen extends Component<WelcomeScreenProps, WelcomeScreenState> {
-    constructor(props: any) {
-        super(props);
-    }
+interface WelcomeScreenProps extends PropsFromRedux {
+    navigation: any;
+}
 
-    goToAuth(auth: string) {
-        this.props.navigation.navigate('AUTH', {
-            screen: auth
+interface WelcomeScreenState {}
+
+const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation, lang })  => {
+
+    const goToAuth = (screen: string) => {
+        navigation.navigate('AUTH', {
+            screen
         });
     }
 
     /**
      * Welcome on-boarding screen [1,2,3]
      */
-    render() {
-        const lang = this.props.lang;
+    return (
+        <>
+            <StatusBar
+                translucent
+                // hidden
+                barStyle="dark-content"
+                backgroundColor={`${Colors.accentLight}`}
+            />
+            <SafeAreaView style={{flex: 1, backgroundColor: Colors.accentLight}}>
 
-        return (
-            <>
-                <StatusBar
-                    translucent
-                    // hidden
-                    barStyle="dark-content"
-                    backgroundColor={`${Colors.accentLight}`}
-                />
-                <SafeAreaView
-                    style={{flex: 1, backgroundColor: Colors.accentLight}}>
-                    <View
-                        style={{
-                            flex: 1,
-                            backgroundColor: Colors.accentLight
-                        }}>
-                        <Slides data={SLIDE_DATA} lang={lang} />
+                <View style={{ flex: 1, backgroundColor: Colors.accentLight }}>
 
-                        <View style={styles.loginPosition}>
-                            <Pressable
-                                onPress={this.goToAuth.bind(this, 'signup')}
-                                style={styles.loginButton}>
-                                <Body
-                                    family="medium"
-                                    style={styles.signupText}
-                                    color="white"
-                                    dictionary={`${lang}.welcome.continue`}
-                                />
-                            </Pressable>
-                            <Pressable
-                                onPress={this.goToAuth.bind(this, 'login')}
-                                style={{
-                                    flexDirection: 'row',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    alignSelf: 'center',
-                                    alignContent: 'center'
-                                }}>
-                                <Body
-                                    style={styles.loginText}
-                                    dictionary={`${lang}.auth.already-have`}
-                                />
-                                <Body
-                                    color="accent"
-                                    family="semiBold"
-                                    style={[styles.loginText]}
-                                    dictionary={`${lang}.auth.login`}
-                                />
-                            </Pressable>
-                        </View>
-                        <LanguageFlags lang={lang} />
+                    <Slides data={SLIDE_DATA}/>
+
+                    <View style={styles.loginPosition}>
+                        <Pressable
+                            onPress={() => goToAuth('CREATE_ACCOUNT')}
+                            style={styles.loginButton}
+                        >
+                            <Body
+                                family="medium"
+                                style={styles.signupText}
+                                color="white"
+                                dictionary={'welcome.get-started'}
+                            />
+                        </Pressable>
+                        <Pressable
+                            onPress={() => goToAuth('LOGIN')}
+                            style={styles.loginContainer}>
+                            <Body
+                                style={styles.loginText}
+                                dictionary={'auth.already-have'}
+                            />
+                            <Body
+                                color="accent"
+                                family="semiBold"
+                                style={[styles.loginText]}
+                                dictionary={'auth.login'}
+                            />
+                        </Pressable>
                     </View>
-                </SafeAreaView>
-            </>
-        );
-    }
+                    {/*<LanguageFlags lang={lang} />*/}
+                </View>
+            </SafeAreaView>
+        </>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -123,6 +106,13 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    loginContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'center',
+        alignContent: 'center'
     },
     loginButton: {
         alignItems: 'center',
@@ -157,4 +147,8 @@ const mapStateToProps = (state: any) => {
     };
 };
 
-export default connect(mapStateToProps, actions)(WelcomeScreen);
+const connector = connect(mapStateToProps, actions);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export default connector(WelcomeScreen);

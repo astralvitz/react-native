@@ -1,24 +1,10 @@
-import {produce} from 'immer';
-import {
-    CHANGE_CATEGORY,
-    CHANGE_ITEM,
-    CHANGE_Q,
-    CHANGE_QUANTITY_STATUS,
-    CHANGE_SWIPER_INDEX,
-    RESET_LITTER_STATE,
-    SHOW_ALL_TAGS,
-    SHOW_INNER_MODAL,
-    SUGGEST_TAGS,
-    TOGGLE_SWITCH,
-    UPDATE_TAGS_X_POS
-} from '../actions/types';
+import { createSlice } from "@reduxjs/toolkit";
+import { useTranslation } from 'react-i18next';
 
 import CATEGORIES from '../assets/data/categories';
 import LITTERKEYS from '../assets/data/litterkeys';
 
-import {getTranslation} from 'react-native-translation';
-
-const INITIAL_STATE = {
+const initialState = {
     category: CATEGORIES[0],
     items: LITTERKEYS.smoking,
     item: 'butts',
@@ -41,158 +27,147 @@ const INITIAL_STATE = {
     quantityChanged: false
 };
 
-export default function (state = INITIAL_STATE, action) {
-    return produce(state, draft => {
-        switch (action.type) {
-            /**
-             * Change category
-             *
-             * @category = Object => title: 'smoking", 'path: '../filepath.png'
-             * @items = Array of objects [ { id, key }, { id, key } ]
-             * @item = First key from array 'butts'
-             */
-            case CHANGE_CATEGORY:
-                const category = CATEGORIES.find(
-                    cat => cat.title === action.payload
-                );
-                const items = LITTERKEYS[category.title];
-                const item = items[0];
+const litterSlice = createSlice({
 
-                draft.category = category;
-                draft.items = items;
-                draft.item = item;
-                draft.q = 1;
+    name: 'litter',
 
-                break;
+    initialState,
 
-            /**
-             * Change item key within a category
-             *
-             * @return 'butts', 'facemask', etc.
-             */
-            case CHANGE_ITEM:
-                draft.item = action.payload;
-                draft.q = 1;
+    reducers: {
+        /**
+         * Change category
+         *
+         * @category = Object => title: 'smoking", 'path: '../filepath.png'
+         * @items = Array of objects [ { id, key }, { id, key } ]
+         * @item = First key from array 'butts'
+         */
+        changeCategory(state, action) {
+            const category = CATEGORIES.find(cat => cat.title === action.payload);
+            const items = LITTERKEYS[category.title];
+            const item = items[0];
 
-                break;
+            state.category = category;
+            state.items = items;
+            state.item = item;
+            state.q = 1;
+        },
 
-            /**
-             * Change quantity
-             *
-             * set quantityChanged to true so that next time Add Tag
-             * is pressed before changing tag quantity in increased by 1;
-             */
+        /**
+         * Change item key within a category
+         *
+         * @return 'butts', 'facemask', etc.
+         */
+        changeItem(state, action) {
+            state.item = action.payload;
+            state.q = 1;
+        },
 
-            case CHANGE_Q:
-                draft.q = action.payload;
-                draft.quantityChanged = true;
+        /**
+         * Change quantity
+         *
+         * set quantityChanged to true so that next time Add Tag
+         * is pressed before changing tag quantity in increased by 1;
+         */
+        changeQ(state, action) {
+            state.q = action.payload;
+            state.quantityChanged = true;
+        },
 
-                break;
+        /**
+         * Change Status of quantity change
+         * picker wheel rotated status == True
+         * after tag is added satus set to false
+         */
+        changeQuantityStatus(state, action) {
+            state.quantityChanged = action.payload;
+        },
 
-            /**
-             * Change Status of quantity change
-             * picker wheel rotated status == True
-             * after tag is added satus set to false
-             */
+        /**
+         * Change the index of the Swiper on LitterPicker.Swiper.LitterImage
+         */
+        changeSwiperIndex(state, action) {
+            state.swiperIndex = action.payload;
+        },
 
-            case CHANGE_QUANTITY_STATUS:
-                draft.quantityChanged = action.payload;
+        // Reset tags to null and close LitterPicker modal
+        resetLitterState() {
+            return initialState;
+        },
 
-                break;
+        /**
+         * Content to show in the modal on LitterPicker
+         */
+        showAllTags(state, action) {
+            state.displayAllTags = action.payload;
+        },
 
-            /**
-             * Change the index of the Swiper on LitterPicker.Swiper.LitterImage
-             */
+        /**
+         * Show the modal on LitterPicker.js
+         * Need to set the content separately
+         */
+        showInnerModal(state) {
+            state.tagsModalVisible = !state.tagsModalVisible;
+        },
 
-            case CHANGE_SWIPER_INDEX:
-                draft.swiperIndex = action.payload;
+        /**
+         * Filter all translated tag values
+         *
+         * Return all results
+         *
+         * Note: We are passing auth.lang as a prop which could be access from auth_reducer
+         */
+        suggestTags(state, action) {
 
-                break;
+            let suggestedTagsArray = [];
 
-            // Reset tags to null and close LitterPicker modal
-            case RESET_LITTER_STATE:
-                return INITIAL_STATE;
-
-            /**
-             * Content to show in the modal on LitterPicker
-             */
-
-            case SHOW_ALL_TAGS:
-                draft.displayAllTags = action.payload;
-
-                break;
-
-            /**
-             * Show the modal on LitterPicker.js
-             * Need to set the content separately
-             */
-
-            case SHOW_INNER_MODAL:
-                draft.tagsModalVisible = !draft.tagsModalVisible;
-
-                break;
-            /**
-             * Filter all translated tag values
-             *
-             * Return all results
-             *
-             * Note: We are passing auth.lang as a prop which could be access from auth_reducer
-             */
-            case SUGGEST_TAGS:
-                // return array of suggested tags based on payload text
-                let suggestedTagsArray = [];
-
-                Object.entries(LITTERKEYS).some(tags => {
-                    tags[1].some(tag => {
-                        const translatedText = getTranslation(
-                            `${action.payload.lang}.litter.${tags[0]}.${tag}`
-                        );
-                        // console.log({translatedText});
-                        if (translatedText !== 'Error Translation') {
-                            if (
-                                translatedText
-                                    .toLowerCase()
-                                    .includes(action.payload.text.toLowerCase())
-                            ) {
-                                suggestedTagsArray.push({
-                                    category: tags[0],
-                                    key: tag
-                                });
-                            }
-                        }
-                    });
+            Object.entries(LITTERKEYS).some(tags => {
+                tags[1].some(tag => {
+                    const translatedText = useTranslation(
+                        `${action.payload.lang}.litter.${tags[0]}.${tag}`
+                    );
+                    if (translatedText !== 'Error Translation' && translatedText.toLowerCase().includes(action.payload.text.toLowerCase())) {
+                        suggestedTagsArray.push({ category: tags[0], key: tag });
+                    }
                 });
+            });
 
-                draft.suggestedTags = suggestedTagsArray;
+            state.suggestedTags = suggestedTagsArray;
+        },
 
-                break;
+        /**
+         * This will toggle the value for the Switch, not the value for each individual image.
+         */
+        // INFO: This is not used currently
+        // TODO: will need to change presence on particular image
+        toggleSwitch(state) {
+            state.presence = !state.presence;
+        },
 
-            /**
-             * This will toggle the value for the Switch, not the value for each individual image.
-             */
-            // INFO: This is not used currently
-            // TODO: will need to change presence on particular image
-            case TOGGLE_SWITCH:
-                draft.presence = !draft.presence;
-
-                break;
-
-            /**
-             * Update X-position of tags
-             */
-            // TODO: Test this -- not sure if it works
-            // payload.item is not passed from -litterTags
-
-            case UPDATE_TAGS_X_POS:
-                let positions = Object.assign({}, state.positions);
-                positions[action.payload.item] = action.payload.x;
-
-                draft.positions = positions;
-
-                break;
-
-            default:
-                return draft;
+        /**
+         * Update X-position of tags
+         */
+        // TODO: Test this -- not sure if it works
+        // payload.item is not passed from -litterTags
+        updateTagsXPos(state, action) {
+            const positions = {...state.positions};
+            positions[action.payload.item] = action.payload.x;
+            state.positions = positions;
         }
-    });
-}
+    }
+});
+
+export const {
+    changeCategory,
+    changeItem,
+    changeQ,
+    changeQuantityStatus,
+    changeSwiperIndex,
+    resetLitterState,
+    showAllTags,
+    showInnerModal,
+    suggestTags,
+    toggleSwitch,
+    updateTagsXPos
+} = litterSlice.actions;
+
+export default litterSlice.reducer;

@@ -63,7 +63,7 @@ export class TeamTitle extends Component {
                             {identifier}
                         </Body>
                         <Icon
-                            name="ios-copy-outline"
+                            name="copy-outline"
                             color={Colors.accent}
                             size={18}
                         />
