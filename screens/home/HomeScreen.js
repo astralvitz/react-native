@@ -76,7 +76,8 @@ const HomeScreen = ({ navigation }) => {
         showThankYouMessages: state.shared.showThankYouMessages,
         token: state.auth.token,
         user: state.auth.user,
-        uniqueValue: state.shared.uniqueValue
+        uniqueValue: state.shared.uniqueValue,
+        isUploading: state.shared.isUploading,
     }));
 
     useEffect(() => {

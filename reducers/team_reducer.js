@@ -1,6 +1,5 @@
 import axios from "axios";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import {CHANGE_ACTIVE_TEAM, LEAVE_TEAM} from "../actions/types";
 
 const initialState = {
     topTeams: [],
@@ -86,11 +85,15 @@ export const createTeam = createAsyncThunk(
                 team: response.data.team,
                 type: 'CREATE'
             };
-        } catch (error) {
+        }
+        catch (error)
+        {
             if (error.response && error.response.status === 422) {
                 const errorData = error.response.data.errors;
+
                 return rejectWithValue(errorData.name || errorData.identifier);
             }
+
             return rejectWithValue('Network Error, please try again');
         }
     }
@@ -226,6 +229,12 @@ const teamSlice = createSlice({
     initialState,
 
     reducers: {
+
+        clearTeamsForm (state) {
+            state.teamsFormError = '';
+            state.successMessage = '';
+            state.teamFormStatus = null;
+        },
 
         // /**
         //  * find team by index and remove from userTeams array

@@ -6,11 +6,13 @@ import { Header, Title, Colors, Body, SubTitle, Caption, Button } from '../compo
 import { CreateTeamForm, JoinTeamForm, TopTeamsList, UserTeamsList } from './teamComponents';
 import StatusModal from './teamComponents/StatusModal';
 import { useDispatch, useSelector } from "react-redux";
+import { getTopTeams, clearTeamsForm } from "../../reducers/team_reducer";
 
 const TeamScreen = () => {
 
     const dispatch = useDispatch();
     const actionSheetRef = useRef();
+
     const [showFormType, setShowFormType] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -32,13 +34,13 @@ const TeamScreen = () => {
     const actionSheetOnClose = () => {
         setShowFormType(null);
 
-        clearTeamsFormError();
+        dispatch(clearTeamsForm());
     };
 
     const onBackPress = () => {
         setShowFormType(null);
 
-        clearTeamsFormError();
+        dispatch(clearTeamsForm());
     };
 
     return (
@@ -46,10 +48,7 @@ const TeamScreen = () => {
             <Header
                 leftContent={<Title color="white">Teams</Title>}
                 rightContent={
-                    <Pressable
-                        onPress={() => {
-                            actionSheetRef.current?.setModalVisible();
-                        }}>
+                    <Pressable onPress={() => { actionSheetRef.current?.setModalVisible() }}>
                         <Icon
                             color={Colors.white}
                             size={32}
@@ -68,28 +67,32 @@ const TeamScreen = () => {
                     contentContainerStyle={{ paddingBottom: 20 }}
                     style={styles.container}
                     alwaysBounceVertical={false}
-                    showsVerticalScrollIndicator={false}>
+                    showsVerticalScrollIndicator={false}
+                >
                     {/* list of top 5 teams  */}
                     {/* Top Teams */}
+
                     <View style={styles.headingRow}>
                         <SubTitle>Top Teams</SubTitle>
-                        <Pressable
-                            onPress={() =>
-                                navigation.navigate('TOP_TEAMS')
-                            }>
+                        <Pressable onPress={() => navigation.navigate('TOP_TEAMS') }>
                             <Caption color="accent">View All</Caption>
                         </Pressable>
                     </View>
+
                     <TopTeamsList topTeams={topTeams?.slice(0, 5)} />
                     {/* list of users teams */}
-                    <UserTeamsList navigation={navigation} />
+
+                    <UserTeamsList
+                        navigation={navigation}
+                    />
                 </ScrollView>
             )}
 
             <ActionSheet
                 onClose={actionSheetOnClose}
                 gestureEnabled
-                ref={actionSheetRef}>
+                ref={actionSheetRef}
+            >
                 <View style={{ padding: 20 }}>
                     {teamFormStatus === null ? (
                         <>
