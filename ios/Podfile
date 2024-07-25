@@ -30,7 +30,7 @@ target 'openlittermap' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-  # ⬇️ Uncomment the permissions you need
+  # Uncomment the permissions you need
   setup_permissions([
     'Camera',
     'PhotoLibrary',

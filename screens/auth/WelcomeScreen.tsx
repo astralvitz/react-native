@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC } from 'react';
 import {
     Dimensions,
     Pressable,
@@ -9,8 +9,6 @@ import {
 } from 'react-native';
 import { LanguageFlags, Slides } from './authComponents';
 import { Body, Colors } from '../components';
-import { connect, ConnectedProps } from 'react-redux';
-import * as actions from '../../actions';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -36,13 +34,14 @@ const SLIDE_DATA = [
     }
 ];
 
-interface WelcomeScreenProps extends PropsFromRedux {
-    navigation: any;
-}
+// interface WelcomeScreenProps extends PropsFromRedux {
+//     navigation: any;
+// }
 
-interface WelcomeScreenState {}
+// interface WelcomeScreenState {}
 
-const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation, lang })  => {
+// @ts-ignore
+const WelcomeScreen: FC = ({ navigation })  => {
 
     const goToAuth = (screen: string) => {
         navigation.navigate('AUTH', {
@@ -140,15 +139,4 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = (state: any) => {
-    return {
-        lang: state.auth.lang,
-        token: state.auth.token
-    };
-};
-
-const connector = connect(mapStateToProps, actions);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export default connector(WelcomeScreen);
+export default WelcomeScreen;

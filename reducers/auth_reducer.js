@@ -77,16 +77,12 @@ export const createAccount = createAsyncThunk(
                 }
             });
 
-            console.log(response);
-
             dispatch(userLogin({ email, password }));
 
             return response.data;
         }
         catch (error)
         {
-            console.log({ error })
-
             if (error.response)
             {
                 const errorData = error.response.data.errors;

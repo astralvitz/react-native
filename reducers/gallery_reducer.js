@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import CameraRoll from '@react-native-community/cameraroll';
+import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 const initialState = {
