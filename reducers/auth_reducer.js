@@ -222,9 +222,9 @@ const authSlice = createSlice({
 
     reducers: {
 
-        changeActiveTeam (state, action) {
-            state.user.active_team = action.payload;
-        },
+        // changeActiveTeam (state, action) {
+        //     state.user.active_team = action.payload;
+        // },
 
         /**
          * Change app language

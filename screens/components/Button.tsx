@@ -1,10 +1,10 @@
-import {ActivityIndicator, Pressable, StyleSheet} from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import React from 'react';
-import {Colors} from './theme';
+import { Colors } from './theme';
 
 interface ButtonProps {
     style?: any;
-    color: keyof typeof Colors;
+    color?: keyof typeof Colors;
     children: React.ReactNode;
     variant?: 'default' | 'outline';
     buttonColor?: keyof typeof Colors;
@@ -54,8 +54,6 @@ const Button: React.FC<ButtonProps> = ({
     );
 };
 
-export default Button;
-
 const styles = StyleSheet.create({
     buttonStyle: {
         height: 52,
@@ -65,3 +63,5 @@ const styles = StyleSheet.create({
         marginBottom: 20
     }
 });
+
+export default Button;

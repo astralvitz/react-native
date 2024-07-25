@@ -1,13 +1,3 @@
-import React from 'react';
-// import CameraRoll from '@react-native-community/cameraroll';
-import {CameraRoll} from '@react-native-camera-roll/camera-roll';
-
-import {ADD_GEOTAGGED_IMAGES, TOGGLE_IMAGES_LOADING} from './types';
-
-/**
- * get photos from camera roll
- */
-
 // export const getPhotosFromCameraroll =
 //     (fetchType = 'INITIAL') =>
 //     async (dispatch, getState) => {

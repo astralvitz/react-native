@@ -1,24 +1,24 @@
-import {
-    CLOSE_SECOND_SETTING_MODAL,
-    LOGOUT,
-    SET_MODEL,
-    SETTINGS_INIT,
-    SETTINGS_UPDATE_STATUS_MESSAGE,
-    START_UPDATING_SETTINGS,
-    TOGGLE_SETTINGS_MODAL,
-    TOGGLE_SETTINGS_WAIT,
-    UPDATE_SETTINGS_PROP,
-    UPDATE_USER_OBJECT,
-    URL
-} from './types';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-
-export const closeSecondSettingModal = () => {
-    return {
-        type: CLOSE_SECOND_SETTING_MODAL
-    };
-};
+// import {
+//     CLOSE_SECOND_SETTING_MODAL,
+//     LOGOUT,
+//     SET_MODEL,
+//     SETTINGS_INIT,
+//     SETTINGS_UPDATE_STATUS_MESSAGE,
+//     START_UPDATING_SETTINGS,
+//     TOGGLE_SETTINGS_MODAL,
+//     TOGGLE_SETTINGS_WAIT,
+//     UPDATE_SETTINGS_PROP,
+//     UPDATE_USER_OBJECT,
+//     URL
+// } from './types';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+// import axios from 'axios';
+//
+// export const closeSecondSettingModal = () => {
+//     return {
+//         type: CLOSE_SECOND_SETTING_MODAL
+//     };
+// };
 //
 // /**
 //  * The user wants to delete their password
@@ -68,29 +68,29 @@ export const closeSecondSettingModal = () => {
 //     };
 // };
 
-/**
- * Initialize settings edit value to update
- *
- * when user selects a field to edit current value of that field is set in settingsEditProp
- * to be used as initial value in textfield in edit modal
- */
-export const initalizeSettingsValue = prop => {
-    return {
-        type: SETTINGS_INIT,
-        payload: prop
-    };
-};
-
-/**
- * fn to set device modal
- */
-export const setModel = model => {
-    return {
-        type: SET_MODEL,
-        payload: model
-    };
-};
+// /**
+//  * Initialize settings edit value to update
+//  *
+//  * when user selects a field to edit current value of that field is set in settingsEditProp
+//  * to be used as initial value in textfield in edit modal
+//  */
+// export const initalizeSettingsValue = prop => {
+//     return {
+//         type: SETTINGS_INIT,
+//         payload: prop
+//     };
+// };
 //
+// /**
+//  * fn to set device modal
+//  */
+// export const setModel = model => {
+//     return {
+//         type: SET_MODEL,
+//         payload: model
+//     };
+// };
+
 // /**
 //  * Update a specific setting (Name, Username or Email)
 //  */
@@ -253,15 +253,15 @@ export const setModel = model => {
 //     };
 // };
 
-/**
- * Toggle the modal and turn one of these options for updating
- */
-export const toggleSettingsModal = (id, title, key) => {
-    return {
-        type: TOGGLE_SETTINGS_MODAL,
-        payload: {id, title, key}
-    };
-};
+// /**
+//  * Toggle the modal and turn one of these options for updating
+//  */
+// export const toggleSettingsModal = (id, title, key) => {
+//     return {
+//         type: TOGGLE_SETTINGS_MODAL,
+//         payload: {id, title, key}
+//     };
+// };
 
 // /**
 //  * The user wants to change one of these settings (<Switch />)
@@ -343,26 +343,26 @@ export const toggleSettingsModal = (id, title, key) => {
 //             });
 //     };
 // };
-
-/**
- * After the users password error is shown,
- *
- * This will be used to reset the value to ''
- * after the user types into the input.
- */
-export const setDeleteAccountError = value => {
-    return {
-        type: 'SET_DELETE_ACCOUNT_ERROR',
-        payload: value
-    };
-};
-
-/**
- * User wants to change text of name, email or username
- */
-export const updateSettingsProp = (value, key) => {
-    return {
-        type: UPDATE_SETTINGS_PROP,
-        payload: key === 'social' ? value : value.text
-    };
-};
+//
+// /**
+//  * After the users password error is shown,
+//  *
+//  * This will be used to reset the value to ''
+//  * after the user types into the input.
+//  */
+// export const setDeleteAccountError = value => {
+//     return {
+//         type: 'SET_DELETE_ACCOUNT_ERROR',
+//         payload: value
+//     };
+// };
+//
+// /**
+//  * User wants to change text of name, email or username
+//  */
+// export const updateSettingsProp = (value, key) => {
+//     return {
+//         type: UPDATE_SETTINGS_PROP,
+//         payload: key === 'social' ? value : value.text
+//     };
+// };

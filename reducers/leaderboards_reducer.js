@@ -8,7 +8,7 @@ const initialState = {
     }
 };
 
-const getLeaderboardData = createAsyncThunk(
+export const getLeaderboardData = createAsyncThunk(
     'leaderboard/fetchLeaderboardData',
     async (leaderboardData, { rejectWithValue }) => {
         try {

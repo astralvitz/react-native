@@ -4,11 +4,12 @@ import moment from 'moment';
 import _ from 'lodash';
 import { useSelector, useDispatch } from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
-import * as actions from '../../actions';
 import { Body, Caption, Colors, Header, SubTitle } from '../components';
 import { isGeotagged } from '../../utils/isGeotagged';
 import { checkCameraRollPermission } from '../../utils/permissions';
 import AnimatedImage from './galleryComponents/AnimatedImage';
+import {getPhotosFromCameraroll} from "../../reducers/gallery_reducer";
+import {addImages} from "../../reducers/images_reducer";
 
 /**
  * fn to check if arg date is "today", this "week", this "month"
@@ -64,7 +65,7 @@ export default function GalleryScreen ({ navigation }) {
 
         if (result === 'granted' || result === 'limited')
         {
-            dispatch(actions.getPhotosFromCameraroll());
+            dispatch(getPhotosFromCameraroll());
 
             await splitIntoRows(geotaggedImages);
 
@@ -128,7 +129,7 @@ export default function GalleryScreen ({ navigation }) {
 
         const sortedArray = selectedImages.sort((a, b) => a.id - b.id);
 
-        dispatch(actions.addImages(sortedArray, 'GALLERY', user.picked_up));
+        dispatch(addImages(sortedArray, 'GALLERY', user.picked_up));
 
         navigation.navigate('HOME');
     };
@@ -165,6 +166,7 @@ export default function GalleryScreen ({ navigation }) {
             week: 'This Week',
             month: 'This Month'
         };
+
         headerTitle = titleMap[headerTitle] || headerTitle;
 
         return (
@@ -178,6 +180,7 @@ export default function GalleryScreen ({ navigation }) {
                     {item.data.map(image => {
                         const selected = selectedImages.includes(image);
                         const isImageGeotagged = isGeotagged(image);
+
                         return (
                             <AnimatedImage
                                 key={image.uri}
@@ -199,19 +202,26 @@ export default function GalleryScreen ({ navigation }) {
                 leftContent={
                     <Pressable
                         onPress={() => {
-                            this.props.navigation.navigate('HOME');
-                            // this.props.setImageLoading;
+                            navigation.navigate('HOME');
+                            // setImageLoading;
                         }}>
-                        <Body color="white" dictionary={'leftpage.cancel'} />
+                        <Body
+                            color="white"
+                            dictionary={'leftpage.cancel'}
+                        />
                     </Pressable>
                 }
                 centerContent={
-                    <SubTitle color="white" dictionary={'leftpage.geotagged'} />
+                    <SubTitle
+                        color="white"
+                        dictionary={'leftpage.geotagged'}
+                    />
                 }
                 centerContainerStyle={{ flex: 2 }}
                 rightContent={
                     <Pressable
-                        onPress={handleDoneClick}>
+                        onPress={handleDoneClick}
+                    >
                         <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
                             <Body color="white" dictionary={'leftpage.next'} />
                             <Body color="white">
@@ -244,14 +254,16 @@ export default function GalleryScreen ({ navigation }) {
                             renderItem={renderSection}
                             extraData={selectedImages}
                             keyExtractor={item => `${item.title}`}
-                            onEndReached={() => dispatch(actions.getPhotosFromCameraroll('LOAD'))}
+                            onEndReached={() => dispatch(getPhotosFromCameraroll('LOAD'))}
                             onEndReachedThreshold={0.05}
                         />
                     </SafeAreaView>
                 </View>
             ) : (
                 <View style={styles.container}>
-                    <ActivityIndicator color={Colors.accent} />
+                    <ActivityIndicator
+                        color={Colors.accent}
+                    />
                 </View>
             )}
         </>

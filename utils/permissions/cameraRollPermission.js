@@ -1,5 +1,5 @@
-import {Platform} from 'react-native';
-import {check, PERMISSIONS, request} from 'react-native-permissions';
+import { Platform } from 'react-native';
+import { check, PERMISSIONS, request } from 'react-native-permissions';
 
 export const requestCameraRollPermission = async () => {
     let result;
@@ -33,7 +33,6 @@ export const requestCameraRollPermission = async () => {
 };
 
 /**
- *
  * @returns {Promise<"limited"|"denied"|"blocked"|"unavailable"|"granted">}
  */
 export const checkCameraRollPermission = async () => {

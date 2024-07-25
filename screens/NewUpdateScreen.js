@@ -1,70 +1,45 @@
-import React, {Component} from 'react';
-import {
-    Image,
-    Linking,
-    Platform,
-    Pressable,
-    StyleSheet,
-    View
-} from 'react-native';
-import {connect} from 'react-redux';
-import * as actions from '../actions';
-import {Body, Colors, Title} from './components';
+import React from 'react';
+import { Image, Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Body, Colors, Title } from './components';
 
-class NewUpdateScreen extends Component {
-    constructor(props) {
-        super(props);
-    }
+const NewUpdateScreen = ({ navigation }) => {
 
-    async handleButtonClick() {
-        const url =
-            Platform.OS === 'ios'
-                ? 'https://apps.apple.com/ie/app/openlittermap/id1475982147'
-                : 'https://play.google.com/store/apps/details?id=com.geotech.openlittermap';
+    const handleButtonClick = async () => {
+        const url = Platform.OS === 'ios'
+            ? 'https://apps.apple.com/ie/app/openlittermap/id1475982147'
+            : 'https://play.google.com/store/apps/details?id=com.geotech.openlittermap';
 
         const canOpen = await Linking.canOpenURL(url);
 
         canOpen && (await Linking.openURL(url));
     }
 
-    render() {
-        const {navigation, route, lang} = this.props;
-        const {url} = route.params;
-        return (
-            <View style={styles.container}>
-                <Image
-                    source={require('../assets/illustrations/new_update.png')}
-                    style={styles.imageStyle}
-                />
-                <Title dictionary={`${lang}.permission.new-version`} />
+    return (
+        <View style={styles.container}>
+            <Image
+                source={require('../assets/illustrations/new_update.png')}
+                style={styles.imageStyle}
+            />
+            <Title dictionary={`${lang}.permission.new-version`} />
+            <Body
+                color="muted"
+                style={styles.bodyText}
+                dictionary={`${lang}.permission.please-update-app`}
+            />
+            <Pressable
+                style={styles.buttonStyle}
+                onPress={() => handleButtonClick}>
                 <Body
-                    color="muted"
-                    style={styles.bodyText}
-                    dictionary={`${lang}.permission.please-update-app`}
+                    color="white"
+                    dictionary={`permission.update-now`}
                 />
-                <Pressable
-                    style={styles.buttonStyle}
-                    onPress={() => this.handleButtonClick()}>
-                    <Body
-                        color="white"
-                        dictionary={`${lang}.permission.update-now`}
-                    />
-                </Pressable>
-                <Pressable onPress={() => navigation.navigate('HOME')}>
-                    <Body dictionary={`${lang}.permission.not-now`} />
-                </Pressable>
-            </View>
-        );
-    }
+            </Pressable>
+            <Pressable onPress={() => navigation.navigate('HOME')}>
+                <Body dictionary={`permission.not-now`} />
+            </Pressable>
+        </View>
+    );
 }
-
-const mapStateToProps = state => {
-    return {
-        lang: state.auth.lang
-    };
-};
-
-export default connect(mapStateToProps, actions)(NewUpdateScreen);
 
 const styles = StyleSheet.create({
     container: {
@@ -89,3 +64,5 @@ const styles = StyleSheet.create({
         marginVertical: 32
     }
 });
+
+export default NewUpdateScreen;

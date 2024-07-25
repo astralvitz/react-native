@@ -218,7 +218,7 @@ const settingsSlice = createSlice({
         /**
          * Change name / username / email component is inside a modal
          */
-        toggleSettingsModal(state, action) {
+        toggleSettingsModal (state, action) {
             state.settingsModalVisible = !state.settingsModalVisible;
             state.settingsEdit = !state.settingsEdit;
             state.dataToEdit = action.payload;

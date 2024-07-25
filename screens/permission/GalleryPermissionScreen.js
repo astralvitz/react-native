@@ -8,8 +8,6 @@ import {
     StyleSheet,
     View
 } from 'react-native';
-import { connect } from 'react-redux';
-import * as actions from '../../actions';
 import { Body, Colors, Title } from '../components';
 import {
     checkAccessMediaLocation,
@@ -19,6 +17,7 @@ import {
 import * as Sentry from '@sentry/react-native';
 
 const GalleryPermissionScreen = ({ navigation }) => {
+
     const [appState, setAppState] = useState(AppState.currentState);
 
     const handleAppStateChange = useCallback((nextAppState) => {
@@ -139,8 +138,4 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = state => ({
-    lang: state.auth.lang
-});
-
-export default connect(mapStateToProps, actions)(GalleryPermissionScreen);
+export default GalleryPermissionScreen;

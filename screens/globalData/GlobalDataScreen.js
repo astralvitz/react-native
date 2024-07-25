@@ -4,7 +4,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AnimatedCircle, Body, Colors, Header, StatsGrid, Title } from '../components';
 import { useDispatch, useSelector} from "react-redux";
 import { getStats } from "../../reducers/stats_reducer";
-import {useTranslation} from "react-i18next";
 
 // interface GlobalDataScreenProps {
 //     totalLitter: number;

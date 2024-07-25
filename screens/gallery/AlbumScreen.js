@@ -1,62 +1,67 @@
-import React, {Component} from 'react';
-import {Pressable, View} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Pressable, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {Header, SubTitle} from '../components';
-import {checkCameraRollPermission} from '../../utils/permissions';
+import { Header, SubTitle } from '../components';
+import { checkCameraRollPermission } from '../../utils/permissions';
 import AlbumList from './galleryComponents/AlbumList';
 
-class AlbumScreen extends Component {
-    constructor(props) {
-        super(props);
+const AlbumScreen = ({ navigation }) => {
 
-        this.state = {
-            loading: true,
-            hasPermission: false
-        };
-    }
+    const [hasPermission, setHasPermission] = useState(false);
 
-    async componentDidMount() {
-        await this.checkGalleryPermission();
-    }
+    useEffect(async () => {
+        await checkGalleryPermission();
+    }, []);
 
     /**
      * fn to check for cameraroll/gallery permissions
      * if permissions granted setState, else navigate to GalleryPermissionScreen
      */
 
-    async checkGalleryPermission() {
+    const checkGalleryPermission = async () => {
         const result = await checkCameraRollPermission();
-        if (result === 'granted' || result === 'limited') {
-            this.setState({hasPermission: true, loading: false});
-        } else {
-            this.props.navigation.navigate('PERMISSION', {
+
+        if (result === 'granted' || result === 'limited')
+        {
+            setHasPermission(true);
+        }
+        else
+        {
+            navigation.navigate('PERMISSION', {
                 screen: 'GALLERY_PERMISSION'
             });
         }
     }
 
-    render() {
-        return (
-            <>
-                <Header
-                    leftContent={
-                        <Pressable
-                            onPress={() => {
-                                this.props.navigation.goBack();
-                            }}>
-                            <Icon name="chevron-back-outline" size={24} color="white" />
-                        </Pressable>
-                    }
-                    centerContent={<SubTitle color="white">Album</SubTitle>}
-                />
-                {this.state.hasPermission && (
-                    <View style={{flex: 1}}>
-                        <AlbumList navigation={this.props.navigation} />
+    return (
+        <>
+            <Header
+                leftContent={
+                    <Pressable
+                        onPress={() => { navigation.goBack(); }}
+                    >
+                        <Icon
+                            name="chevron-back-outline"
+                            size={24}
+                            color="white"
+                        />
+                    </Pressable>
+                }
+                centerContent={
+                    <SubTitle color="white">Album</SubTitle>
+                }
+            />
+            {
+                hasPermission && (
+                    <View style={{ flex: 1 }}>
+                        <AlbumList
+                            navigation={navigation}
+                        />
                     </View>
-                )}
-            </>
-        );
-    }
+                )
+            }
+        </>
+    );
 }
 
 export default AlbumScreen;

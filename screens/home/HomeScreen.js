@@ -13,7 +13,13 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { setModel } from '../../reducers/settings_reducer';
 import { cancelUpload, checkAppVersion, startUploading } from '../../reducers/shared_reducer';
-import { getUntaggedImages, uploadImage, uploadTagsToWebImage } from '../../reducers/images_reducer';
+import {
+    deleteImage,
+    deleteWebImage,
+    getUntaggedImages,
+    uploadImage,
+    uploadTagsToWebImage
+} from '../../reducers/images_reducer';
 import { getPhotosFromCameraroll } from "../../reducers/gallery_reducer";
 
 // import {Button} from '@rneui/themed';
@@ -286,13 +292,13 @@ const HomeScreen = ({ navigation }) => {
         images.map(image => {
             if (image.selected) {
                 if (image.type === 'web' && image.uploaded) {
-                    deleteWebImage(
+                    dispatch(deleteWebImage(
                         token,
                         image.id,
                         user.enable_admin_tagging
-                    );
+                    ));
                 } else {
-                    deleteImage(image.id);
+                    dispatch(deleteImage(image.id));
                 }
             }
         });

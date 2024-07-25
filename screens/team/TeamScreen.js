@@ -1,162 +1,136 @@
-import React, { Component, createRef } from 'react';
-import {
-    StyleSheet,
-    ScrollView,
-    View,
-    Text,
-    Pressable,
-    ActivityIndicator
-} from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { StyleSheet, ScrollView, View, Pressable, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ActionSheet from 'react-native-actions-sheet';
-import {
-    Header,
-    Title,
-    Colors,
-    Body,
-    SubTitle,
-    Caption,
-    Button
-} from '../components';
-import * as actions from '../../actions';
-import { connect } from 'react-redux';
-import {
-    CreateTeamForm,
-    JoinTeamForm,
-    TopTeamsList,
-    UserTeamsList
-} from './teamComponents';
+import { Header, Title, Colors, Body, SubTitle, Caption, Button } from '../components';
+import { CreateTeamForm, JoinTeamForm, TopTeamsList, UserTeamsList } from './teamComponents';
 import StatusModal from './teamComponents/StatusModal';
+import { useDispatch, useSelector } from "react-redux";
 
-class TeamScreen extends Component {
-    constructor(props) {
-        super(props);
-        this.actionSheetRef = createRef();
+const TeamScreen = () => {
 
-        this.state = {
-            showFormType: null,
-            isLoading: true
-        };
-    }
-    componentDidMount() {
-        this.getTeams();
-    }
+    const dispatch = useDispatch();
+    const actionSheetRef = useRef();
+    const [showFormType, setShowFormType] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    getTeams = async () => {
-        await this.props.getTopTeams(this.props.token);
-        this.setState({ isLoading: false });
+    const topTeams = useSelector(state => state.teams.topTeams);
+    const teamFormStatus = useSelector(state => state.teams.teamFormStatus);
+    const successMessage = useSelector(state => state.teams.successMessage);
+    const token = useSelector(state => state.auth.token);
+
+    useEffect(() =>{
+        getTeams();
+    }, []);
+
+    const getTeams = async () => {
+        dispatch(getTopTeams(token));
+
+        setIsLoading(false);
     };
 
-    actionSheetOnClose = () => {
-        this.setState({ showFormType: null });
-        this.props.clearTeamsFormError();
+    const actionSheetOnClose = () => {
+        setShowFormType(null);
+
+        clearTeamsFormError();
     };
 
-    onBackPress = () => {
-        this.setState({ showFormType: null });
-        this.props.clearTeamsFormError();
+    const onBackPress = () => {
+        setShowFormType(null);
+
+        clearTeamsFormError();
     };
 
-    render() {
-        const { topTeams, teamFormStatus, successMessage } = this.props;
-        return (
-            <>
-                <Header
-                    leftContent={<Title color="white">Teams</Title>}
-                    rightContent={
+    return (
+        <>
+            <Header
+                leftContent={<Title color="white">Teams</Title>}
+                rightContent={
+                    <Pressable
+                        onPress={() => {
+                            actionSheetRef.current?.setModalVisible();
+                        }}>
+                        <Icon
+                            color={Colors.white}
+                            size={32}
+                            name="add-outline"
+                        />
+                    </Pressable>
+                }
+            />
+            {/* loading state */}
+            {isLoading ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator color={Colors.accent} />
+                </View>
+            ) : (
+                <ScrollView
+                    contentContainerStyle={{ paddingBottom: 20 }}
+                    style={styles.container}
+                    alwaysBounceVertical={false}
+                    showsVerticalScrollIndicator={false}>
+                    {/* list of top 5 teams  */}
+                    {/* Top Teams */}
+                    <View style={styles.headingRow}>
+                        <SubTitle>Top Teams</SubTitle>
                         <Pressable
-                            onPress={() => {
-                                this.actionSheetRef.current?.setModalVisible();
-                            }}>
-                            <Icon
-                                color={Colors.white}
-                                size={32}
-                                name="add-outline"
-                            />
+                            onPress={() =>
+                                navigation.navigate('TOP_TEAMS')
+                            }>
+                            <Caption color="accent">View All</Caption>
                         </Pressable>
-                    }
-                />
-                {/* loading state */}
-                {this.state.isLoading ? (
-                    <View style={styles.loadingContainer}>
-                        <ActivityIndicator color={Colors.accent} />
                     </View>
-                ) : (
-                    <ScrollView
-                        contentContainerStyle={{ paddingBottom: 20 }}
-                        style={styles.container}
-                        alwaysBounceVertical={false}
-                        showsVerticalScrollIndicator={false}>
-                        {/* list of top 5 teams  */}
-                        {/* Top Teams */}
-                        <View style={styles.headingRow}>
-                            <SubTitle>Top Teams</SubTitle>
-                            <Pressable
-                                onPress={() =>
-                                    this.props.navigation.navigate('TOP_TEAMS')
-                                }>
-                                <Caption color="accent">View All</Caption>
-                            </Pressable>
-                        </View>
-                        <TopTeamsList topTeams={topTeams?.slice(0, 5)} />
-                        {/* list of users teams */}
-                        <UserTeamsList navigation={this.props.navigation} />
-                    </ScrollView>
-                )}
+                    <TopTeamsList topTeams={topTeams?.slice(0, 5)} />
+                    {/* list of users teams */}
+                    <UserTeamsList navigation={navigation} />
+                </ScrollView>
+            )}
 
-                <ActionSheet
-                    onClose={this.actionSheetOnClose}
-                    gestureEnabled
-                    ref={this.actionSheetRef}>
-                    <View style={{ padding: 20 }}>
-                        {teamFormStatus === null ? (
-                            <>
-                                {!this.state.showFormType ? (
-                                    <>
-                                        <Button
-                                            onPress={() =>
-                                                this.setState({
-                                                    showFormType: 'JOIN'
-                                                })
-                                            }>
-                                            <Body color="white">
-                                                JOIN A TEAM
-                                            </Body>
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            onPress={() =>
-                                                this.setState({
-                                                    showFormType: 'CREATE'
-                                                })
-                                            }>
-                                            <Body color="accent">
-                                                CREATE A TEAM
-                                            </Body>
-                                        </Button>
-                                    </>
-                                ) : (
-                                    <>
-                                        {this.state.showFormType === 'JOIN' ? (
-                                            <JoinTeamForm
-                                                backPress={this.onBackPress}
-                                            />
-                                        ) : (
-                                            <CreateTeamForm
-                                                backPress={this.onBackPress}
-                                            />
-                                        )}
-                                    </>
-                                )}
-                            </>
-                        ) : (
-                            <StatusModal text={successMessage} type="SUCCESS" />
-                        )}
-                    </View>
-                </ActionSheet>
-            </>
-        );
-    }
+            <ActionSheet
+                onClose={actionSheetOnClose}
+                gestureEnabled
+                ref={actionSheetRef}>
+                <View style={{ padding: 20 }}>
+                    {teamFormStatus === null ? (
+                        <>
+                            {!showFormType ? (
+                                <>
+                                    <Button
+                                        onPress={() => setShowFormType('JOIN')}
+                                    >
+                                        <Body color="white">
+                                            JOIN A TEAM
+                                        </Body>
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        onPress={() => setShowFormType('CREATE')}
+                                    >
+                                        <Body color="accent">
+                                            CREATE A TEAM
+                                        </Body>
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                    {showFormType === 'JOIN' ? (
+                                        <JoinTeamForm backPress={onBackPress} />
+                                    ) : (
+                                        <CreateTeamForm backPress={onBackPress} />
+                                    )}
+                                </>
+                            )}
+                        </>
+                    ) : (
+                        <StatusModal
+                            text={successMessage}
+                            type="SUCCESS"
+                        />
+                    )}
+                </View>
+            </ActionSheet>
+        </>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -177,17 +151,4 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = state => {
-    return {
-        lang: state.auth.lang,
-        successMessage: state.teams.successMessage,
-        topTeams: state.teams.topTeams,
-        teamFormStatus: state.teams.teamFormStatus,
-        token: state.auth.token
-    };
-};
-
-export default connect(
-    mapStateToProps,
-    actions
-)(TeamScreen);
+export default TeamScreen;
