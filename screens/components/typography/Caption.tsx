@@ -1,7 +1,7 @@
 import React from 'react';
-import {StyleProp, StyleSheet, TextStyle} from 'react-native';
+import { StyleProp, StyleSheet, TextStyle } from 'react-native';
 import StyledText from './StyledText';
-import {Colors, Fonts} from '../theme';
+import { Colors, Fonts } from '../theme';
 
 interface CaptionProps {
     family?: keyof typeof Fonts;

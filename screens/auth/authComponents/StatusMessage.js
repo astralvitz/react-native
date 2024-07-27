@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Caption } from '../../components';
 
-const StatusMessage = ({ serverStatusText, color = "white", showError = true }) => {
+const StatusMessage = ({ serverStatusText = '', color = "white", showError = true }) => {
     return (
         <View style={styles.container}>
             <Caption
@@ -11,7 +11,7 @@ const StatusMessage = ({ serverStatusText, color = "white", showError = true }) 
                     textAlign: 'center'
                 }}
             >
-                { showError ? { serverStatusText } : '' }
+                { showError ? serverStatusText : '' }
             </Caption>
         </View>
     );

@@ -11,7 +11,6 @@ const initialState = {
     showThankYouMessages: false,
 };
 
-
 /**
  * API calls
  *

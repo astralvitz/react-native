@@ -64,7 +64,8 @@ const HomeScreen = ({ navigation }) => {
         showThankYouMessages,
         token,
         user,
-        uniqueValue
+        uniqueValue,
+        isUploading,
     } = useSelector(state => ({
         appVersion: state.shared.appVersion,
         images: state.images.imagesArray,
@@ -79,6 +80,8 @@ const HomeScreen = ({ navigation }) => {
         uniqueValue: state.shared.uniqueValue,
         isUploading: state.shared.isUploading,
     }));
+
+    console.log({ isUploading });
 
     useEffect(() => {
         const getModel = () => {
@@ -278,7 +281,8 @@ const HomeScreen = ({ navigation }) => {
      * Toggle Selecting - header right
      */
     const toggleSelecting = () => {
-        deselectAllImages();
+        // missing?
+        // deselectAllImages();
         toggleSelecting();
     }
 
@@ -580,10 +584,8 @@ const HomeScreen = ({ navigation }) => {
 
                                 {taggedFailed > 0 && (
                                     <Text
-                                        style={{
-                                            fontSize: SCREEN_HEIGHT * 0.02,
-                                            marginBottom: 5
-                                        }}>
+                                        style={{ fontSize: SCREEN_HEIGHT * 0.02, marginBottom: 5}}
+                                    >
                                         {taggedFailed} tags failed
                                     </Text>
                                 )}
@@ -604,19 +606,19 @@ const HomeScreen = ({ navigation }) => {
                 </Modal>
 
                 {/* Grid to display images -- 3 columns */}
-                <UploadImagesGrid
-                    navigation={navigation}
-                    photos={images}
-                    lang={lang}
-                    uniqueValue={uniqueValue}
-                    isSelecting={isSelecting}
-                />
+                {/*<UploadImagesGrid*/}
+                {/*    navigation={navigation}*/}
+                {/*    photos={images}*/}
+                {/*    lang={lang}*/}
+                {/*    uniqueValue={uniqueValue}*/}
+                {/*    isSelecting={isSelecting}*/}
+                {/*/>*/}
 
                 <View style={styles.bottomContainer}>{renderHelperMessage}</View>
             </View>
 
-            {renderActionButton}
-            {renderUploadButton}
+            {/*{renderActionButton()}*/}
+            {/*{renderUploadButton()}*/}
         </>
     );
 }

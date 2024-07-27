@@ -21,6 +21,9 @@ const resources = {
     pt: { translation: pt }
 };
 
+// import * as RNLocalize from 'react-native-localize';
+// const lang = RNLocalize.getLocales().languageCode;
+
 i18n.use(initReactI18next).init({
 
     compatibilityJSON: 'v3',
