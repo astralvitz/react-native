@@ -1,6 +1,6 @@
 import React from 'react';
-import {Image, StyleSheet, View} from 'react-native';
-import {Body} from '../../components';
+import { Image, StyleSheet, View } from 'react-native';
+import { Body } from '../../components';
 
 const medals = {
     gold: require('../../../assets/icons/gold-medal.png'),
@@ -10,6 +10,7 @@ const medals = {
 
 const RankingMedal = ({index}) => {
     let medalSource;
+
     switch (index) {
         case 0:
             medalSource = medals.gold;
@@ -42,8 +43,6 @@ const RankingMedal = ({index}) => {
     );
 };
 
-export default RankingMedal;
-
 const styles = StyleSheet.create({
     container: {
         height: 24,
@@ -51,3 +50,5 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     }
 });
+
+export default RankingMedal;

@@ -80,7 +80,8 @@ const WelcomeScreen: FC = ({ navigation })  => {
                         </Pressable>
                         <Pressable
                             onPress={() => goToAuth('LOGIN')}
-                            style={styles.loginContainer}>
+                            style={styles.loginContainer}
+                        >
                             <Body
                                 style={styles.loginText}
                                 dictionary={'auth.already-have'}

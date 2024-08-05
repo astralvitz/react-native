@@ -8,8 +8,8 @@ import { Body, Caption, Colors, Header, SubTitle } from '../components';
 import { isGeotagged } from '../../utils/isGeotagged';
 import { checkCameraRollPermission } from '../../utils/permissions';
 import AnimatedImage from './galleryComponents/AnimatedImage';
-import {getPhotosFromCameraroll} from "../../reducers/gallery_reducer";
-import {addImages} from "../../reducers/images_reducer";
+import { getPhotosFromCameraroll } from "../../reducers/gallery_reducer";
+import { addImages } from "../../reducers/images_reducer";
 
 /**
  * fn to check if arg date is "today", this "week", this "month"
@@ -38,7 +38,7 @@ export const placeInTime = date => {
     }
 };
 
-export default function GalleryScreen ({ navigation }) {
+const GalleryScreen = ({ navigation }) => {
 
     const [selectedImages, setSelectedImages] = useState([]);
     const [sortedData, setSortedData] = useState([]);
@@ -126,10 +126,13 @@ export default function GalleryScreen ({ navigation }) {
      * call action addImages to save selected images to state
      */
     const handleDoneClick = async () => {
-
         const sortedArray = selectedImages.sort((a, b) => a.id - b.id);
 
-        dispatch(addImages(sortedArray, 'GALLERY', user.picked_up));
+        dispatch(addImages({
+            images: sortedArray,
+            type: 'GALLERY',
+            picked_up: user.picked_up
+        }));
 
         navigation.navigate('HOME');
     };
@@ -282,3 +285,5 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     }
 });
+
+export default GalleryScreen;

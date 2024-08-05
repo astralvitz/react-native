@@ -8,7 +8,7 @@ import StatusModal from './teamComponents/StatusModal';
 import { useDispatch, useSelector } from "react-redux";
 import { getTopTeams, clearTeamsForm } from "../../reducers/team_reducer";
 
-const TeamScreen = () => {
+const TeamScreen = ({ navigation }) => {
 
     const dispatch = useDispatch();
     const actionSheetRef = useRef();

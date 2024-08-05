@@ -2,6 +2,7 @@ import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import * as Sentry from '@sentry/react-native';
+import { URL } from '../actions/types';
 
 const initialState = {
     imagesArray: [],
@@ -80,6 +81,7 @@ export const getUntaggedImages = createAsyncThunk(
         catch (error)
         {
             console.error('getUntaggedImages error:', error.response || error.message);
+            console.log(error);
 
             // Return a reject action with value if an error occurs
             return rejectWithValue(error.response?.data || 'Network Error');
@@ -186,9 +188,55 @@ const imagesSlice = createSlice({
     initialState,
 
     reducers: {
+        /**
+         * Add images from Camera, Gallery or Web to state
+         */
+        addImages (state, action)
+        {
+            const images = action.payload.images;
 
-        addImages (state, action) {
+            images && images.map(image => {
+                let index;
 
+                if (image.platform === 'mobile')
+                {
+                    // image type can be gallery or camera
+
+                    if (image.uploaded) {
+                        index = state.imagesArray.findIndex(
+                            img => img.id === image.id
+                        );
+                    } else {
+                        index = state.imagesArray.findIndex(
+                            img => img.uri === image.uri
+                        );
+                    }
+                }
+
+                // size, height, width?
+
+                // If index is -1, it was not found
+                if (index === -1) {
+                    state.imagesArray.push({
+                        id: image.id,
+                        date: image.date ?? null,
+                        lat: image.lat ?? 0,
+                        lon: image.lon ?? 0,
+                        filename: image.filename,
+                        uri: image.uri,
+                        type: image.type, // gallery, camera, or web
+                        platform: image.platform, // web or mobile
+
+                        tags: image.tags,
+                        customTags: image.customTags,
+                        picked_up: action.payload.picked_up,
+
+                        // photoId: image.id, // need to remove this duplicate
+                        selected: false,
+                        uploaded: image.uploaded
+                    });
+                }
+            });
         },
 
         /**
@@ -208,8 +256,13 @@ const imagesSlice = createSlice({
          * after adding tag save tag to previousTags array.
          * max 10 tags in previousTags array remove old tags if it exceeds limits.
          */
-        addTagToImage (state, action) {
+        addTagToImage (state, action)
+        {
+            console.log({ state });
+            console.log({ action });
+
             let image = state.imagesArray[action.payload.currentIndex];
+            console.log({ image });
             let newTags = image.tags;
 
             let quantity = 1;
@@ -276,9 +329,9 @@ const imagesSlice = createSlice({
             }
         },
 
-        addCustomTagToImage (state, action) {
-            let currentImage =
-                state.imagesArray[action.payload.currentIndex];
+        addCustomTagToImage (state, action)
+        {
+            let currentImage = state.imagesArray[action.payload.currentIndex];
             let customTags = action.payload.tag;
 
             if (currentImage.customTags) {

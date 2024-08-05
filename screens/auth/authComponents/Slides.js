@@ -1,33 +1,31 @@
-import React, {Component} from 'react';
-import {Dimensions, Image, ScrollView, StyleSheet, View} from 'react-native';
+import React from 'react';
+import { Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';
 // import PageControl from 'react-native-page-control';
-import {Body, Colors, Title} from '../../components';
+import { Body, Colors, Title } from '../../components';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-class Slides extends Component {
-    constructor(props) {
-        super(props);
-    }
-
+const Slides = ({ data }) => {
     /**
      * For langs with longer text, we need to change flexDirection
      */
-    getInnerTextContainer() {
+    const getInnerTextContainer = () => {
         let flexDirection = 'row';
 
         // if (getLanguage() === 'nl') {
         //     flexDirection = 'column';
         // }
 
-        return {flexDirection: flexDirection, alignSelf: 'center'};
+        return {
+            flexDirection: flexDirection,
+            alignSelf: 'center'
+        };
     }
 
-    renderSlides() {
-        const lang = this.props.lang;
+    const renderSlides = () => {
 
-        return this.props.data.map((slide, i) => {
+        return data.map((slide, i) => {
             return (
                 <View key={slide.id} style={styles.slide}>
                     <Image
@@ -38,7 +36,7 @@ class Slides extends Component {
                     />
 
                     <View>
-                        <View style={this.getInnerTextContainer()}>
+                        <View style={getInnerTextContainer()}>
                             <Title
                                 style={styles.slideTitle}
                                 dictionary={'welcome.its'}
@@ -60,7 +58,7 @@ class Slides extends Component {
 
                     {/*<PageControl*/}
                     {/*    style={styles.pageControl}*/}
-                    {/*    numberOfPages={this.props.data.length}*/}
+                    {/*    numberOfPages={props.data.length}*/}
                     {/*    currentPage={slide.id - 1}*/}
                     {/*    // hidesForSinglePage*/}
                     {/*    pageIndicatorTintColor="white"*/}
@@ -68,24 +66,22 @@ class Slides extends Component {
                     {/*    indicatorStyle={{borderRadius: 15}}*/}
                     {/*    currentIndicatorStyle={{borderRadius: 5}}*/}
                     {/*    indicatorSize={styles.indicatorSize}*/}
-                    {/*    onPageIndicatorPress={this.onItemTap}*/}
+                    {/*    onPageIndicatorPress={onItemTap}*/}
                     {/*/>*/}
                 </View>
             );
         });
     }
 
-    render() {
-        return (
-            <ScrollView
-                horizontal
-                style={{flex: 1}}
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}>
-                {this.renderSlides()}
-            </ScrollView>
-        );
-    }
+    return (
+        <ScrollView
+            horizontal
+            style={{flex: 1}}
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}>
+            {renderSlides()}
+        </ScrollView>
+    );
 }
 
 const styles = StyleSheet.create({

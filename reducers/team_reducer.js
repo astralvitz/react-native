@@ -221,6 +221,75 @@ export const getTopTeams = createAsyncThunk(
     }
 );
 
+export const getUserTeams = createAsyncThunk(
+    'teams/getUserTeams',
+    async (token, { rejectWithValue }) => {
+        try {
+            const response = await axios({
+                url: URL + '/api/teams/list',
+                method: 'GET',
+                headers: {
+                    Authorization: 'Bearer ' + token,
+                    Accept: 'application/json',
+                    'content-type': 'application/json'
+                }
+            });
+            if (response.data && response.data.success) {
+                return response.data.teams;
+            } else {
+                return rejectWithValue('Something went wrong, please try again');
+            }
+        } catch (error) {
+            if (error.response) {
+                return rejectWithValue('Something went wrong, please try again');
+            } else {
+                return rejectWithValue('Network Error, please try again');
+            }
+        }
+    }
+);
+
+export const joinTeam = createAsyncThunk(
+    'teams/joinTeam',
+    async ({ token, identifier }, { rejectWithValue }) => {
+        try {
+            const response = await axios({
+                url: URL + '/api/teams/join',
+                method: 'POST',
+                headers: {
+                    Authorization: 'Bearer ' + token,
+                    Accept: 'application/json',
+                    'content-type': 'application/json'
+                },
+                data: {
+                    identifier
+                }
+            });
+            if (response.data) {
+                if (!response.data.success) {
+                    return rejectWithValue('You have already joined this team.');
+                } else {
+                    return {
+                        activeTeamId: response.data?.activeTeam?.id,
+                        team: response.data?.team,
+                        type: 'JOIN'
+                    };
+                }
+            }
+        } catch (error) {
+            if (error.response) {
+                let payload = 'Something went wrong, please try again';
+                if (error.response?.status === 422) {
+                    const errorData = error.response?.data?.errors;
+                    payload = errorData?.identifier;
+                }
+                return rejectWithValue(payload);
+            } else {
+                return rejectWithValue('Network Error, please try again');
+            }
+        }
+    }
+);
 
 const teamSlice = createSlice({
 
@@ -388,6 +457,36 @@ const teamSlice = createSlice({
             .addCase(getTopTeams.rejected, (state, action) => {
                 state.teamsRequestStatus = action.payload;
                 state.teamFormStatus = 'ERROR';
+            })
+
+            .addCase(getUserTeams.pending, (state) => {
+                // no action yet
+            })
+            .addCase(getUserTeams.fulfilled, (state, action) => {
+                state.userTeams = action.payload;
+            })
+            .addCase(getUserTeams.rejected, (state, action) => {
+                state.teamsRequestStatus = action.payload;
+                state.teamFormStatus = 'ERROR';
+            })
+
+            .addCase(joinTeam.pending, (state) => {
+                // no action yet
+            })
+            .addCase(joinTeam.fulfilled, (state, action) => {
+                // dispatch changeActiveTeam on auth_reducer.js
+
+                state.userTeams.push(action.payload.team);
+
+                // This was commented out on teams_actions
+                // state.teamFormStatus = 'SUCCESS';
+                //
+                // action.payload.type === 'JOIN'
+                //     ? (state.successMessage = 'Congrats! you have joined a new team')
+                //     : (state.successMessage = 'Congrats! you created a new team');
+            })
+            .addCase(joinTeam.rejected, (state, action) => {
+                state.teamsFormError = action.payload;
             });
     }
 });

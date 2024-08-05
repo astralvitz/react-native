@@ -1,28 +1,36 @@
-import React, {PureComponent} from 'react';
-import {Dimensions, FlatList, Image, Pressable, Text, View} from 'react-native';
-import {connect} from 'react-redux';
-import * as actions from '../../../actions';
-import {Body, SubTitle} from '../../components';
-import {isTagged} from '../../../utils/isTagged';
+import React, { } from 'react';
+import { Dimensions, FlatList, Image, Pressable, Text, View } from 'react-native';
+import { useDispatch } from "react-redux";
+import { Body, SubTitle } from '../../components';
+import { isTagged } from '../../../utils/isTagged';
+import { decrementSelected, incrementSelected, toggleSelectedImages } from "../../../reducers/images_reducer";
+import { changeSwiperIndex } from "../../../reducers/litter_reducer";
 
-const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-class UploadImagesGrid extends PureComponent {
-    imagePressed(index) {
-        const image = this.props.photos[index];
+const UploadImagesGrid = ({ images, isSelecting, navigation, uniqueValue }) => {
 
-        if (this.props.isSelecting) {
+    const dispatch = useDispatch();
+
+    const imagePressed = (index) => {
+        const image = images[index];
+
+        if (isSelecting)
+        {
             image.selected
-                ? this.props.decrementSelected()
-                : this.props.incrementSelected();
+                ? dispatch(decrementSelected())
+                : dispatch(incrementSelected())
 
-            this.props.toggleSelectedImage(index);
-        } else {
+            dispatch(toggleSelectedImages(index));
+        }
+        else
+        {
             // shared_reducer - Open LitterPicker modal
 
             // litter.js
-            this.props.swiperIndexChanged(index);
-            this.props.navigation.navigate('ADD_TAGS');
+            dispatch(changeSwiperIndex(index));
+
+            navigation.navigate('ADD_TAGS');
         }
     }
 
@@ -35,35 +43,26 @@ class UploadImagesGrid extends PureComponent {
      *   - isPickedUp
      *   - isSelected: for deletion
      */
-    renderImage = ({item, index}) => {
-        // console.log('renderImage', index, item);
-
+    const renderImage = ({ item, index }) => {
         const isItemTagged = isTagged(item);
         const itemIsPickedUp = item.picked_up ?? null;
         const pickedUpIcon = itemIsPickedUp ? '⬆️' : '⬇️';
         const isItemUploaded = item.hasOwnProperty('uploaded') && item.uploaded;
 
         return (
-            <Pressable onPress={() => this.imagePressed(index)}>
+            <Pressable onPress={() => imagePressed(index)}>
                 <View style={styles.gridImageContainer}>
                     <Image
                         style={styles.gridImageStyle}
                         source={{
-                            uri:
-                                item.hasOwnProperty('uri') &&
-                                item.uri !== undefined
-                                    ? item.uri
-                                    : item.filename
+                            uri: item.hasOwnProperty('uri') && item.uri !== undefined
+                                ? item.uri
+                                : item.filename
                         }}
                         resizeMode="cover"
                     />
                     {isItemUploaded && (
-                        <View
-                            style={{
-                                position: 'absolute',
-                                top: 5,
-                                left: 5
-                            }}>
+                        <View style={{ position: 'absolute', top: 5, left: 5 }}>
                             <Text>☁</Text>
                         </View>
                     )}
@@ -97,52 +96,44 @@ class UploadImagesGrid extends PureComponent {
         );
     };
 
-    render() {
-        // Show empty state illustration when no images
-        if (this.props.photos.length === 0) {
-            return (
-                <View
-                    style={{
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flex: 0.75
-                    }}>
-                    <Image
-                        style={styles.imageStyle}
-                        source={require('../../../assets/illustrations/empty_image.png')}
-                    />
-                    <SubTitle
-                        style={styles.exptyStateText}
-                        dictionary={'leftpage.no-images'}
-                    />
-                    <Body
-                        style={styles.exptyStateText}
-                        dictionary={'leftpage.take-photo'}
-                    />
-                </View>
-            );
-        }
-
+    // Show empty state illustration when no images
+    if (images.length === 0)
+    {
         return (
-            <View
-                style={{
-                    paddingTop: 1,
-                    paddingHorizontal: 0.5
-                }}>
-                {this.props.photos && (
-                    <FlatList
-                        contentContainerStyle={{paddingBottom: 100}}
-                        data={this.props.photos}
-                        extraData={this.props.uniqueValue}
-                        keyExtractor={(item, index) => item + index}
-                        numColumns={3}
-                        renderItem={this.renderImage}
-                        keyboardShouldPersistTaps="handled"
-                    />
-                )}
+            <View style={{ alignItems: 'center', justifyContent: 'center', flex: 0.75 }}>
+                <Image
+                    style={styles.imageStyle}
+                    source={require('../../../assets/illustrations/empty_image.png')}
+                />
+                <SubTitle
+                    style={styles.exptyStateText}
+                    dictionary={'leftpage.no-images'}
+                />
+                <Body
+                    style={styles.exptyStateText}
+                    dictionary={'leftpage.take-photo'}
+                />
             </View>
         );
     }
+
+    return (
+        <View style={{ paddingTop: 1, paddingHorizontal: 0.5 }}>
+            {
+                images && (
+                    <FlatList
+                        contentContainerStyle={{ paddingBottom: 100 }}
+                        data={images}
+                        extraData={uniqueValue}
+                        keyExtractor={(item, index) => item + index}
+                        numColumns={3}
+                        renderItem={renderImage}
+                        keyboardShouldPersistTaps="handled"
+                    />
+                )
+            }
+        </View>
+    );
 }
 
 const styles = {
@@ -177,4 +168,4 @@ const styles = {
     }
 };
 
-export default connect(null, actions)(UploadImagesGrid);
+export default UploadImagesGrid;

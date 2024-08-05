@@ -211,7 +211,7 @@ const settingsSlice = createSlice({
          * when user selects a field to edit current value of that field is set in settingsEditProp
          * to be used as initial value in textfield in edit modal
          */
-        settingsInit(state, action) {
+        settingsInit (state, action) {
             state.settingsEditProp = action.payload;
         },
 

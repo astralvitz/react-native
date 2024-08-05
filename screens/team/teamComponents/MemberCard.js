@@ -1,29 +1,22 @@
-import {StyleSheet, View} from 'react-native';
 import React from 'react';
+import { StyleSheet, View } from 'react-native';
 import moment from 'moment';
-import {Body, Caption, SubTitle} from '../../components';
+import { Body, Caption, SubTitle } from '../../components';
 import RankingMedal from './RankingMedal';
 
-const MemberCard = ({data, teamId, index}) => {
+const MemberCard = ({ data, teamId, index }) => {
+
     const isActiveTeam = teamId === data?.team?.id;
     const lastActivity = data?.pivot?.updated_at
         ? moment(data?.pivot?.updated_at).fromNow()
         : '-';
+
     return (
         <View
-            style={{
-                borderWidth: 1,
-                borderColor: '#eee',
-                padding: 8,
-                borderRadius: 8,
-                marginBottom: 20,
-                backgroundColor: 'white'
-            }}>
+            style={styles.memberCardContainer}>
             <View
-                style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between'
-                }}>
+                style={{ flexDirection: 'row', justifyContent: 'space-between'}}
+            >
                 <View style={{flexDirection: 'row'}}>
                     <RankingMedal index={index} />
                     <View style={{marginLeft: 10}}>
@@ -35,33 +28,16 @@ const MemberCard = ({data, teamId, index}) => {
                     {isActiveTeam ? 'Active' : 'Inactive'}
                 </Body>
             </View>
-            <View
-                style={{
-                    marginTop: 16,
-                    flexDirection: 'row',
-                    justifyContent: 'space-between'
-                }}>
-                <View
-                    style={{
-                        justifyContent: 'center',
-                        alignItems: 'center'
-                    }}>
+            <View style={{ marginTop: 16, flexDirection: 'row', justifyContent: 'space-between'}}>
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                     <Body>{data?.pivot?.total_photos}</Body>
                     <Caption>PHOTOS</Caption>
                 </View>
-                <View
-                    style={{
-                        justifyContent: 'center',
-                        alignItems: 'center'
-                    }}>
+                <View style={{ justifyContent: 'center', alignItems: 'center'}}>
                     <Body>{data?.pivot?.total_litter}</Body>
                     <Caption>LITTER</Caption>
                 </View>
-                <View
-                    style={{
-                        justifyContent: 'center',
-                        alignItems: 'center'
-                    }}>
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                     <Body>{lastActivity}</Body>
                     <Caption>LAST ACTIVITY</Caption>
                 </View>
@@ -70,6 +46,17 @@ const MemberCard = ({data, teamId, index}) => {
     );
 };
 
-export default MemberCard;
+const styles = StyleSheet.create({
 
-const styles = StyleSheet.create({});
+    memberCardContainer: {
+        borderWidth: 1,
+        borderColor: '#eee',
+        padding: 8,
+        borderRadius: 8,
+        marginBottom: 20,
+        backgroundColor: 'white'
+    }
+
+});
+
+export default MemberCard;

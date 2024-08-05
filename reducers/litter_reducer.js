@@ -41,7 +41,8 @@ const litterSlice = createSlice({
          * @items = Array of objects [ { id, key }, { id, key } ]
          * @item = First key from array 'butts'
          */
-        changeCategory(state, action) {
+        changeCategory (state, action)
+        {
             const category = CATEGORIES.find(cat => cat.title === action.payload);
             const items = LITTERKEYS[category.title];
             const item = items[0];
@@ -76,21 +77,21 @@ const litterSlice = createSlice({
         /**
          * Change Status of quantity change
          * picker wheel rotated status == True
-         * after tag is added satus set to false
+         * after tag is added status set to false
          */
-        changeQuantityStatus(state, action) {
+        changeQuantityStatus (state, action) {
             state.quantityChanged = action.payload;
         },
 
         /**
          * Change the index of the Swiper on LitterPicker.Swiper.LitterImage
          */
-        changeSwiperIndex(state, action) {
+        changeSwiperIndex (state, action) {
             state.swiperIndex = action.payload;
         },
 
         // Reset tags to null and close LitterPicker modal
-        resetLitterState() {
+        resetLitterState () {
             return initialState;
         },
 

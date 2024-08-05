@@ -1,44 +1,39 @@
-import {Animated, Easing, Pressable, StyleSheet, View} from 'react-native';
-import React, {Component} from 'react';
+import React, { useState } from 'react';
+import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-import {Body, Caption, Colors, Title} from '../../components';
+import { Body, Caption, Colors, Title } from '../../components';
 
 /**
  * @prop {string} identifier
  * @prop {string} teamName
  */
-export class TeamTitle extends Component {
-    constructor(props) {
-        super(props);
+const TeamTitle = ({ identifier, teamName }) => {
 
-        this.state = {
-            opacityAnimation: new Animated.Value(0)
-        };
-    }
+    const [opacityAnimation, setOpacityAnimation] = useState(new Animated.Value(0));
 
     /**
      * copy team unique identifier to Clipboard
      */
-    copyIdentifier = async () => {
+    const copyIdentifier = async () => {
         // Clipboard.setString(this.props.identifier);
-        this.opacityAnmiation();
+        await opacityAnmiation();
     };
 
     /**
      * opactity animations for Copied message
      */
-    opacityAnmiation = async () => {
-        Animated.timing(this.state.opacityAnimation, {
+    const opacityAnmiation = async () => {
+        Animated.timing(opacityAnimation, {
             toValue: 1,
             duration: 500,
             useNativeDriver: true,
             easing: Easing.elastic(1)
-        }).start(this.returnOpacityAnmiation);
+        }).start(returnOpacityAnimation);
     };
 
-    returnOpacityAnmiation = async () => {
-        Animated.timing(this.state.opacityAnimation, {
+    const returnOpacityAnimation = async () => {
+        Animated.timing(opacityAnimation, {
             toValue: 0,
             duration: 800,
             useNativeDriver: true,
@@ -46,41 +41,37 @@ export class TeamTitle extends Component {
         }).start();
     };
 
-    render() {
-        const opacityStyle = {
-            opacity: this.state.opacityAnimation
-        };
+    const opacityStyle = {
+        opacity: opacityAnimation
+    };
 
-        const {identifier, teamName} = this.props;
-        return (
-            <View>
-                <Pressable
-                    onPress={this.copyIdentifier}
-                    style={styles.titleContainer}>
-                    <Title>{teamName}</Title>
-                    <View style={{flexDirection: 'row'}}>
-                        <Body color="accent" style={{marginRight: 10}}>
-                            {identifier}
-                        </Body>
-                        <Icon
-                            name="copy-outline"
-                            color={Colors.accent}
-                            size={18}
-                        />
-                    </View>
-                </Pressable>
-                {/* Copied message */}
-                <Animated.View style={opacityStyle}>
-                    <Caption color="accent" style={{textAlign: 'center'}}>
-                        Copied
-                    </Caption>
-                </Animated.View>
-            </View>
-        );
-    }
+    return (
+        <View>
+            <Pressable
+                onPress={copyIdentifier}
+                style={styles.titleContainer}>
+                <Title>{teamName}</Title>
+                <View style={{flexDirection: 'row'}}>
+                    <Body color="accent" style={{marginRight: 10}}>
+                        {identifier}
+                    </Body>
+                    <Icon
+                        name="copy-outline"
+                        color={Colors.accent}
+                        size={18}
+                    />
+                </View>
+            </Pressable>
+
+            {/* Copied message */}
+            <Animated.View style={opacityStyle}>
+                <Caption color="accent" style={{ textAlign: 'center' }}>
+                    Copied
+                </Caption>
+            </Animated.View>
+        </View>
+    );
 }
-
-export default TeamTitle;
 
 const styles = StyleSheet.create({
     titleContainer: {
@@ -89,3 +80,5 @@ const styles = StyleSheet.create({
         marginTop: 20
     }
 });
+
+export default TeamTitle;

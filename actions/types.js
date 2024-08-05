@@ -12,8 +12,6 @@ export const CLIENT_ID = ID_CLIENT;
 export const CLIENT_SECRET = SECRET_CLIENT;
 export const URL = OLM_ENDPOINT;
 
-console.log({ URL });
-
 export const TOGGLE_ACTIVITY_INDICATOR = 'TOGGLE_ACTIVITY_INDICATOR';
 
 // Auth

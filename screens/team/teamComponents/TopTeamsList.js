@@ -1,4 +1,3 @@
-import { StyleSheet } from 'react-native';
 import React from 'react';
 import TeamListCard from './TeamListCard';
 
@@ -17,5 +16,3 @@ const TopTeamsList = ({ topTeams }) => {
 };
 
 export default TopTeamsList;
-
-const styles = StyleSheet.create({});

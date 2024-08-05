@@ -1,19 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-    AppState,
-    Image,
-    Linking,
-    Platform,
-    Pressable,
-    StyleSheet,
-    View
-} from 'react-native';
+import { AppState, Image, Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Body, Colors, Title } from '../components';
-import {
-    checkAccessMediaLocation,
-    checkCameraRollPermission,
-    requestCameraRollPermission
-} from '../../utils/permissions';
+import { checkAccessMediaLocation, checkCameraRollPermission, requestCameraRollPermission } from '../../utils/permissions';
 import * as Sentry from '@sentry/react-native';
 
 const GalleryPermissionScreen = ({ navigation }) => {

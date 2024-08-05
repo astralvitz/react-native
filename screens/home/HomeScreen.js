@@ -1,25 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import {
-    ActivityIndicator,
-    Dimensions,
-    Modal,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableWithoutFeedback,
-    View
-} from 'react-native';
-
+import { ActivityIndicator, Dimensions, Modal, Platform, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { createSelector } from '@reduxjs/toolkit'
 import { useDispatch, useSelector } from 'react-redux';
 import { setModel } from '../../reducers/settings_reducer';
 import { cancelUpload, checkAppVersion, startUploading } from '../../reducers/shared_reducer';
-import {
-    deleteImage,
-    deleteWebImage,
-    getUntaggedImages,
-    uploadImage,
-    uploadTagsToWebImage
-} from '../../reducers/images_reducer';
+import { deleteImage, deleteWebImage, getUntaggedImages, uploadImage, uploadTagsToWebImage} from '../../reducers/images_reducer';
 import { getPhotosFromCameraroll } from "../../reducers/gallery_reducer";
 
 // import {Button} from '@rneui/themed';
@@ -33,6 +18,7 @@ import { isGeotagged } from '../../utils/isGeotagged';
 import { ActionButton , UploadButton, UploadImagesGrid } from './homeComponents';
 import DeviceInfo from 'react-native-device-info';
 import { isTagged } from '../../utils/isTagged';
+import {useTranslation} from "react-i18next";
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -53,6 +39,76 @@ const HomeScreen = ({ navigation }) => {
         unknown: 0
     });
 
+    const selectSharedState = state => state.shared;
+    const selectImagesState = state => state.images;
+    const selectAuthState = state => state.auth;
+    const selectSettingsState = state => state.settings;
+
+    // Shared state selectors
+    const selectAppVersion = createSelector([selectSharedState], shared => shared.appVersion);
+    const selectShowModal = createSelector([selectSharedState], shared => shared.showModal);
+    const selectShowThankYouMessages = createSelector([selectSharedState], shared => shared.showThankYouMessages);
+    const selectUniqueValue = createSelector([selectSharedState], shared => shared.uniqueValue);
+    const selectIsUploading = createSelector([selectSharedState], shared => shared.isUploading);
+
+    // Images state selectors
+    const selectImages = createSelector([selectImagesState], images => images.imagesArray);
+    const selectIsSelecting = createSelector([selectImagesState], images => images.isSelecting);
+    const selectSelected = createSelector([selectImagesState], images => images.selected);
+
+    // Auth state selectors
+    const selectLang = createSelector([selectAuthState], auth => auth.lang);
+    const selectToken = createSelector([selectAuthState], auth => auth.token);
+    const selectUser = createSelector([selectAuthState], auth => auth.user);
+
+    // Settings state selectors
+    const selectModel = createSelector([selectSettingsState], settings => settings.model);
+
+    const selectAll = createSelector(
+        [
+            selectAppVersion,
+            selectImages,
+            selectIsSelecting,
+            selectLang,
+            selectShowModal,
+            selectModel,
+            selectSelected,
+            selectShowThankYouMessages,
+            selectToken,
+            selectUser,
+            selectUniqueValue,
+            selectIsUploading,
+        ],
+        (
+            appVersion,
+            images,
+            isSelecting,
+            lang,
+            showModal,
+            model,
+            selected,
+            showThankYouMessages,
+            token,
+            user,
+            uniqueValue,
+            isUploading,
+        ) => ({
+            appVersion,
+            images,
+            isSelecting,
+            lang,
+            showModal,
+            model,
+            selected,
+            showThankYouMessages,
+            token,
+            user,
+            uniqueValue,
+            isUploading,
+        })
+    );
+
+    // Use the combined selector in useSelector
     const {
         appVersion,
         images,
@@ -66,22 +122,7 @@ const HomeScreen = ({ navigation }) => {
         user,
         uniqueValue,
         isUploading,
-    } = useSelector(state => ({
-        appVersion: state.shared.appVersion,
-        images: state.images.imagesArray,
-        isSelecting: state.images.isSelecting,
-        lang: state.auth.lang,
-        showModal: state.shared.showModal,
-        model: state.settings.model,
-        selected: state.images.selected,
-        showThankYouMessages: state.shared.showThankYouMessages,
-        token: state.auth.token,
-        user: state.auth.user,
-        uniqueValue: state.shared.uniqueValue,
-        isUploading: state.shared.isUploading,
-    }));
-
-    console.log({ isUploading });
+    } = useSelector(selectAll);
 
     useEffect(() => {
         const getModel = () => {
@@ -100,8 +141,12 @@ const HomeScreen = ({ navigation }) => {
             checkNewVersion().then(r => console.log('New version', r));
         }
 
-        checkGalleryPermission().then(r => console.log('Gallery permission', r));
+        checkGalleryPermission();
     }, []);
+
+    const { t } = useTranslation();
+    const cancelText = t('leftpage.cancel');
+    const deleteText = t('leftpage.delete');
 
     // useEffect(() => {
     //     if (prevAppVersion !== appVersion) {
@@ -141,19 +186,6 @@ const HomeScreen = ({ navigation }) => {
      * INFO: these are images that were uploaded on website
      * but were not tagged and submitted
      */
-    // async componentDidMount() {
-    //     // If enable_admin_tagging is False, the user wants to get and tag their uploads
-    //     if (!user?.enable_admin_tagging) {
-    //         // images_actions, images_reducer
-    //         await getUntaggedImages(token);
-    //     }
-    //
-    //     // if not in DEV mode check for new version
-    //     !__DEV__ && this.checkNewVersion();
-    //
-    //     await this.checkGalleryPermission();
-    // }
-    //
     // componentDidUpdate(prevProps) {
     //     if (prevProps.appVersion !== appVersion) {
     //         this.checkNewVersion();
@@ -181,7 +213,7 @@ const HomeScreen = ({ navigation }) => {
         let status = 'NO_IMAGES';
         let fabFunction = loadGallery;
 
-        if (images.length === 0) {
+        if (images?.length === 0) {
             status = 'NO_IMAGES';
             fabFunction = loadGallery;
         }
@@ -201,23 +233,21 @@ const HomeScreen = ({ navigation }) => {
      * Render helper text when delete button is clicked
      */
     const renderHelperMessage = () => {
-        if (isSelecting) {
-            if (selected === 0) {
-                return (
-                    <View style={styles.helperContainer}>
-                        <Icon
-                            color={Colors.muted}
-                            name="information-circle-outline"
-                            size={32}
-                        />
-                        <Body
-                            style={{marginLeft: 10}}
-                            color="muted"
-                            dictionary={'leftpage.select-to-delete'}
-                        />
-                    </View>
-                );
-            }
+        if (isSelecting && selected === 0) {
+            return (
+                <View style={styles.helperContainer}>
+                    <Icon
+                        color={Colors.muted}
+                        name="information-circle-outline"
+                        size={32}
+                    />
+                    <Body
+                        style={{marginLeft: 10}}
+                        color="muted"
+                        dictionary={'leftpage.select-to-delete'}
+                    />
+                </View>
+            );
         }
     }
 
@@ -257,20 +287,16 @@ const HomeScreen = ({ navigation }) => {
                 <Text
                     style={styles.normalWhiteText}
                     onPress={toggleSelecting}
-                >
-                    useTranslation('leftpage.cancel')
-                </Text>
+                >{cancelText}</Text>
             );
         }
 
-        if (images.length > 0) {
+        if (images?.length > 0) {
             return (
                 <Text
                     style={styles.normalWhiteText}
-                    onPress={this.toggleSelecting}
-                >
-                    t('leftpage.delete')
-                </Text>
+                    onPress={toggleSelecting}
+                >{deleteText}</Text>
             );
         }
 
@@ -297,11 +323,11 @@ const HomeScreen = ({ navigation }) => {
         images.map(image => {
             if (image.selected) {
                 if (image.type === 'web' && image.uploaded) {
-                    dispatch(deleteWebImage(
+                    dispatch(deleteWebImage({
                         token,
-                        image.id,
-                        user.enable_admin_tagging
-                    ));
+                        image_id: image.id,
+                        enableAdminTagging: user.enable_admin_tagging
+                    }));
                 } else {
                     dispatch(deleteImage(image.id));
                 }
@@ -356,13 +382,13 @@ const HomeScreen = ({ navigation }) => {
         // shared.js
         // showModal = true;
         // isUploading = true;
-        startUploading();
+        dispatch(startUploading());
 
-        if (imagesCount > 0) {
+        if (imagesCount > 0)
+        {
             // async loop
-            for (const img of images) {
-                console.log(img);
-
+            for (const img of images)
+            {
                 // break loop if cancel button is pressed
                 if (isUploadCancelled) {
                     resetAfterUploadCancelled();
@@ -426,19 +452,19 @@ const HomeScreen = ({ navigation }) => {
                             errorMessage = 'unknown';
                         }
 
-                        this.setState(previousState => {
-                            const updatedFailedCounts = {
-                                ...previousState.failedCounts
-                            };
-
-                            updatedFailedCounts[errorMessage] =
-                                (updatedFailedCounts[errorMessage] || 0) + 1;
-
-                            return {
-                                uploadFailed: previousState.uploadFailed + 1,
-                                failedCounts: updatedFailedCounts
-                            };
-                        });
+                        // this.setState(previousState => {
+                        //     const updatedFailedCounts = {
+                        //         ...previousState.failedCounts
+                        //     };
+                        //
+                        //     updatedFailedCounts[errorMessage] =
+                        //         (updatedFailedCounts[errorMessage] || 0) + 1;
+                        //
+                        //     return {
+                        //         uploadFailed: previousState.uploadFailed + 1,
+                        //         failedCounts: updatedFailedCounts
+                        //     };
+                        // });
                     }
                 } else if (img.type.toLowerCase() === 'web' && isItemTagged) {
                     /**
@@ -467,16 +493,15 @@ const HomeScreen = ({ navigation }) => {
             }
         }
 
-        showThankYouMessagesAfterUpload();
+        // showThankYouMessagesAfterUpload();
     };
 
     /**
      *
      */
     const hideThankYouMessages = () => {
-        closeThankYouMessages();
+        // closeThankYouMessages();
     }
-
 
     return (
         <>
@@ -606,19 +631,19 @@ const HomeScreen = ({ navigation }) => {
                 </Modal>
 
                 {/* Grid to display images -- 3 columns */}
-                {/*<UploadImagesGrid*/}
-                {/*    navigation={navigation}*/}
-                {/*    photos={images}*/}
-                {/*    lang={lang}*/}
-                {/*    uniqueValue={uniqueValue}*/}
-                {/*    isSelecting={isSelecting}*/}
-                {/*/>*/}
+                <UploadImagesGrid
+                    navigation={navigation}
+                    images={images}
+                    lang={lang}
+                    uniqueValue={uniqueValue}
+                    isSelecting={isSelecting}
+                />
 
-                <View style={styles.bottomContainer}>{renderHelperMessage}</View>
+                <View style={styles.bottomContainer}>{renderHelperMessage()}</View>
             </View>
 
-            {/*{renderActionButton()}*/}
-            {/*{renderUploadButton()}*/}
+            {renderActionButton()}
+            {renderUploadButton()}
         </>
     );
 }

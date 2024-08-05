@@ -1,17 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-    AppState,
-    StyleSheet,
-    View,
-    Image,
-    Pressable,
-    Platform,
-    Linking,
-    Dimensions
-} from 'react-native';
+import { AppState, StyleSheet, View, Image, Pressable, Platform, Linking, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { connect } from 'react-redux';
-import * as actions from '../../actions';
 import { Title, Body, Colors, Caption } from '../components';
 import {
     checkCameraPermission,
@@ -92,12 +81,6 @@ const CameraPermissionScreen = ({ navigation, lang }) => {
     );
 };
 
-const mapStateToProps = state => ({
-    lang: state.auth.lang
-});
-
-export default connect(mapStateToProps, actions)(CameraPermissionScreen);
-
 const styles = StyleSheet.create({
     container: {
         justifyContent: 'center',
@@ -127,3 +110,5 @@ const styles = StyleSheet.create({
         marginVertical: 32
     }
 });
+
+export default CameraPermissionScreen;

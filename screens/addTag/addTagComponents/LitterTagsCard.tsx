@@ -1,8 +1,8 @@
 import React from 'react';
-import {Dimensions, ScrollView, StyleSheet, View} from 'react-native';
-import {Body, Caption, Colors} from '../../components';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { Body, Caption, Colors } from '../../components';
 
-const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 /**
  * Card component to show added tags on image when AddTags screen is opened
@@ -25,9 +25,7 @@ const LitterTagsCard: React.FC<LitterTagsCardProps> = ({
     customTags,
     lang
 }) => {
-    const isTagged =
-        (customTags && customTags.length > 0) ||
-        (tags && Object.keys(tags)?.length !== 0);
+    const isTagged = (customTags && customTags.length > 0) || (tags && Object.keys(tags)?.length !== 0);
 
     return (
         <>
@@ -85,9 +83,11 @@ const RenderTags: React.FC<RenderTagsProps> = ({tags, lang}) => {
                             style={{
                                 flexDirection: 'row',
                                 flexWrap: 'wrap'
-                            }}>
+                            }}
+                        >
                             {Object?.keys(tags[category])?.map(tag => {
                                 const value = tags[category][tag];
+
                                 return (
                                     <View key={tag} style={styles.tagBadges}>
                                         <Caption
@@ -140,8 +140,6 @@ const RenderCustomTags: React.FC<RenderCustomTagsProps> = ({customTags}) => {
     );
 };
 
-export default LitterTagsCard;
-
 const styles = StyleSheet.create({
     card: {
         backgroundColor: Colors.white,
@@ -160,3 +158,5 @@ const styles = StyleSheet.create({
         paddingVertical: 4
     }
 });
+
+export default LitterTagsCard;

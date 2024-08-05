@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import React from 'react';
 import RankingMedal from './RankingMedal';
 import { Body, Caption } from '../../components';
@@ -29,8 +29,6 @@ const TeamListCard = ({ team, index, showRanking = true, leftContent }) => {
     );
 };
 
-export default TeamListCard;
-
 const styles = StyleSheet.create({
     itemContainer: {
         height: 60,
@@ -51,3 +49,5 @@ const styles = StyleSheet.create({
     },
     rightContainer: { marginLeft: 20 }
 });
+
+export default TeamListCard;

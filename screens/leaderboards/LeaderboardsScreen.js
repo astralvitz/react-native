@@ -3,7 +3,7 @@ import { ActivityIndicator, Dimensions, FlatList, Image, StyleSheet, Text, View}
 import { Picker } from '@react-native-picker/picker';
 import { Header, Title } from '../components';
 import { flags } from '../../assets/icons/flags';
-import {useDispatch, useSelector} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getLeaderboardData } from "../../reducers/leaderboards_reducer";
 
 const SCREEN_WIDTH = Dimensions.get('window').width;

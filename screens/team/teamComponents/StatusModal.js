@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
+import { StyleSheet, View } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { Body } from '../../components';
 
@@ -9,6 +9,7 @@ const ErrorAnimation = require('../../../assets/lottie/error.json');
 
 const StatusModal = ({ text, type }) => {
     let animationSource;
+
     switch (type) {
         case 'SUCCESS':
             animationSource = SuccessAnimation;
@@ -34,8 +35,6 @@ const StatusModal = ({ text, type }) => {
     );
 };
 
-export default StatusModal;
-
 const styles = StyleSheet.create({
     container: {
         paddingHorizontal: 40,
@@ -43,3 +42,5 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     }
 });
+
+export default StatusModal;

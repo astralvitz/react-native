@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { useState } from 'react';
 import {
     Image,
     Platform,
@@ -10,118 +10,104 @@ import {
 // setLang not working
 // import { getLanguage, setLanguage } from 'react-native-translation';
 // import * as Animatable from 'react-native-animatable';
-import {connect} from 'react-redux';
-import * as actions from '../../../actions';
+import { changeLang } from "../../../reducers/auth_reducer";
+import { useDispatch } from "react-redux";
 
 // const SCREEN_HEIGHT = Dimensions.get('window').height;
 // const SCREEN_WIDTH = Dimensions.get('window').width;
 
-class LanguageFlags extends Component {
-    /**
-     * We need to bind toggle to access state
-     */
-    constructor(props) {
-        super(props);
+const LanguageFlags = ({ lang }) => {
 
-        this.state = {
-            show: false,
-            langs: [
-                {
-                    lang: 'ar',
-                    flag: require('../../../assets/icons/flags/sa.png')
-                },
-                {
-                    lang: 'es',
-                    flag: require('../../../assets/icons/flags/es.png')
-                },
-                {
-                    lang: 'en',
-                    flag: require('../../../assets/icons/flags/gb.png')
-                },
-                {
-                    lang: 'fr',
-                    flag: require('../../../assets/icons/flags/fr.png')
-                },
-                {
-                    lang: 'de',
-                    flag: require('../../../assets/icons/flags/de.png')
-                },
-                {
-                    lang: 'ie',
-                    flag: require('../../../assets/icons/flags/ie.png')
-                },
-                {
-                    lang: 'nl',
-                    flag: require('../../../assets/icons/flags/nl.png')
-                },
-                {
-                    lang: 'pt',
-                    flag: require('../../../assets/icons/flags/pt.png')
-                }
-            ]
-        };
+    const dispatch = useDispatch();
 
-        this.change = this.change.bind(this);
-        this.toggle = this.toggle.bind(this);
-    }
+    const [show, setShow] = useState(false);
+    const [langs, setLangs] = useState([
+        {
+            lang: 'ar',
+            flag: require('../../../assets/icons/flags/sa.png')
+        },
+        {
+            lang: 'es',
+            flag: require('../../../assets/icons/flags/es.png')
+        },
+        {
+            lang: 'en',
+            flag: require('../../../assets/icons/flags/gb.png')
+        },
+        {
+            lang: 'fr',
+            flag: require('../../../assets/icons/flags/fr.png')
+        },
+        {
+            lang: 'de',
+            flag: require('../../../assets/icons/flags/de.png')
+        },
+        {
+            lang: 'ie',
+            flag: require('../../../assets/icons/flags/ie.png')
+        },
+        {
+            lang: 'nl',
+            flag: require('../../../assets/icons/flags/nl.png')
+        },
+        {
+            lang: 'pt',
+            flag: require('../../../assets/icons/flags/pt.png')
+        }
+    ]);
 
-    /**
-     *
-     */
-    change(lang) {
-        this.props.changeLang(lang);
+    const change = (lang) => {
+        dispatch(changeLang(lang));
 
-        this.toggle();
+        toggle();
     }
 
     /**
      * Return the flag image path for the currently active language
      */
-    getCurrentFlag() {
-        return this.state.langs.find(lng => lng.lang === this.props.lang).flag;
+    const getCurrentFlag = () => {
+        return langs.find(lng => lng.lang === lang).flag;
     }
 
     /**
      * Show or hide available languages
      */
-    toggle() {
-        this.setState({show: !this.state.show});
+    const toggle = () => {
+        setShow(!show);
     }
 
-    render() {
-        return (
-            <SafeAreaView style={styles.top}>
-                {this.state.show ? (
-                    this.state.langs.map(lang => (
-                        <TouchableOpacity
-                            key={lang.lang}
-                            onPress={() => this.change(lang.lang)}>
-                            <Image
-                                source={lang.flag}
-                                resizeMethod="auto"
-                                resizeMode="cover"
-                                style={[
-                                    styles.imageStyle,
-                                    {
-                                        marginBottom: 12
-                                    }
-                                ]}
-                            />
-                        </TouchableOpacity>
-                    ))
-                ) : (
-                    <TouchableOpacity onPress={this.toggle}>
+    return (
+        <SafeAreaView style={styles.top}>
+            {show ? (
+                langs.map(lang => (
+                    <TouchableOpacity
+                        key={lang.lang}
+                        onPress={() => change(lang.lang)}>
                         <Image
+                            source={lang.flag}
                             resizeMethod="auto"
                             resizeMode="cover"
-                            style={styles.imageStyle}
-                            source={this.getCurrentFlag()}
+                            style={[
+                                styles.imageStyle,
+                                {
+                                    marginBottom: 12
+                                }
+                            ]}
                         />
                     </TouchableOpacity>
-                )}
-            </SafeAreaView>
-        );
-    }
+                ))
+            ) : (
+                <TouchableOpacity onPress={toggle}>
+                    <Image
+                        resizeMethod="auto"
+                        resizeMode="cover"
+                        style={styles.imageStyle}
+                        source={getCurrentFlag()}
+                    />
+                </TouchableOpacity>
+            )}
+        </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -136,4 +122,4 @@ const styles = StyleSheet.create({
 
 // LanguageFlags = Animatable.createAnimatableComponent(LanguageFlags);
 
-export default connect(null, actions)(LanguageFlags);
+export default LanguageFlags;

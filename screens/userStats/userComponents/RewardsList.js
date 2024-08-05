@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView, Image } from 'react-native';
+import { StyleSheet, View, ScrollView, Image } from 'react-native';
 import { Body, Caption, Colors } from '../../components';
 
 const RewardCard = () => {
@@ -26,14 +26,13 @@ const RewardsList = () => {
         <ScrollView
             horizontal
             style={{ marginTop: 20 }}
-            showsHorizontalScrollIndicator={false}>
+            showsHorizontalScrollIndicator={false}
+        >
             <RewardCard />
             <RewardCard />
         </ScrollView>
     );
 };
-
-export default RewardsList;
 
 const styles = StyleSheet.create({
     cardContainer: {
@@ -59,3 +58,5 @@ const styles = StyleSheet.create({
         height: 50
     }
 });
+
+export default RewardsList;

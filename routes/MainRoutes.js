@@ -12,27 +12,27 @@ import PermissionStack from './PermissionStack';
 import { GalleryScreen, NewUpdateScreen,  SettingScreen } from '../screens';
 import AddTags from '../screens/addTag/AddTags';
 
-interface AuthDetails {
-    token: string | null;
-    tokenIsValid: boolean;
-}
-
-interface AppState {
-    auth: {
-        token: string | null;
-        tokenIsValid: boolean;
-    };
-}
+// interface AuthDetails {
+//     token: string | null;
+//     tokenIsValid: boolean;
+// }
+//
+// interface AppState {
+//     auth: {
+//         token: string | null;
+//         tokenIsValid: boolean;
+//     };
+// }
 
 const Stack = createStackNavigator();
 
-const MainRoutes: FC = () => {
+const MainRoutes = () => {
 
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoading, setIsLoading] = useState(true);
 
     // Define a selector that computes derived data from the state and memoizes the output.
     // @ts-ignore
-    const getAuthDetails = createSelector<AppState, string | null, boolean, AuthDetails>(
+    const getAuthDetails = createSelector(
         // @ts-ignore
         state => state.auth.token,
         // @ts-ignore
@@ -46,8 +46,7 @@ const MainRoutes: FC = () => {
 
     const dispatch = useDispatch();
 
-    async function bootstrapAuthentication (dispatch: any, setIsLoading: (loading: boolean) => void)
-    {
+    async function bootstrapAuthentication (dispatch) {
         const jwt = await AsyncStorage.getItem('jwt');
 
         if (jwt)

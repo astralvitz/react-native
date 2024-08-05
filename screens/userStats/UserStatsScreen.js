@@ -31,7 +31,7 @@ const UserStatsScreen = ({ navigation }) => {
         const fetchData = async () => {
             await getDataFromStorage();
 
-            await dispatch(fetchUser(token));
+            dispatch(fetchUser(token));
 
             await fetchUserData();
         }

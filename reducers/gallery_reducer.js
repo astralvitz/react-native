@@ -30,6 +30,7 @@ const initialState = {
 export const getPhotosFromCameraroll = createAsyncThunk(
     'gallery/getPhotosFromCameraroll',
     async (fetchType = 'INITIAL', { getState, rejectWithValue }) => {
+
         const {
             gallery: {
                 geotaggedImages,
@@ -41,10 +42,6 @@ export const getPhotosFromCameraroll = createAsyncThunk(
             },
             auth: { user }
         } = getState();
-
-        if (imagesLoading) {
-            return rejectWithValue('Images are currently loading');
-        }
 
         let camerarollData;
 
@@ -69,7 +66,8 @@ export const getPhotosFromCameraroll = createAsyncThunk(
             include: ['location', 'filename', 'fileSize', 'imageSize']
         };
 
-        try {
+        try
+        {
             if (fetchType === 'LOAD' && isNextPageAvailable && lastImageCursor !== null) {
                 camerarollData = await CameraRoll.getPhotos(loadParams);
             } else if (geotaggedImages?.length === 0 && !camerarollImageFetched && lastFetchTime === null) {
