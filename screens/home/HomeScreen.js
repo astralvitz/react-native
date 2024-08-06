@@ -1,13 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Modal, Platform, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import {
+    ActivityIndicator,
+    Dimensions,
+    Modal,
+    Platform,
+    StyleSheet,
+    Text,
+    TouchableWithoutFeedback,
+    View
+} from 'react-native';
 import { createSelector } from '@reduxjs/toolkit'
 import { useDispatch, useSelector } from 'react-redux';
 import { setModel } from '../../reducers/settings_reducer';
 import { cancelUpload, checkAppVersion, startUploading } from '../../reducers/shared_reducer';
-import { deleteImage, deleteWebImage, getUntaggedImages, uploadImage, uploadTagsToWebImage} from '../../reducers/images_reducer';
+import {
+    deleteImage,
+    deleteWebImage,
+    deselectAllImages,
+    getUntaggedImages,
+    uploadImage,
+    uploadTagsToWebImage
+} from '../../reducers/images_reducer';
 import { getPhotosFromCameraroll } from "../../reducers/gallery_reducer";
 
-// import {Button} from '@rneui/themed';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Body, Colors, Header, Title } from '../components';
 
@@ -19,6 +34,7 @@ import { ActionButton , UploadButton, UploadImagesGrid } from './homeComponents'
 import DeviceInfo from 'react-native-device-info';
 import { isTagged } from '../../utils/isTagged';
 import {useTranslation} from "react-i18next";
+import {resetUploadState} from "../../reducers/upload_reducer";
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -38,6 +54,7 @@ const HomeScreen = ({ navigation }) => {
         invalidCoordinates: 0,
         unknown: 0
     });
+    const [isSelectingImagesToDelete, setIsSelectingImagesToDelete] = useState(false);
 
     const selectSharedState = state => state.shared;
     const selectImagesState = state => state.images;
@@ -53,8 +70,6 @@ const HomeScreen = ({ navigation }) => {
 
     // Images state selectors
     const selectImages = createSelector([selectImagesState], images => images.imagesArray);
-    const selectIsSelecting = createSelector([selectImagesState], images => images.isSelecting);
-    const selectSelected = createSelector([selectImagesState], images => images.selected);
 
     // Auth state selectors
     const selectLang = createSelector([selectAuthState], auth => auth.lang);
@@ -68,11 +83,9 @@ const HomeScreen = ({ navigation }) => {
         [
             selectAppVersion,
             selectImages,
-            selectIsSelecting,
             selectLang,
             selectShowModal,
             selectModel,
-            selectSelected,
             selectShowThankYouMessages,
             selectToken,
             selectUser,
@@ -82,7 +95,6 @@ const HomeScreen = ({ navigation }) => {
         (
             appVersion,
             images,
-            isSelecting,
             lang,
             showModal,
             model,
@@ -95,7 +107,6 @@ const HomeScreen = ({ navigation }) => {
         ) => ({
             appVersion,
             images,
-            isSelecting,
             lang,
             showModal,
             model,
@@ -112,7 +123,6 @@ const HomeScreen = ({ navigation }) => {
     const {
         appVersion,
         images,
-        isSelecting,
         lang,
         showModal,
         model,
@@ -218,7 +228,7 @@ const HomeScreen = ({ navigation }) => {
             fabFunction = loadGallery;
         }
 
-        if (isSelecting) {
+        if (isSelectingImagesToDelete) {
             status = 'SELECTING';
             if (selected > 0) {
                 status = 'SELECTED';
@@ -233,7 +243,7 @@ const HomeScreen = ({ navigation }) => {
      * Render helper text when delete button is clicked
      */
     const renderHelperMessage = () => {
-        if (isSelecting && selected === 0) {
+        if (isSelectingImagesToDelete && selected === 0) {
             return (
                 <View style={styles.helperContainer}>
                     <Icon
@@ -257,7 +267,7 @@ const HomeScreen = ({ navigation }) => {
      * ... if images exist and at least 1 image has a tag
      */
     const renderUploadButton = () => {
-        if (images?.length === 0 || isSelecting) {
+        if (images?.length === 0 || isSelectingImagesToDelete) {
             return;
         }
 
@@ -282,11 +292,11 @@ const HomeScreen = ({ navigation }) => {
      * Render Delete / Cancel Header Button
      */
     const renderDeleteButton = () => {
-        if (isSelecting) {
+        if (isSelectingImagesToDelete) {
             return (
                 <Text
                     style={styles.normalWhiteText}
-                    onPress={toggleSelecting}
+                    onPress={handleToggleSelecting}
                 >{cancelText}</Text>
             );
         }
@@ -295,7 +305,7 @@ const HomeScreen = ({ navigation }) => {
             return (
                 <Text
                     style={styles.normalWhiteText}
-                    onPress={toggleSelecting}
+                    onPress={handleToggleSelecting}
                 >{deleteText}</Text>
             );
         }
@@ -306,10 +316,10 @@ const HomeScreen = ({ navigation }) => {
     /**
      * Toggle Selecting - header right
      */
-    const toggleSelecting = () => {
-        // missing?
-        // deselectAllImages();
-        toggleSelecting();
+    const handleToggleSelecting = () => {
+        dispatch(deselectAllImages());
+
+        setIsSelectingImagesToDelete(!isSelectingImagesToDelete);
     }
 
     /**
@@ -334,8 +344,7 @@ const HomeScreen = ({ navigation }) => {
             }
         });
 
-        // deleteSelectedImages();
-        toggleSelecting();
+        setIsSelectingImagesToDelete(false);
     }
 
     // reset state after cancel button pressed
@@ -361,16 +370,19 @@ const HomeScreen = ({ navigation }) => {
      * - Consider: Auto-upload any tagged images in the background once the user has pressed Confirm
      */
     const uploadPhotos = async () => {
-        // Reset upload count
-        setUploaded(0);
-        setUploadFailed(0);
-        setTagged(0);
-        setTaggedFailed(0);
-        setFailedCounts({
-            alreadyUploaded: 0,
-            invalidCoordinates: 0,
-            unknown: 0
-        });
+
+        dispatch(resetUploadState());
+
+        // // Reset upload count
+        // setUploaded(0);
+        // setUploadFailed(0);
+        // setTagged(0);
+        // setTaggedFailed(0);
+        // setFailedCounts({
+        //     alreadyUploaded: 0,
+        //     invalidCoordinates: 0,
+        //     unknown: 0
+        // });
 
         // The model of the users device
         // const model = model;
@@ -438,9 +450,7 @@ const HomeScreen = ({ navigation }) => {
                     // if success upload++ else failed++
 
                     if (response && response.success) {
-                        this.setState(previousState => ({
-                            uploaded: previousState.uploaded + 1
-                        }));
+                        setUploaded(uploaded + 1);
                     } else {
                         let errorMessage = '';
 
@@ -636,7 +646,7 @@ const HomeScreen = ({ navigation }) => {
                     images={images}
                     lang={lang}
                     uniqueValue={uniqueValue}
-                    isSelecting={isSelecting}
+                    isSelecting={isSelectingImagesToDelete}
                 />
 
                 <View style={styles.bottomContainer}>{renderHelperMessage()}</View>

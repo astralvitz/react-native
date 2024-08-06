@@ -3,7 +3,7 @@ import { Dimensions, FlatList, Image, Pressable, Text, View } from 'react-native
 import { useDispatch } from "react-redux";
 import { Body, SubTitle } from '../../components';
 import { isTagged } from '../../../utils/isTagged';
-import { decrementSelected, incrementSelected, toggleSelectedImages } from "../../../reducers/images_reducer";
+import { toggleSelectedImages } from "../../../reducers/images_reducer";
 import { changeSwiperIndex } from "../../../reducers/litter_reducer";
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -13,18 +13,10 @@ const UploadImagesGrid = ({ images, isSelecting, navigation, uniqueValue }) => {
     const dispatch = useDispatch();
 
     const imagePressed = (index) => {
-        const image = images[index];
-
-        if (isSelecting)
-        {
-            image.selected
-                ? dispatch(decrementSelected())
-                : dispatch(incrementSelected())
-
+        if (isSelecting) {
             dispatch(toggleSelectedImages(index));
         }
-        else
-        {
+        else {
             // shared_reducer - Open LitterPicker modal
 
             // litter.js

@@ -10,6 +10,7 @@ import shared from './shared_reducer';
 import settings from './settings_reducer';
 import stats from './stats_reducer';
 import teams from './team_reducer';
+import upload from './upload_reducer';
 import web from './web_reducer';
 
 export const rootReducer = combineReducers({
@@ -23,5 +24,6 @@ export const rootReducer = combineReducers({
     settings,
     stats,
     teams,
+    upload,
     web
 });

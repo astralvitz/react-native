@@ -477,8 +477,9 @@ const AddTags = ({ navigation, lang }) => {
                             onPress={deleteImage}
                             style={[
                                 styles.actionButtonStyle,
-                                {backgroundColor: Colors.error}
-                            ]}>
+                                { backgroundColor: Colors.error }
+                            ]}
+                        >
                             <Body
                                 color="white"
                                 dictionary={`tag.delete`}

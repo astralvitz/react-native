@@ -1,8 +1,8 @@
 import React, { useRef } from 'react';
-import { Dimensions, LayoutChangeEvent, Pressable, ScrollView, StyleSheet, View} from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import { Dimensions, Pressable, ScrollView, StyleSheet, View} from 'react-native';
+import { useDispatch } from 'react-redux';
 import { Body, Caption, Colors } from '../../components';
-import { removeTagFromImage } from "../../../reducers/images_reducer";
+import { removeCustomTagFromImage, removeTagFromImage } from "../../../reducers/images_reducer";
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -25,25 +25,20 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 // }
 
 // Tags not being deleted when using PureComponent
-const LitterTags = () => {
+const LitterTags = ({ tags, customTags, lang, swiperIndex }) => {
 
     const dispatch = useDispatch();
-
     const scrollRef = useRef(null);
-
-    const tags = useSelector(state => state.litter.tags);
-    const customTags = useSelector(state => state.litter.customTags);
-    const lang = useSelector(state => state.litter.lang);
-    const swiperIndex = useSelector(state => state.litter.swiperIndex);
-
 
     /**
      * Display a card for each tag
      */
     const renderTags = () => {
-        if (tags) {
+        if (tags)
+        {
             return Object.keys(tags).map(category => {
-                if (tags[category]) {
+                if (tags[category])
+                {
                     return Object.keys(tags[category]).map(tag => {
                         const value = tags[category][tag];
 

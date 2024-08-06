@@ -6,8 +6,6 @@ import { URL } from '../actions/types';
 
 const initialState = {
     imagesArray: [],
-    isSelecting: false,
-    selected: 0,
     selectedImages: [],
     previousTags: []
 };
@@ -395,24 +393,18 @@ const imagesSlice = createSlice({
         },
 
         /**
-         * Decrement the count of images selected for deletion
+         * Delete image from HomeScreen by id
          */
-        decrementSelected (state) {
-            state.selected = state.selected - 1;
-        },
+        deleteImage (state, action)
+        {
+            const index = state.imagesArray.findIndex(
+                delImg => delImg.id === action.payload
+            );
 
-        // /**
-        //  * Delete image by id
-        //  */
-        // deleteImage (state, action) {
-        //     const index = state.imagesArray.findIndex(
-        //         delImg => delImg.id === action.payload
-        //     );
-        //
-        //     if (index !== -1) {
-        //         state.imagesArray.splice(index, 1);
-        //     }
-        // },
+            if (index !== -1) {
+                state.imagesArray.splice(index, 1);
+            }
+        },
 
         /**
          * Delete selected images -- all images with property selected set to true
@@ -426,21 +418,14 @@ const imagesSlice = createSlice({
         },
 
         /**
-         * When isSelecting is turned off,
+         * When HomeScreen.isSelecting is turned off,
          *
          * Change selected value on every image to false
          */
-        deselectAllImages (state, action) {
+        deselectAllImages (state) {
             state.imagesArray.map(image => {
                 image.selected = false;
             });
-        },
-
-        /**
-         * Increment the count of images selected for deletion
-         */
-        incrementSelected (state, action) {
-            state.selected = state.selected + 1;
         },
 
         /**
@@ -486,7 +471,6 @@ const imagesSlice = createSlice({
          */
         toggleSelecting (state) {
             state.selected = 0;
-            state.isSelecting = !state.isSelecting;
         },
 
         /**
@@ -667,11 +651,11 @@ export const {
     addCustomTagToImage,
     changeLitterStatus,
     clearUploadedWebImages,
-    decrementSelected,
+    // decrementSelected,
     deleteImage,
     deleteSelectedImages,
     deselectAllImages,
-    incrementSelected,
+    // incrementSelected,
     removeTagFromImage,
     removeCustomTagFromImage,
     togglePickedUp,
