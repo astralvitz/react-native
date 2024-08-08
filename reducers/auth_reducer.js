@@ -187,7 +187,8 @@ export const userLogin = createAsyncThunk(
                 }
             });
 
-            if (response.status === 200) {
+            if (response.status === 200)
+            {
                 const token = response.data.access_token;
 
                 try
@@ -200,6 +201,8 @@ export const userLogin = createAsyncThunk(
 
                     return rejectWithValue('Unable to save token to asyncstore');
                 }
+
+                console.log({ token });
 
                 dispatch(fetchUser(token));
 

@@ -9,7 +9,6 @@ import {
     TouchableWithoutFeedback,
     View
 } from 'react-native';
-import { createSelector } from '@reduxjs/toolkit'
 import { useDispatch, useSelector } from 'react-redux';
 import { setModel } from '../../reducers/settings_reducer';
 import { cancelUpload, checkAppVersion, startUploading } from '../../reducers/shared_reducer';
@@ -18,6 +17,7 @@ import {
     deleteWebImage,
     deselectAllImages,
     getUntaggedImages,
+    resetUploadState, setTotalToUpload,
     uploadImage,
     uploadTagsToWebImage
 } from '../../reducers/images_reducer';
@@ -33,8 +33,7 @@ import { isGeotagged } from '../../utils/isGeotagged';
 import { ActionButton , UploadButton, UploadImagesGrid } from './homeComponents';
 import DeviceInfo from 'react-native-device-info';
 import { isTagged } from '../../utils/isTagged';
-import {useTranslation} from "react-i18next";
-import {resetUploadState} from "../../reducers/upload_reducer";
+import { useTranslation } from "react-i18next";
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -44,95 +43,36 @@ const HomeScreen = ({ navigation }) => {
     const dispatch = useDispatch();
 
     const [isUploadCancelled, setIsUploadCancelled] = useState(false);
-    const [total, setTotal] = useState(0); // total number of images to upload
-    const [uploaded, setUploaded] = useState(0); // total number of tagged images uploaded
-    const [uploadFailed, setUploadFailed] = useState(0);
-    const [tagged, setTagged] = useState(0);  // total number of images tagged successfully
-    const [taggedFailed, setTaggedFailed] = useState(0);
-    const [failedCounts, setFailedCounts] = useState({
-        alreadyUploaded: 0,
-        invalidCoordinates: 0,
-        unknown: 0
-    });
+    // const [total, setTotal] = useState(0); // total number of images to upload
+    // const [uploaded, setUploaded] = useState(0); // total number of tagged images uploaded
+    // const [uploadFailed, setUploadFailed] = useState(0);
+    // const [tagged, setTagged] = useState(0);  // total number of images tagged successfully
+    // const [taggedFailed, setTaggedFailed] = useState(0);
+    // const [failedCounts, setFailedCounts] = useState({
+    //     alreadyUploaded: 0,
+    //     invalidCoordinates: 0,
+    //     unknown: 0
+    // });
     const [isSelectingImagesToDelete, setIsSelectingImagesToDelete] = useState(false);
 
-    const selectSharedState = state => state.shared;
-    const selectImagesState = state => state.images;
-    const selectAuthState = state => state.auth;
-    const selectSettingsState = state => state.settings;
+    const appVersion = useSelector(state => state.shared.appVersion);
+    const images = useSelector(state => state.images.imagesArray);
+    const lang = useSelector(state => state.auth.lang);
+    const showModal = useSelector(state => state.shared.showModal);
+    const model = useSelector(state => state.settings.model);
+    const showThankYouMessages = useSelector(state => state.shared.showThankYouMessages);
+    const token = useSelector(state => state.auth.token);
+    const user = useSelector(state => state.auth.user);
+    const uniqueValue = useSelector(state => state.shared.uniqueValue);
+    const isUploading = useSelector(state => state.shared.isUploading);
 
-    // Shared state selectors
-    const selectAppVersion = createSelector([selectSharedState], shared => shared.appVersion);
-    const selectShowModal = createSelector([selectSharedState], shared => shared.showModal);
-    const selectShowThankYouMessages = createSelector([selectSharedState], shared => shared.showThankYouMessages);
-    const selectUniqueValue = createSelector([selectSharedState], shared => shared.uniqueValue);
-    const selectIsUploading = createSelector([selectSharedState], shared => shared.isUploading);
-
-    // Images state selectors
-    const selectImages = createSelector([selectImagesState], images => images.imagesArray);
-
-    // Auth state selectors
-    const selectLang = createSelector([selectAuthState], auth => auth.lang);
-    const selectToken = createSelector([selectAuthState], auth => auth.token);
-    const selectUser = createSelector([selectAuthState], auth => auth.user);
-
-    // Settings state selectors
-    const selectModel = createSelector([selectSettingsState], settings => settings.model);
-
-    const selectAll = createSelector(
-        [
-            selectAppVersion,
-            selectImages,
-            selectLang,
-            selectShowModal,
-            selectModel,
-            selectShowThankYouMessages,
-            selectToken,
-            selectUser,
-            selectUniqueValue,
-            selectIsUploading,
-        ],
-        (
-            appVersion,
-            images,
-            lang,
-            showModal,
-            model,
-            selected,
-            showThankYouMessages,
-            token,
-            user,
-            uniqueValue,
-            isUploading,
-        ) => ({
-            appVersion,
-            images,
-            lang,
-            showModal,
-            model,
-            selected,
-            showThankYouMessages,
-            token,
-            user,
-            uniqueValue,
-            isUploading,
-        })
-    );
-
-    // Use the combined selector in useSelector
-    const {
-        appVersion,
-        images,
-        lang,
-        showModal,
-        model,
-        selected,
-        showThankYouMessages,
-        token,
-        user,
-        uniqueValue,
-        isUploading,
-    } = useSelector(selectAll);
+    // Uploads
+    const totalToUpload = useSelector(state => state.images.totalToUpload);
+    const uploaded = useSelector(state => state.images.uploaded);
+    const uploadFailed = useSelector(state => state.images.uploadFailed);
+    const tagged = useSelector(state => state.images.tagged);
+    const taggedFailed = useSelector(state => state.images.taggedFailed);
+    const failedCounts = useSelector(state => state.images.failedCounts);
 
     useEffect(() => {
         const getModel = () => {
@@ -152,7 +92,7 @@ const HomeScreen = ({ navigation }) => {
         }
 
         checkGalleryPermission();
-    }, []);
+    }, [token]);
 
     const { t } = useTranslation();
     const cancelText = t('leftpage.cancel');
@@ -243,7 +183,7 @@ const HomeScreen = ({ navigation }) => {
      * Render helper text when delete button is clicked
      */
     const renderHelperMessage = () => {
-        if (isSelectingImagesToDelete && selected === 0) {
+        if (isSelectingImagesToDelete) {
             return (
                 <View style={styles.helperContainer}>
                     <Icon
@@ -347,20 +287,55 @@ const HomeScreen = ({ navigation }) => {
         setIsSelectingImagesToDelete(false);
     }
 
-    // reset state after cancel button pressed
-    const resetAfterUploadCancelled = () => {
-        setTotal(0);
-        setUploaded(0);
-        setUploadFailed(0);
-        setIsUploadCancelled(false);
-        setTagged(0);
-        setTaggedFailed(0);
-        setFailedCounts({
-            alreadyUploaded: 0,
-            invalidCoordinates: 0,
-            unknown: 0
-        });
-    };
+    // // reset state after cancel button pressed
+    // const resetAfterUploadCancelled = () => {
+    //     setTotal(0);
+    //     setUploaded(0);
+    //     setUploadFailed(0);
+    //     setIsUploadCancelled(false);
+    //     setTagged(0);
+    //     setTaggedFailed(0);
+    //     setFailedCounts({
+    //         alreadyUploaded: 0,
+    //         invalidCoordinates: 0,
+    //         unknown: 0
+    //     });
+    // };
+
+    const getImageDataForUpload = (img) => {
+        const isgeotagged = isGeotagged(img);
+        const isItemTagged = isTagged(img);
+
+        // Upload any new image that is tagged or not
+        if (img.type === 'gallery' && isgeotagged) {
+            let imageData = new FormData();
+
+            imageData.append('photo', {
+                name: img.filename,
+                type: 'image/jpeg',
+                uri: img.uri
+            });
+
+            imageData.append('lat', img.lat);
+            imageData.append('lon', img.lon);
+            imageData.append('date', parseInt(img.date));
+            imageData.append('picked_up', img.picked_up ? 1 : 0);
+            imageData.append('model', model);
+
+            // Tags and custom_tags may or may not exist
+            if (isItemTagged) {
+                if (Object.keys(img.tags).length > 0) {
+                    imageData.append('tags', JSON.stringify(img.tags));
+                }
+
+                if (img.hasOwnProperty('customTags') && img.customTags.length > 0) {
+                    imageData.append('custom_tags', JSON.stringify(img.customTags));
+                }
+            }
+
+            return [imageData, isItemTagged];
+        }
+    }
 
     /**
      * Upload photos, 1 photo per request
@@ -373,23 +348,10 @@ const HomeScreen = ({ navigation }) => {
 
         dispatch(resetUploadState());
 
-        // // Reset upload count
-        // setUploaded(0);
-        // setUploadFailed(0);
-        // setTagged(0);
-        // setTaggedFailed(0);
-        // setFailedCounts({
-        //     alreadyUploaded: 0,
-        //     invalidCoordinates: 0,
-        //     unknown: 0
-        // });
-
-        // The model of the users device
         // const model = model;
+        const imagesCount = images.length;
 
-        let imagesCount = images.length;
-
-        setTotal(imagesCount);
+        dispatch(setTotalToUpload(imagesCount));
 
         // shared.js
         // showModal = true;
@@ -401,82 +363,49 @@ const HomeScreen = ({ navigation }) => {
             // async loop
             for (const img of images)
             {
-                // break loop if cancel button is pressed
                 if (isUploadCancelled) {
-                    resetAfterUploadCancelled();
+                    dispatch(resetUploadState());
                     return;
                 }
 
-                const isgeotagged = isGeotagged(img);
-                const isItemTagged = isTagged(img);
+                const [imageData, isItemTagged] = getImageDataForUpload(img);
 
-                // Upload any new image that is tagged or not
-                if (img.type === 'gallery' && isgeotagged) {
-                    let ImageData = new FormData();
+                dispatch(uploadImage({
+                    token,
+                    imageData,
+                    imageId: img.id,
+                    enableAdminTagging: user.enable_admin_tagging,
+                    isItemTagged
+                }));
 
-                    ImageData.append('photo', {
-                        name: img.filename,
-                        type: 'image/jpeg',
-                        uri: img.uri
-                    });
 
-                    ImageData.append('lat', img.lat);
-                    ImageData.append('lon', img.lon);
-                    ImageData.append('date', parseInt(img.date));
-                    ImageData.append('picked_up', img.picked_up ? 1 : 0);
-                    ImageData.append('model', model);
-
-                    // Tags and custom_tags may or may not exist
-
-                    if (isItemTagged) {
-                        if (Object.keys(img.tags).length > 0) {
-                            ImageData.append('tags', JSON.stringify(img.tags));
-                        }
-
-                        if (img.hasOwnProperty('customTags') && img.customTags.length > 0) {
-                            ImageData.append('custom_tags', JSON.stringify(img.customTags));
-                        }
-                    }
-
-                    // Upload image
-                    const response = await uploadImage(
-                        token,
-                        ImageData,
-                        img.id,
-                        user.enable_admin_tagging,
-                        isItemTagged
-                    );
-
-                    // if success upload++ else failed++
-
-                    if (response && response.success) {
-                        setUploaded(uploaded + 1);
-                    } else {
-                        let errorMessage = '';
-
-                        if (response.errorMessage === 'photo-already-uploaded') {
-                            errorMessage = 'alreadyUploaded';
-                        } else if (response.errorMessage === 'invalid-coordinates') {
-                            errorMessage = 'invalidCoordinates';
-                        } else if (response.errorMessage === 'unknown') {
-                            errorMessage = 'unknown';
-                        }
-
-                        // this.setState(previousState => {
-                        //     const updatedFailedCounts = {
-                        //         ...previousState.failedCounts
-                        //     };
-                        //
-                        //     updatedFailedCounts[errorMessage] =
-                        //         (updatedFailedCounts[errorMessage] || 0) + 1;
-                        //
-                        //     return {
-                        //         uploadFailed: previousState.uploadFailed + 1,
-                        //         failedCounts: updatedFailedCounts
-                        //     };
-                        // });
-                    }
-                } else if (img.type.toLowerCase() === 'web' && isItemTagged) {
+                    // if (response && response.success) {
+                    //     // setUploaded(uploaded + 1);
+                    // } else {
+                    //     let errorMessage = '';
+                    //
+                    //     if (response.errorMessage === 'photo-already-uploaded') {
+                    //         errorMessage = 'alreadyUploaded';
+                    //     } else if (response.errorMessage === 'invalid-coordinates') {
+                    //         errorMessage = 'invalidCoordinates';
+                    //     } else if (response.errorMessage === 'unknown') {
+                    //         errorMessage = 'unknown';
+                    //     }
+                    //
+                    //     this.setState(previousState => {
+                    //         const updatedFailedCounts = {
+                    //             ...previousState.failedCounts
+                    //         };
+                    //
+                    //         updatedFailedCounts[errorMessage] = (updatedFailedCounts[errorMessage] || 0) + 1;
+                    //
+                    //         return {
+                    //             uploadFailed: previousState.uploadFailed + 1,
+                    //             failedCounts: updatedFailedCounts
+                    //         };
+                    //     });
+                    // }
+                // } else if (img.type.toLowerCase() === 'web' && isItemTagged) {
                     /**
                      * Upload tags for already uploaded image
                      *
@@ -486,14 +415,14 @@ const HomeScreen = ({ navigation }) => {
                      *
                      * We can also update 'picked_up' value here
                      */
-                    const response = await uploadTagsToWebImage(token, img);
-
-                    if (response && response.success) {
-                        setTagged(tagged + 1);
-                    } else {
-                        setTaggedFailed(taggedFailed + 1);
-                    }
-                }
+                    // const response = await uploadTagsToWebImage(token, img);
+                    //
+                    // if (response && response.success) {
+                    //     setTagged(tagged + 1);
+                    // } else {
+                    //     setTaggedFailed(taggedFailed + 1);
+                    // }
+                // }
                 // else if (!isgeotagged)
                 // {
                 //     this.setState(previousState => ({
@@ -532,7 +461,7 @@ const HomeScreen = ({ navigation }) => {
                             <ActivityIndicator style={{marginBottom: 10}} />
 
                             <Text style={styles.uploadCount}>
-                                {uploaded} / {total}
+                                {uploaded} / {totalToUpload}
                             </Text>
 
                             {/*<Button*/}
@@ -546,25 +475,15 @@ const HomeScreen = ({ navigation }) => {
                     {showThankYouMessages && (
                         <View style={styles.modal}>
                             <View style={styles.thankYouModalInner}>
-                                <Text
-                                    style={{
-                                        fontSize: SCREEN_HEIGHT * 0.03,
-                                        marginBottom: 5
-                                    }}
-                                >
+                                <Text style={{ fontSize: SCREEN_HEIGHT * 0.03, marginBottom: 5 }}>
                                     useTranslation({'leftpage.thank-you'})
                                 </Text>
 
                                 {/* Upload success */}
                                 {uploaded > 0 && (
                                     <Text
-                                        style={{
-                                            fontSize: SCREEN_HEIGHT * 0.02,
-                                            marginBottom: 5
-                                        }}
-                                        values={{
-                                            count: uploaded
-                                        }}
+                                        style={{ fontSize: SCREEN_HEIGHT * 0.02, marginBottom: 5 }}
+                                        values={{ count: uploaded }}
                                     >
                                         useTranslation({'leftpage.you-have-uploaded'})
                                     </Text>
@@ -573,13 +492,8 @@ const HomeScreen = ({ navigation }) => {
                                 {/* Tagged success */}
                                 {tagged > 0 && (
                                     <Text
-                                        style={{
-                                            fontSize: SCREEN_HEIGHT * 0.02,
-                                            marginBottom: 5
-                                        }}
-                                        values={{
-                                            count: tagged
-                                        }}
+                                        style={{ fontSize: SCREEN_HEIGHT * 0.02, marginBottom: 5 }}
+                                        values={{ count: tagged }}
                                     >
                                         useTranslation({'leftpage.you-have-tagged'})
                                     </Text>
@@ -591,7 +505,8 @@ const HomeScreen = ({ navigation }) => {
                                             style={{
                                                 fontSize: SCREEN_HEIGHT * 0.02,
                                                 marginBottom: 5
-                                            }}>
+                                            }}
+                                        >
                                             {uploadFailed} uploads failed
                                         </Text>
 

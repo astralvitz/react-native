@@ -156,7 +156,8 @@ const UserStatsScreen = ({ navigation }) => {
                         justifyContent: 'center',
                         alignItems: 'center',
                         backgroundColor: 'white'
-                    }}>
+                    }}
+                >
                     <ActivityIndicator
                         size="small"
                         color={Colors.accent}
@@ -169,7 +170,6 @@ const UserStatsScreen = ({ navigation }) => {
                     alwaysBounceVertical={false}
                 >
                     <ProgressCircleCard
-                        lang={lang}
                         level={user?.level}
                         levelStart={levelStart}
                         levelPercentage={user?.targetPercentage}

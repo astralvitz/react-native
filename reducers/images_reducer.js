@@ -7,7 +7,20 @@ import { URL } from '../actions/types';
 const initialState = {
     imagesArray: [],
     selectedImages: [],
-    previousTags: []
+    previousTags: [],
+
+    // For Uploads
+    totalToUpload: 0,
+    uploaded: 0,
+    uploadFailed: 0,
+    tagged: 0,
+    taggedFailed: 0,
+    errorMessage: '',
+    failedCounts: {
+        alreadyUploaded: 0,
+        invalidCoordinates: 0,
+        unknown: 0
+    }
 };
 
 /**
@@ -54,6 +67,8 @@ export const getUntaggedImages = createAsyncThunk(
     async (token, { rejectWithValue }) => {
         try
         {
+            console.log('getUntaggedImages.token', token);
+
             const response = await axios({
                 url: `${URL}/api/v2/photos/get-untagged-uploads`,
                 method: 'GET',
@@ -256,11 +271,8 @@ const imagesSlice = createSlice({
          */
         addTagToImage (state, action)
         {
-            console.log({ state });
-            console.log({ action });
-
             let image = state.imagesArray[action.payload.currentIndex];
-            console.log({ image });
+
             let newTags = image.tags;
 
             let quantity = 1;
@@ -452,6 +464,24 @@ const imagesSlice = createSlice({
             ].customTags.splice(action.payload.tagIndex, 1);
         },
 
+        resetUploadState (state) {
+            state.totalToUpload = 0;
+            state.uploaded = 0;
+            state.uploadFailed = 0;
+            state.tagged = 0;
+            state.taggedFailed = 0;
+            state.errorMessage = '';
+            state.failedCounts = {
+                alreadyUploaded: 0,
+                invalidCoordinates: 0,
+                unknown: 0
+            }
+        },
+
+        setTotalToUpload (state, action) {
+            state.totalToUpload = action.payload;
+        },
+
         /**
          * toggles picked_up status on an image based on id
          */
@@ -580,6 +610,7 @@ const imagesSlice = createSlice({
             })
 
             // Upload Image
+            // if success upload++ else failed++
             .addCase(uploadImage.pending, (state) => {
                 // state.uploading = true;
             })
@@ -596,9 +627,7 @@ const imagesSlice = createSlice({
                 if (enableAdminTagging || isTagged) {
 
                     // can we filter this instead?
-                    const index = state.imagesArray.findIndex(
-                        delImg => delImg.id === action.payload
-                    );
+                    const index = state.imagesArray.findIndex(delImg => delImg.id === action.payload);
 
                     if (index !== -1) {
                         state.imagesArray.splice(index, 1);
@@ -618,10 +647,24 @@ const imagesSlice = createSlice({
                         return img;
                     });
                 }
+
+                state.uploaded++;
             })
             .addCase(uploadImage.rejected, (state, action) => {
+                const errorMessage = action.payload;
+
+                state.uploadFailed += 1;
                 state.uploading = false;
-                state.error = action.payload;
+                state.error = errorMessage;
+
+                // Parse the error message and increment the corresponding counter
+                if (errorMessage === 'photo-already-uploaded') {
+                    state.failedCounts.alreadyUploaded += 1;
+                } else if (errorMessage === 'invalid-coordinates') {
+                    state.failedCounts.invalidCoordinates += 1;
+                } else if (errorMessage === 'unknown') {
+                    state.failedCounts.unknown += 1;
+                }
             })
 
             // UploadTagsToWebImage
@@ -658,6 +701,8 @@ export const {
     // incrementSelected,
     removeTagFromImage,
     removeCustomTagFromImage,
+    resetUploadState,
+    setTotalToUpload,
     togglePickedUp,
     toggleSelecting,
     toggleSelectedImages,
