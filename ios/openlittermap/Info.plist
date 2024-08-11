@@ -28,8 +28,18 @@
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
+		<key>NSExceptionDomains</key>
+        	<dict>
+        		<key>olm.test</key>
+        		<dict>
+        			<key>NSExceptionAllowsInsecureHTTPLoads</key>
+        			<true/>
+        		</dict>
+        	</dict>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
+		<key>NSAllowsLocalNetworking</key>
+        <true/>
 	</dict>
     <key>NSAppleMusicUsageDescription</key>
 	<string>OpenLitterMap needs permission to your photos if you would like to upload geotagged photos taken outside of the app.</string>

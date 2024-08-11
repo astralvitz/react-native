@@ -1,11 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { useDispatch, useSelector } from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTranslation } from "react-i18next";
-import { userLogin } from '../../../reducers/auth_reducer';
+import { userLogin} from '../../../reducers/auth_reducer';
 import { Body, Colors, CustomTextInput, SubTitle } from '../../components';
 
 /**
@@ -106,7 +106,8 @@ const SigninForm = ({ changeFormType }) => {
                             returnKeyType="done"
                             rightContent={
                                 <Pressable
-                                    onPress={handlePasswordVisibility}>
+                                    onPress={handlePasswordVisibility}
+                                >
                                     <Icon
                                         style={styles.textFieldIcon}
                                         name={isPasswordVisible ? 'eye' : 'eye-off'}

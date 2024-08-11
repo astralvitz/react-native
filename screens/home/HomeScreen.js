@@ -349,16 +349,14 @@ const HomeScreen = ({ navigation }) => {
         dispatch(resetUploadState());
 
         // const model = model;
-        const imagesCount = images.length;
+        const numberOfImages = images.length;
 
-        dispatch(setTotalToUpload(imagesCount));
+        dispatch(setTotalToUpload(numberOfImages));
 
-        // shared.js
-        // showModal = true;
-        // isUploading = true;
+        // shared.js -> showModal = true; isUploading = true;
         dispatch(startUploading());
 
-        if (imagesCount > 0)
+        if (numberOfImages > 0)
         {
             // async loop
             for (const img of images)
@@ -378,33 +376,6 @@ const HomeScreen = ({ navigation }) => {
                     isItemTagged
                 }));
 
-
-                    // if (response && response.success) {
-                    //     // setUploaded(uploaded + 1);
-                    // } else {
-                    //     let errorMessage = '';
-                    //
-                    //     if (response.errorMessage === 'photo-already-uploaded') {
-                    //         errorMessage = 'alreadyUploaded';
-                    //     } else if (response.errorMessage === 'invalid-coordinates') {
-                    //         errorMessage = 'invalidCoordinates';
-                    //     } else if (response.errorMessage === 'unknown') {
-                    //         errorMessage = 'unknown';
-                    //     }
-                    //
-                    //     this.setState(previousState => {
-                    //         const updatedFailedCounts = {
-                    //             ...previousState.failedCounts
-                    //         };
-                    //
-                    //         updatedFailedCounts[errorMessage] = (updatedFailedCounts[errorMessage] || 0) + 1;
-                    //
-                    //         return {
-                    //             uploadFailed: previousState.uploadFailed + 1,
-                    //             failedCounts: updatedFailedCounts
-                    //         };
-                    //     });
-                    // }
                 // } else if (img.type.toLowerCase() === 'web' && isItemTagged) {
                     /**
                      * Upload tags for already uploaded image

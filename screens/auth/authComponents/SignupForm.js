@@ -80,7 +80,7 @@ const SignupForm = () => {
                         <CustomTextInput
                             ref={usernameRef}
                             onSubmitEditing={() => emailRef?.current?.focus()}
-                            style={{marginBottom: 10}}
+                            style={{ marginBottom: 10 }}
                             onChangeText={handleChange('username')}
                             value={values.username}
                             name="username"
@@ -94,7 +94,7 @@ const SignupForm = () => {
                         {/* email input */}
                         <CustomTextInput
                             ref={emailRef}
-                            style={{marginBottom: 10}}
+                            style={{ marginBottom: 10 }}
                             onSubmitEditing={() => passwordRef?.current?.focus()}
                             onChangeText={e => setFieldValue('email', e.trim().toLowerCase())}
                             value={values.email}
@@ -111,6 +111,7 @@ const SignupForm = () => {
                         {/* password input */}
                         <CustomTextInput
                             ref={passwordRef}
+                            style={{ marginBottom: 10 }}
                             onChangeText={handleChange('password')}
                             value={values.password}
                             name="password"

@@ -76,6 +76,8 @@ export const createAccount = createAsyncThunk(
                     'Content-Type': 'application/json'
                 }
             });
+            console.log('CreateAccount.response');
+            console.log(response);
 
             dispatch(userLogin({ email, password }));
 
@@ -83,6 +85,9 @@ export const createAccount = createAsyncThunk(
         }
         catch (error)
         {
+            console.log('CreateAccount.error');
+            console.log(error);
+
             if (error.response)
             {
                 const errorData = error.response.data.errors;
@@ -187,6 +192,8 @@ export const userLogin = createAsyncThunk(
                 }
             });
 
+            console.log(response);
+
             if (response.status === 200)
             {
                 const token = response.data.access_token;
@@ -211,6 +218,11 @@ export const userLogin = createAsyncThunk(
                 return rejectWithValue('Login failed');
             }
         } catch (error) {
+            console.log('error');
+            console.log(error);
+
+            console.log('Error message:', error.response);
+
             // This handles any network or other errors
             return rejectWithValue(error.response?.data || error.message || 'Network error, please try again');
         }
@@ -349,7 +361,7 @@ const authSlice = createSlice({
                 // state.isSubmitting = false;
             })
             .addCase(userLogin.rejected, (state, action) => {
-                state.serverStatusText = action.payload.message;
+                state.serverStatusText = action.payload?.message || "Problem with login";
                 state.isSubmitting = false;
             })
     }

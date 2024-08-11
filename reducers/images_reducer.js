@@ -67,8 +67,6 @@ export const getUntaggedImages = createAsyncThunk(
     async (token, { rejectWithValue }) => {
         try
         {
-            console.log('getUntaggedImages.token', token);
-
             const response = await axios({
                 url: `${URL}/api/v2/photos/get-untagged-uploads`,
                 method: 'GET',
@@ -78,7 +76,7 @@ export const getUntaggedImages = createAsyncThunk(
             });
 
             // Return the photos array if available
-            if (response && response.data && response.data.photos.length > 0)
+            if (response?.data?.photos?.length > 0)
             {
                 return {
                     images: response.data.photos,
