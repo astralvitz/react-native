@@ -68,7 +68,7 @@ const sharedSlice = createSlice({
         /**
          * Show Thank You + upload messages after uploading
          */
-        showThankYouMessagesAfterUpload(state) {
+        showThankYouMessagesAfterUpload (state) {
             state.isUploading = false;
             state.showThankYouMessages = true;
         },
@@ -82,6 +82,8 @@ const sharedSlice = createSlice({
         startUploading (state) {
             state.showModal = true;
             state.isUploading = true;
+
+            console.log('... is uploading');
         },
     },
 
@@ -92,8 +94,6 @@ const sharedSlice = createSlice({
             .addCase(checkAppVersion.fulfilled, (state, action) => {
                 state.appVersion = action.payload;
             });
-
-
     }
 });
 

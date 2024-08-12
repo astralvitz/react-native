@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
+    ActivityIndicator, Button,
     Dimensions,
     Modal,
     Platform,
@@ -11,7 +11,13 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { setModel } from '../../reducers/settings_reducer';
-import { cancelUpload, checkAppVersion, startUploading } from '../../reducers/shared_reducer';
+import {
+    cancelUpload,
+    checkAppVersion,
+    closeThankYouMessages,
+    showThankYouMessagesAfterUpload,
+    startUploading
+} from '../../reducers/shared_reducer';
 import {
     deleteImage,
     deleteWebImage,
@@ -43,16 +49,6 @@ const HomeScreen = ({ navigation }) => {
     const dispatch = useDispatch();
 
     const [isUploadCancelled, setIsUploadCancelled] = useState(false);
-    // const [total, setTotal] = useState(0); // total number of images to upload
-    // const [uploaded, setUploaded] = useState(0); // total number of tagged images uploaded
-    // const [uploadFailed, setUploadFailed] = useState(0);
-    // const [tagged, setTagged] = useState(0);  // total number of images tagged successfully
-    // const [taggedFailed, setTaggedFailed] = useState(0);
-    // const [failedCounts, setFailedCounts] = useState({
-    //     alreadyUploaded: 0,
-    //     invalidCoordinates: 0,
-    //     unknown: 0
-    // });
     const [isSelectingImagesToDelete, setIsSelectingImagesToDelete] = useState(false);
 
     const appVersion = useSelector(state => state.shared.appVersion);
@@ -65,6 +61,11 @@ const HomeScreen = ({ navigation }) => {
     const user = useSelector(state => state.auth.user);
     const uniqueValue = useSelector(state => state.shared.uniqueValue);
     const isUploading = useSelector(state => state.shared.isUploading);
+
+    console.log({ isUploading });
+
+    // Number of selected images
+    const selected = images.filter(img => img.selected).length;
 
     // Uploads
     const totalToUpload = useSelector(state => state.images.totalToUpload);
@@ -271,11 +272,12 @@ const HomeScreen = ({ navigation }) => {
      */
     const deleteImages = () => {
         images.map(image => {
+            console.log(image);
             if (image.selected) {
                 if (image.type === 'web' && image.uploaded) {
                     dispatch(deleteWebImage({
                         token,
-                        image_id: image.id,
+                        photoId: image.id,
                         enableAdminTagging: user.enable_admin_tagging
                     }));
                 } else {
@@ -287,27 +289,12 @@ const HomeScreen = ({ navigation }) => {
         setIsSelectingImagesToDelete(false);
     }
 
-    // // reset state after cancel button pressed
-    // const resetAfterUploadCancelled = () => {
-    //     setTotal(0);
-    //     setUploaded(0);
-    //     setUploadFailed(0);
-    //     setIsUploadCancelled(false);
-    //     setTagged(0);
-    //     setTaggedFailed(0);
-    //     setFailedCounts({
-    //         alreadyUploaded: 0,
-    //         invalidCoordinates: 0,
-    //         unknown: 0
-    //     });
-    // };
-
     const getImageDataForUpload = (img) => {
-        const isgeotagged = isGeotagged(img);
+        const isGeoTagged = isGeotagged(img);
         const isItemTagged = isTagged(img);
 
         // Upload any new image that is tagged or not
-        if (img.type === 'gallery' && isgeotagged) {
+        if (img.type === 'gallery' && isGeoTagged) {
             let imageData = new FormData();
 
             imageData.append('photo', {
@@ -333,7 +320,7 @@ const HomeScreen = ({ navigation }) => {
                 }
             }
 
-            return [imageData, isItemTagged];
+            return [imageData, isItemTagged, isGeoTagged];
         }
     }
 
@@ -348,7 +335,6 @@ const HomeScreen = ({ navigation }) => {
 
         dispatch(resetUploadState());
 
-        // const model = model;
         const numberOfImages = images.length;
 
         dispatch(setTotalToUpload(numberOfImages));
@@ -366,17 +352,17 @@ const HomeScreen = ({ navigation }) => {
                     return;
                 }
 
-                const [imageData, isItemTagged] = getImageDataForUpload(img);
+                const [imageData, isItemTagged, isGeoTagged] = getImageDataForUpload(img);
 
-                dispatch(uploadImage({
-                    token,
-                    imageData,
-                    imageId: img.id,
-                    enableAdminTagging: user.enable_admin_tagging,
-                    isItemTagged
-                }));
-
-                // } else if (img.type.toLowerCase() === 'web' && isItemTagged) {
+                if (img.type === 'gallery' && isGeoTagged) {
+                    await dispatch(uploadImage({
+                        token,
+                        imageData,
+                        imageId: img.id,
+                        enableAdminTagging: user.enable_admin_tagging,
+                        isItemTagged
+                    }));
+                } else if (img.type.toLowerCase() === 'web' && isItemTagged) {
                     /**
                      * Upload tags for already uploaded image
                      *
@@ -393,7 +379,7 @@ const HomeScreen = ({ navigation }) => {
                     // } else {
                     //     setTaggedFailed(taggedFailed + 1);
                     // }
-                // }
+                }
                 // else if (!isgeotagged)
                 // {
                 //     this.setState(previousState => ({
@@ -403,14 +389,14 @@ const HomeScreen = ({ navigation }) => {
             }
         }
 
-        // showThankYouMessagesAfterUpload();
+        dispatch(showThankYouMessagesAfterUpload());
     };
 
     /**
-     *
+     * Close modal after uploading - shared_reducer
      */
     const hideThankYouMessages = () => {
-        // closeThankYouMessages();
+        dispatch(closeThankYouMessages());
     }
 
     return (
@@ -420,13 +406,13 @@ const HomeScreen = ({ navigation }) => {
                 rightContent={renderDeleteButton()}
             />
             <View style={styles.container}>
-                {/* INFO: modal thats shown during image upload */}
+                {/* INFO: modal to show during image upload */}
                 <Modal animationType="slide" transparent={true} visible={showModal}>
                     {/* Waiting spinner to show during upload */}
                     {isUploading && (
                         <View style={styles.modal}>
                             <Text style={styles.uploadText}>
-                                useTranslation({'leftpage.please-wait-uploading'})
+                                { t('leftpage.please-wait-uploading') }
                             </Text>
 
                             <ActivityIndicator style={{marginBottom: 10}} />
@@ -435,10 +421,10 @@ const HomeScreen = ({ navigation }) => {
                                 {uploaded} / {totalToUpload}
                             </Text>
 
-                            {/*<Button*/}
-                            {/*    onPress={cancelUploadWrapper)}*/}
-                            {/*    title="Cancel"*/}
-                            {/*/>*/}
+                            <Button
+                                onPress={cancelUploadWrapper}
+                                title="Cancel"
+                            />
                         </View>
                     )}
 
@@ -447,7 +433,7 @@ const HomeScreen = ({ navigation }) => {
                         <View style={styles.modal}>
                             <View style={styles.thankYouModalInner}>
                                 <Text style={{ fontSize: SCREEN_HEIGHT * 0.03, marginBottom: 5 }}>
-                                    useTranslation({'leftpage.thank-you'})
+                                    { t('leftpage.thank-you') }
                                 </Text>
 
                                 {/* Upload success */}
@@ -456,7 +442,7 @@ const HomeScreen = ({ navigation }) => {
                                         style={{ fontSize: SCREEN_HEIGHT * 0.02, marginBottom: 5 }}
                                         values={{ count: uploaded }}
                                     >
-                                        useTranslation({'leftpage.you-have-uploaded'})
+                                        { t('leftpage.you-have-uploaded') }
                                     </Text>
                                 )}
 
@@ -466,7 +452,7 @@ const HomeScreen = ({ navigation }) => {
                                         style={{ fontSize: SCREEN_HEIGHT * 0.02, marginBottom: 5 }}
                                         values={{ count: tagged }}
                                     >
-                                        useTranslation({'leftpage.you-have-tagged'})
+                                        { t('leftpage.you-have-tagged') }
                                     </Text>
                                 )}
 
@@ -504,19 +490,16 @@ const HomeScreen = ({ navigation }) => {
                                 )}
 
                                 {taggedFailed > 0 && (
-                                    <Text
-                                        style={{ fontSize: SCREEN_HEIGHT * 0.02, marginBottom: 5}}
-                                    >
+                                    <Text style={{ fontSize: SCREEN_HEIGHT * 0.02, marginBottom: 5}}>
                                         {taggedFailed} tags failed
                                     </Text>
                                 )}
 
                                 <View style={{flexDirection: 'row'}}>
-                                    <TouchableWithoutFeedback
-                                        onPress={hideThankYouMessages}>
+                                    <TouchableWithoutFeedback onPress={hideThankYouMessages}>
                                         <View style={styles.thankYouButton}>
                                             <Text style={styles.normalWhiteText}>
-                                                useTranslation({'leftpage.close'})
+                                                { t('leftpage.close') }
                                             </Text>
                                         </View>
                                     </TouchableWithoutFeedback>

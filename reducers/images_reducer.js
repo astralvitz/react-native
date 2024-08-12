@@ -45,12 +45,7 @@ export const deleteWebImage = createAsyncThunk(
                 params: { photoId }
             });
 
-            console.log('deleteWebImgResp', response.data);
-
             if (response.data.success) {
-                console.log('deleteWebImageSuccess', response.data);
-                console.log({enableAdminTagging});
-
                 return photoId;  // returning photoId to identify the deleted image
             } else {
                 return rejectWithValue('Failed to delete image, no success flag');
@@ -129,7 +124,7 @@ export const uploadImage = createAsyncThunk(
         }
         catch (error)
         {
-            console.error('uploadImage.catch', error);
+            console.error('uploadImage.error', error);
 
             let errorMessage = 'none';
 
@@ -613,26 +608,17 @@ const imagesSlice = createSlice({
                 // state.uploading = true;
             })
             .addCase(uploadImage.fulfilled, (state, action) => {
-                // state.uploading = false;
 
-                const {
-                    imageId,
-                    photo_id,
-                    enableAdminTagging,
-                    isTagged
-                } = action.payload;
+                const { imageId, photo_id, enableAdminTagging, isTagged } = action.payload;
+
+                console.log({ imageId });
+                console.log({ photo_id });
 
                 if (enableAdminTagging || isTagged) {
-
-                    // can we filter this instead?
-                    const index = state.imagesArray.findIndex(delImg => delImg.id === action.payload);
-
-                    if (index !== -1) {
-                        state.imagesArray.splice(index, 1);
-                    }
-
+                    // Remove the image if its tagged + uploaded
+                    state.imagesArray = state.imagesArray.filter(img => img.id !== imageId);
                 } else {
-                    // Update image as uploaded
+                    // Update image as uploaded but not yet tagged
                     state.imagesArray = state.imagesArray.map(img => {
 
                         if (img.type === 'gallery' && img.id === imageId) {
@@ -652,7 +638,7 @@ const imagesSlice = createSlice({
                 const errorMessage = action.payload;
 
                 state.uploadFailed += 1;
-                state.uploading = false;
+                // state.uploading = false;
                 state.error = errorMessage;
 
                 // Parse the error message and increment the corresponding counter
