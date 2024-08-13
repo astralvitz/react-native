@@ -13,8 +13,11 @@ const initialState = {
     totalToUpload: 0,
     uploaded: 0,
     uploadFailed: 0,
+
+    // uploaded to web and tagged or not
     tagged: 0,
     taggedFailed: 0,
+
     errorMessage: '',
     failedCounts: {
         alreadyUploaded: 0,
@@ -95,10 +98,9 @@ export const getUntaggedImages = createAsyncThunk(
     }
 );
 
-
 export const uploadImage = createAsyncThunk(
     'images/uploadImage',
-    async ({ token, imageData, imageId, enableAdminTagging, isTagged }, { rejectWithValue }) => {
+    async ({ token, imageData, imageId, enableAdminTagging, photoHasTags }, { rejectWithValue }) => {
         try
         {
             const response = await axios({
@@ -116,7 +118,7 @@ export const uploadImage = createAsyncThunk(
                     imageId,
                     photo_id: response.data.photo_id,
                     enableAdminTagging,
-                    isTagged
+                    photoHasTags
                 };
             } else {
                 return rejectWithValue('Upload failed with no success flag');
@@ -155,7 +157,6 @@ export const uploadImage = createAsyncThunk(
         }
     }
 );
-
 
 export const uploadTagsToWebImage = createAsyncThunk(
     'images/uploadTagsToWebImage',
@@ -609,12 +610,16 @@ const imagesSlice = createSlice({
             })
             .addCase(uploadImage.fulfilled, (state, action) => {
 
-                const { imageId, photo_id, enableAdminTagging, isTagged } = action.payload;
+                // image_id is a local index
+                // photo_id is our primary key from the photos table
+                const { imageId, photo_id, enableAdminTagging, photoHasTags } = action.payload;
 
                 console.log({ imageId });
                 console.log({ photo_id });
+                console.log({ enableAdminTagging });
+                console.log({ photoHasTags });
 
-                if (enableAdminTagging || isTagged) {
+                if (enableAdminTagging || photoHasTags) {
                     // Remove the image if its tagged + uploaded
                     state.imagesArray = state.imagesArray.filter(img => img.id !== imageId);
                 } else {
@@ -656,18 +661,15 @@ const imagesSlice = createSlice({
                 // nothing yet
             })
             .addCase(uploadTagsToWebImage.fulfilled, (state, action) => {
-                // Assuming images are stored in an array and you need to update or remove one
-                const index = state.imagesArray.findIndex(
-                    delImg => delImg.id === action.payload
-                );
+                // Remove the tagged image
+                state.imagesArray = state.imagesArray.filter(img => img.id !== action.payload);
 
-                if (index !== -1) {
-                    state.imagesArray.splice(index, 1);
-                }
+                state.tagged++;
             })
             .addCase(uploadTagsToWebImage.rejected, (state, action) => {
                 // state.loading = false;
                 // state.error = action.payload;
+                state.taggedFailed++;
             });
     }
 });

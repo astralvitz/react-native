@@ -62,8 +62,6 @@ const HomeScreen = ({ navigation }) => {
     const uniqueValue = useSelector(state => state.shared.uniqueValue);
     const isUploading = useSelector(state => state.shared.isUploading);
 
-    console.log({ isUploading });
-
     // Number of selected images
     const selected = images.filter(img => img.selected).length;
 
@@ -82,17 +80,21 @@ const HomeScreen = ({ navigation }) => {
             dispatch(setModel(model));
         };
 
+        const checkPermissionsAndFetchData = async () => {
+            if (!user?.enable_admin_tagging && token) {
+                await dispatch(getUntaggedImages(token));
+            }
+
+            if (!__DEV__) {
+                const newVersion = await checkNewVersion();
+                console.log('New version', newVersion);
+            }
+
+            checkGalleryPermission();
+        };
+
         getModel();
-
-        if (!user?.enable_admin_tagging) {
-            dispatch(getUntaggedImages(token));
-        }
-
-        if (!__DEV__) {
-            checkNewVersion().then(r => console.log('New version', r));
-        }
-
-        checkGalleryPermission();
+        checkPermissionsAndFetchData();
     }, [token]);
 
     const { t } = useTranslation();
@@ -115,7 +117,7 @@ const HomeScreen = ({ navigation }) => {
         const result = await checkCameraRollPermission();
 
         if (result === 'granted') {
-            getImagesFromCameraRoll();
+            await dispatch(getPhotosFromCameraroll());
         } else {
             navigation.navigate('PERMISSION', { screen: 'GALLERY_PERMISSION' });
         }
@@ -130,24 +132,6 @@ const HomeScreen = ({ navigation }) => {
         } else if (appVersion[platform].version !== version) {
             navigation.navigate('UPDATE', { url: appVersion[platform].url });
         }
-    }
-
-    /**
-     * Check for images on the web app when this page loads
-     * INFO: these are images that were uploaded on website
-     * but were not tagged and submitted
-     */
-    // componentDidUpdate(prevProps) {
-    //     if (prevProps.appVersion !== appVersion) {
-    //         this.checkNewVersion();
-    //     }
-    // }
-
-    /**
-     * Dispatch action that will get the images from the camera roll
-     */
-    const getImagesFromCameraRoll = ()  => {
-        dispatch(getPhotosFromCameraroll());
     }
 
     /**
@@ -271,11 +255,10 @@ const HomeScreen = ({ navigation }) => {
      * delete images from state based on id
      */
     const deleteImages = () => {
-        images.map(image => {
-            console.log(image);
+        images.map(async image => {
             if (image.selected) {
                 if (image.type === 'web' && image.uploaded) {
-                    dispatch(deleteWebImage({
+                    await dispatch(deleteWebImage({
                         token,
                         photoId: image.id,
                         enableAdminTagging: user.enable_admin_tagging
@@ -291,7 +274,9 @@ const HomeScreen = ({ navigation }) => {
 
     const getImageDataForUpload = (img) => {
         const isGeoTagged = isGeotagged(img);
-        const isItemTagged = isTagged(img);
+        const photoHasTags = isTagged(img);
+
+        console.log({ photoHasTags });
 
         // Upload any new image that is tagged or not
         if (img.type === 'gallery' && isGeoTagged) {
@@ -310,7 +295,7 @@ const HomeScreen = ({ navigation }) => {
             imageData.append('model', model);
 
             // Tags and custom_tags may or may not exist
-            if (isItemTagged) {
+            if (photoHasTags) {
                 if (Object.keys(img.tags).length > 0) {
                     imageData.append('tags', JSON.stringify(img.tags));
                 }
@@ -320,7 +305,7 @@ const HomeScreen = ({ navigation }) => {
                 }
             }
 
-            return [imageData, isItemTagged, isGeoTagged];
+            return [imageData, photoHasTags, isGeoTagged];
         }
     }
 
@@ -352,7 +337,7 @@ const HomeScreen = ({ navigation }) => {
                     return;
                 }
 
-                const [imageData, isItemTagged, isGeoTagged] = getImageDataForUpload(img);
+                const [imageData, photoHasTags, isGeoTagged] = getImageDataForUpload(img);
 
                 if (img.type === 'gallery' && isGeoTagged) {
                     await dispatch(uploadImage({
@@ -360,7 +345,7 @@ const HomeScreen = ({ navigation }) => {
                         imageData,
                         imageId: img.id,
                         enableAdminTagging: user.enable_admin_tagging,
-                        isItemTagged
+                        photoHasTags
                     }));
                 } else if (img.type.toLowerCase() === 'web' && isItemTagged) {
                     /**
@@ -372,20 +357,8 @@ const HomeScreen = ({ navigation }) => {
                      *
                      * We can also update 'picked_up' value here
                      */
-                    // const response = await uploadTagsToWebImage(token, img);
-                    //
-                    // if (response && response.success) {
-                    //     setTagged(tagged + 1);
-                    // } else {
-                    //     setTaggedFailed(taggedFailed + 1);
-                    // }
+                    await dispatch(uploadTagsToWebImage({ token, img }));
                 }
-                // else if (!isgeotagged)
-                // {
-                //     this.setState(previousState => ({
-                //         uploadFailed: previousState.uploadFailed + 1
-                //     }));
-                // }
             }
         }
 
@@ -438,21 +411,15 @@ const HomeScreen = ({ navigation }) => {
 
                                 {/* Upload success */}
                                 {uploaded > 0 && (
-                                    <Text
-                                        style={{ fontSize: SCREEN_HEIGHT * 0.02, marginBottom: 5 }}
-                                        values={{ count: uploaded }}
-                                    >
-                                        { t('leftpage.you-have-uploaded') }
+                                    <Text style={{ fontSize: SCREEN_HEIGHT * 0.02, marginBottom: 5 }}>
+                                        { t('leftpage.you-have-uploaded', { count: uploaded }) }
                                     </Text>
                                 )}
 
-                                {/* Tagged success */}
+                                {/* For uploaded and now tagged */}
                                 {tagged > 0 && (
-                                    <Text
-                                        style={{ fontSize: SCREEN_HEIGHT * 0.02, marginBottom: 5 }}
-                                        values={{ count: tagged }}
-                                    >
-                                        { t('leftpage.you-have-tagged') }
+                                    <Text style={{ fontSize: SCREEN_HEIGHT * 0.02, marginBottom: 5 }}>
+                                        { t('leftpage.you-have-tagged', { count: tagged }) }
                                     </Text>
                                 )}
 
@@ -463,9 +430,7 @@ const HomeScreen = ({ navigation }) => {
                                                 fontSize: SCREEN_HEIGHT * 0.02,
                                                 marginBottom: 5
                                             }}
-                                        >
-                                            {uploadFailed} uploads failed
-                                        </Text>
+                                        >{uploadFailed} uploads failed</Text>
 
                                         {failedCounts.alreadyUploaded > 0 && (
                                             <Text>
