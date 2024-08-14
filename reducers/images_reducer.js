@@ -160,7 +160,7 @@ export const uploadImage = createAsyncThunk(
 
 export const uploadTagsToWebImage = createAsyncThunk(
     'images/uploadTagsToWebImage',
-    async ({ token, image }, { rejectWithValue }) => {
+    async ({ token, img }, { rejectWithValue }) => {
         try {
             const response = await axios({
                 url: `${URL}/api/v2/add-tags-to-uploaded-image`,
@@ -169,15 +169,15 @@ export const uploadTagsToWebImage = createAsyncThunk(
                     Authorization: `Bearer ${token}`
                 },
                 data: {
-                    photo_id: image.id,
-                    tags: image.tags,
-                    custom_tags: image.customTags,
-                    picked_up: image.picked_up ? 1 : 0
+                    photo_id: img.id,
+                    tags: img.tags,
+                    custom_tags: img.customTags,
+                    picked_up: img.picked_up ? 1 : 0
                 }
             });
 
             if (response.data.success) {
-                return { imageId: image.id };
+                return img.id;
             } else {
                 return rejectWithValue('Failed to add tags to the image');
             }
@@ -210,13 +210,9 @@ const imagesSlice = createSlice({
                     // image type can be gallery or camera
 
                     if (image.uploaded) {
-                        index = state.imagesArray.findIndex(
-                            img => img.id === image.id
-                        );
+                        index = state.imagesArray.findIndex(img => img.id === image.id);
                     } else {
-                        index = state.imagesArray.findIndex(
-                            img => img.uri === image.uri
-                        );
+                        index = state.imagesArray.findIndex(img => img.uri === image.uri);
                     }
                 }
 
@@ -403,9 +399,7 @@ const imagesSlice = createSlice({
          */
         deleteImage (state, action)
         {
-            const index = state.imagesArray.findIndex(
-                delImg => delImg.id === action.payload
-            );
+            const index = state.imagesArray.findIndex(delImg => delImg.id === action.payload);
 
             if (index !== -1) {
                 state.imagesArray.splice(index, 1);
@@ -560,39 +554,41 @@ const imagesSlice = createSlice({
              */
             .addCase(getUntaggedImages.fulfilled, (state, action) => {
 
+                console.log('GetUntaggedImages');
+
                 action.payload.images && action.payload.images.map(image => {
+
+                    console.log({ image });
+
                     let index;
 
                     if (image.platform === 'mobile') {
                         // image type can be gallery or camera
 
                         if (image.uploaded) {
-                            index = state.imagesArray.findIndex(
-                                img => img.id === image.id
-                            );
+                            index = state.imagesArray.findIndex(img => img.id === image.id);
                         } else {
-                            index = state.imagesArray.findIndex(
-                                img => img.uri === image.uri
-                            );
+                            index = state.imagesArray.findIndex(img => img.uri === image.uri);
                         }
                     }
 
                     // size, height, width?
 
                     // If index is -1, it was not found
-                    if (index === -1) {
+                    if (index === -1)
+                    {
                         state.imagesArray.push({
                             id: image.id,
                             date: image.date ?? null,
                             lat: image.lat ?? 0,
                             lon: image.lon ?? 0,
                             filename: image.filename,
-                            uri: image.uri,
+                            uri: null,
                             type: image.type, // gallery, camera, or web
                             platform: image.platform, // web or mobile
 
-                            tags: image.tags,
-                            customTags: image.customTags,
+                            tags: {},
+                            customTags: [],
                             picked_up: action.payload.picked_up,
 
                             // photoId: image.id, // need to remove this duplicate
@@ -614,11 +610,6 @@ const imagesSlice = createSlice({
                 // photo_id is our primary key from the photos table
                 const { imageId, photo_id, enableAdminTagging, photoHasTags } = action.payload;
 
-                console.log({ imageId });
-                console.log({ photo_id });
-                console.log({ enableAdminTagging });
-                console.log({ photoHasTags });
-
                 if (enableAdminTagging || photoHasTags) {
                     // Remove the image if its tagged + uploaded
                     state.imagesArray = state.imagesArray.filter(img => img.id !== imageId);
@@ -629,9 +620,8 @@ const imagesSlice = createSlice({
                         if (img.type === 'gallery' && img.id === imageId) {
                             img.id = action.payload.photo_id;
                             img.type = 'web';
+                            img.uploaded = true;
                         }
-
-                        img.uploaded = true;
 
                         return img;
                     });

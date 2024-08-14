@@ -34,12 +34,14 @@ const UploadImagesGrid = ({ images, isSelecting, navigation, uniqueValue }) => {
      *   - isTagged
      *   - isPickedUp
      *   - isSelected: for deletion
+     *
+     * Flatlist expects "item" as the first key but it is an image.
      */
     const renderImage = ({ item, index }) => {
-        const isItemTagged = isTagged(item);
-        const itemIsPickedUp = item.picked_up ?? null;
-        const pickedUpIcon = itemIsPickedUp ? '⬆️' : '⬇️';
-        const isItemUploaded = item.hasOwnProperty('uploaded') && item.uploaded;
+        const imageHasTags = isTagged(item);
+        const isPickedUp = item.picked_up ?? null;
+        const pickedUpIcon = isPickedUp ? '⬆️' : '⬇️';
+        const isUploaded = item.hasOwnProperty('uploaded') && item.uploaded;
 
         return (
             <Pressable onPress={() => imagePressed(index)}>
@@ -47,13 +49,13 @@ const UploadImagesGrid = ({ images, isSelecting, navigation, uniqueValue }) => {
                     <Image
                         style={styles.gridImageStyle}
                         source={{
-                            uri: item.hasOwnProperty('uri') && item.uri !== undefined
+                            uri: item.hasOwnProperty('uri') && item.uri !== null
                                 ? item.uri
                                 : item.filename
                         }}
                         resizeMode="cover"
                     />
-                    {isItemUploaded && (
+                    {isUploaded && (
                         <View style={{ position: 'absolute', top: 5, left: 5 }}>
                             <Text>☁</Text>
                         </View>
@@ -63,7 +65,7 @@ const UploadImagesGrid = ({ images, isSelecting, navigation, uniqueValue }) => {
                             <Text>🚮</Text>
                         </View>
                     )}
-                    {isItemTagged && (
+                    {imageHasTags && (
                         <View
                             style={{
                                 position: 'absolute',
@@ -73,7 +75,7 @@ const UploadImagesGrid = ({ images, isSelecting, navigation, uniqueValue }) => {
                             <Text>🏷</Text>
                         </View>
                     )}
-                    {itemIsPickedUp !== null && (
+                    {isPickedUp !== null && (
                         <View
                             style={{
                                 position: 'absolute',
@@ -117,7 +119,7 @@ const UploadImagesGrid = ({ images, isSelecting, navigation, uniqueValue }) => {
                         contentContainerStyle={{ paddingBottom: 100 }}
                         data={images}
                         extraData={uniqueValue}
-                        keyExtractor={(item, index) => item + index}
+                        keyExtractor={(img, index) => img + index}
                         numColumns={3}
                         renderItem={renderImage}
                         keyboardShouldPersistTaps="handled"

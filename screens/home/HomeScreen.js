@@ -276,10 +276,9 @@ const HomeScreen = ({ navigation }) => {
         const isGeoTagged = isGeotagged(img);
         const photoHasTags = isTagged(img);
 
-        console.log({ photoHasTags });
-
         // Upload any new image that is tagged or not
-        if (img.type === 'gallery' && isGeoTagged) {
+        if (img.type === 'gallery' && isGeoTagged)
+        {
             let imageData = new FormData();
 
             imageData.append('photo', {
@@ -307,6 +306,10 @@ const HomeScreen = ({ navigation }) => {
 
             return [imageData, photoHasTags, isGeoTagged];
         }
+        else if (img.type === 'web')
+        {
+            return [null, photoHasTags, true];
+        }
     }
 
     /**
@@ -332,6 +335,7 @@ const HomeScreen = ({ navigation }) => {
             // async loop
             for (const img of images)
             {
+
                 if (isUploadCancelled) {
                     dispatch(resetUploadState());
                     return;
@@ -339,7 +343,8 @@ const HomeScreen = ({ navigation }) => {
 
                 const [imageData, photoHasTags, isGeoTagged] = getImageDataForUpload(img);
 
-                if (img.type === 'gallery' && isGeoTagged) {
+                if (img.type === 'gallery' && isGeoTagged)
+                {
                     await dispatch(uploadImage({
                         token,
                         imageData,
@@ -347,15 +352,12 @@ const HomeScreen = ({ navigation }) => {
                         enableAdminTagging: user.enable_admin_tagging,
                         photoHasTags
                     }));
-                } else if (img.type.toLowerCase() === 'web' && isItemTagged) {
+                }
+                else if (img.type=== 'web' && photoHasTags)
+                {
                     /**
                      * Upload tags for already uploaded image
-                     *
-                     * Previously these were images uploaded to web,
-                     * But now untagged images can also be uploaded from mobile.
-                     * These should be re-classified as Uploaded, Not tagged.
-                     *
-                     * We can also update 'picked_up' value here
+                     * Updates picked_up
                      */
                     await dispatch(uploadTagsToWebImage({ token, img }));
                 }

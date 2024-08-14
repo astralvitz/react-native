@@ -6,5 +6,5 @@
  * @returns {boolean}
  */
 export const isTagged = img => {
-    return ((img.customTags && img.customTags?.length > 0) || (img.tags && Object.keys(img.tags)?.length > 0));
+    return ((img?.customTags && img?.customTags?.length > 0) || (img?.tags && Object.keys(img?.tags)?.length > 0));
 };

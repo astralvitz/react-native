@@ -11,7 +11,8 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface LitterImageProps {
     photoSelected: {
-        uri: string;
+        uri: string|null;
+        filename: string|null;
     };
     navigation: NavigationProp<any>;
     onLongPressStart: () => void;
@@ -65,7 +66,8 @@ const LitterImage: React.FC<LitterImageProps> = ({
     return (
         <GestureHandlerRootView>
             <GestureRecognizer
-                onSwipeDown={state => { navigation.navigate('HOME'); }}>
+                onSwipeDown={state => { navigation.navigate('HOME'); }}
+            >
                 <PinchGestureHandler
                     onGestureEvent={onPinchGestureEvent}
                     onHandlerStateChange={onPinchHandlerStateChange}>
@@ -83,7 +85,7 @@ const LitterImage: React.FC<LitterImageProps> = ({
                         <Animated.Image
                             resizeMode="contain"
                             source={
-                                { uri: photoSelected.uri } as ImageSourcePropType
+                                { uri: photoSelected.uri === null ? photoSelected.filename : photoSelected.uri } as ImageSourcePropType
                             }
                             style={[
                                 styles.image,

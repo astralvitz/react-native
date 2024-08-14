@@ -82,8 +82,6 @@ const sharedSlice = createSlice({
         startUploading (state) {
             state.showModal = true;
             state.isUploading = true;
-
-            console.log('... is uploading');
         },
     },
 
