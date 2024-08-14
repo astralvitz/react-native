@@ -13,8 +13,8 @@ const JoinTeamSchema = Yup.object().shape({
         .max(15, 'Maximum 15 characters long')
 });
 
-const JoinTeamForm = () => {
-    // const { teamsFormError } = this.props;
+const JoinTeamForm = ({ backPress }) => {
+
     const dispatch = useDispatch();
 
     const teamsFormError = useSelector(state => state.teams);
@@ -26,7 +26,7 @@ const JoinTeamForm = () => {
             >
                 <Body>Join team by identifier</Body>
 
-                <Pressable onPress={this.props.backPress}>
+                <Pressable onPress={backPress}>
                     <Body color="accent">Back</Body>
                 </Pressable>
             </View>
@@ -35,7 +35,7 @@ const JoinTeamForm = () => {
                 initialValues={{ id: '' }}
                 validationSchema={JoinTeamSchema}
                 onSubmit={async values => {
-                    dispatch(joinTeam({ token, id: values.id }));
+                    await dispatch(joinTeam({ token, id: values.id }));
                 }}>
                 {({
                     isValid,
@@ -78,9 +78,8 @@ const JoinTeamForm = () => {
                             disabled={!isValid}
                             loading={isSubmitting}
                             onPress={handleSubmit}
-                            style={{
-                                marginVertical: 20
-                            }}>
+                            style={{ marginVertical: 20 }}
+                        >
                             <Body color="white">JOIN TEAM</Body>
                         </Button>
                     </>
@@ -90,16 +89,12 @@ const JoinTeamForm = () => {
     );
 }
 
-// export default JoinTeamForm;
-
 const styles = StyleSheet.create({
-
     joinTeamContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 20
     },
-
     input: {
         marginTop: 10,
         padding: 10,

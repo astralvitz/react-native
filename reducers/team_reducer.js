@@ -1,4 +1,5 @@
 import axios from "axios";
+import { URL } from "../actions/types";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
@@ -155,7 +156,7 @@ export const leaveTeam = createAsyncThunk(
         }
         catch (error)
         {
-            console.error(error.response || error);
+            // console.error(error.response || error);
             return rejectWithValue('Error while trying to leave the team');
         }
     }
@@ -185,7 +186,7 @@ export const getTeamMembers = createAsyncThunk(
 
             return response.data.result;
         } catch (error) {
-            console.error(error);
+            // console.error(error);
             return rejectWithValue('Error fetching team members');
         }
     }
@@ -205,13 +206,14 @@ export const getTopTeams = createAsyncThunk(
                 }
             });
 
+            console.log('getTopTeams.response');
+
             if (!response.data) {
                 return rejectWithValue('No data received');
             }
 
             return response.data;
         } catch (error) {
-            console.error(error);
             if (error.response) {
                 return rejectWithValue('Something went wrong, please try again');
             } else {
@@ -231,7 +233,7 @@ export const getUserTeams = createAsyncThunk(
                 headers: {
                     Authorization: 'Bearer ' + token,
                     Accept: 'application/json',
-                    'content-type': 'application/json'
+                    'Content-Type': 'application/json'
                 }
             });
             if (response.data && response.data.success) {
@@ -366,15 +368,14 @@ const teamSlice = createSlice({
             .addCase(changeActiveTeam.fulfilled, (state, action) => {
 
                 // dispatch changeActiveTeam on auth_reducer.js
-
                 state.userTeams.push(action.payload.team);
 
                 // This was commented out on teams_actions
-                // state.teamFormStatus = 'SUCCESS';
-                //
-                // action.payload.type === 'JOIN'
-                //     ? (state.successMessage = 'Congrats! you have joined a new team')
-                //     : (state.successMessage = 'Congrats! you created a new team');
+                state.teamFormStatus = 'SUCCESS';
+
+                action.payload.type === 'JOIN'
+                    ? (state.successMessage = 'Congrats! you have joined a new team')
+                    : (state.successMessage = 'Congrats! you created a new team');
             })
             .addCase(changeActiveTeam.rejected, (state, action) => {
                 state.teamsFormError = action.payload;
@@ -382,20 +383,20 @@ const teamSlice = createSlice({
 
             .addCase(createTeam.pending, (state) => {
                 state.teamsFormError = '';
+                state.teamFormStatus = '';
                 state.successMessage = '';
-                state.teamFormStatus = null;
             })
             .addCase(createTeam.fulfilled, (state, action) => {
-                // dispatch changeActiveTeam on auth_reducer.js
 
+                // dispatch changeActiveTeam on auth_reducer.js
                 state.userTeams.push(action.payload.team);
 
                 // This was commented out on teams_actions
-                // state.teamFormStatus = 'SUCCESS';
-                //
-                // action.payload.type === 'JOIN'
-                //     ? (state.successMessage = 'Congrats! you have joined a new team')
-                //     : (state.successMessage = 'Congrats! you created a new team');
+                state.teamFormStatus = 'SUCCESS';
+
+                action.payload.type === 'JOIN'
+                    ? (state.successMessage = 'Congrats! you have joined a new team')
+                    : (state.successMessage = 'Congrats! you created a new team');
             })
             .addCase(createTeam.rejected, (state, action) => {
                 state.teamsFormError = action.payload;

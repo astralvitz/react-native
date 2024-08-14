@@ -6,15 +6,13 @@ import { Header, Title, Colors } from '../components';
 import { TopTeamsList } from './teamComponents';
 
 const TopTeamsScreen = ({ navigation }) => {
-    const { topTeams } = useSelector(state => state.team);
+    const topTeams = useSelector(state => state.team.topTeams );
 
     return (
         <>
             <Header
                 leftContent={
-                    <Pressable
-                        onPress={() => navigation.goBack()}
-                    >
+                    <Pressable onPress={() => navigation.goBack()}>
                         <Icon
                             name="chevron-back-outline"
                             color={Colors.white}

@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { StyleSheet, View, TextInput, Pressable } from 'react-native';
-import {useDispatch, useSelector} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { createTeam } from "../../../reducers/team_reducer";
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -19,20 +19,13 @@ const JoinTeamSchema = Yup.object().shape({
         .max(100, 'Maximum 100 characters long')
 });
 
-const CreateTeamForm = () => {
-
-    // constructor(props) {
-    //     super(props);
-    //
-    //     this.identifierRef = React.createRef();
-    // }
+const CreateTeamForm = ({ backPress }) => {
 
     const dispatch = useDispatch();
-
     const identifierRef = useRef(null);
-
-    // const { user, teamsFormError, token } = this.props;
-    const user = useSelector(state => state.auth);
+    const user = useSelector(state => state.auth.user);
+    const token = useSelector(state => state.auth.token);
+    const teamsFormError = useSelector(state => state.teams.teamsFormError);
 
     return (
         <View>
@@ -40,7 +33,7 @@ const CreateTeamForm = () => {
                 initialValues={{ name: '', identifier: '' }}
                 validationSchema={JoinTeamSchema}
                 onSubmit={async values => {
-                    dispatch(createTeam({
+                    await dispatch(createTeam({
                         name: values.name,
                         identifier: values.identifier,
                         token
@@ -70,9 +63,7 @@ const CreateTeamForm = () => {
                                     }}>
                                     <SubTitle>Create a Team</SubTitle>
 
-                                    <Pressable
-                                        onPress={this.props.backPress}
-                                    >
+                                    <Pressable onPress={backPress}>
                                         <Body color="accent">Back</Body>
                                     </Pressable>
                                 </View>
@@ -104,9 +95,7 @@ const CreateTeamForm = () => {
                                     textContentType="none"
                                     onChangeText={handleChange('name')}
                                     style={styles.input}
-                                    onSubmitEditing={() =>
-                                        identifierRef.current.focus()
-                                    }
+                                    onSubmitEditing={() => identifierRef.current.focus()}
                                     returnKeyType="next"
                                     placeholder="My Litterpicker Team"
                                 />

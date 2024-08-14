@@ -26,7 +26,7 @@ const TeamScreen = ({ navigation }) => {
     }, []);
 
     const getTeams = async () => {
-        dispatch(getTopTeams(token));
+        await dispatch(getTopTeams(token));
 
         setIsLoading(false);
     };
@@ -48,7 +48,7 @@ const TeamScreen = ({ navigation }) => {
             <Header
                 leftContent={<Title color="white">Teams</Title>}
                 rightContent={
-                    <Pressable onPress={() => { actionSheetRef.current?.setModalVisible() }}>
+                    <Pressable onPress={() => { actionSheetRef.current?.show() }}>
                         <Icon
                             color={Colors.white}
                             size={32}
@@ -71,7 +71,6 @@ const TeamScreen = ({ navigation }) => {
                 >
                     {/* list of top 5 teams  */}
                     {/* Top Teams */}
-
                     <View style={styles.headingRow}>
                         <SubTitle>Top Teams</SubTitle>
                         <Pressable onPress={() => navigation.navigate('TOP_TEAMS') }>
@@ -79,9 +78,11 @@ const TeamScreen = ({ navigation }) => {
                         </Pressable>
                     </View>
 
-                    <TopTeamsList topTeams={topTeams?.slice(0, 5)} />
-                    {/* list of users teams */}
+                    <TopTeamsList
+                        topTeams={topTeams?.slice(0, 5)}
+                    />
 
+                    {/* list of users teams */}
                     <UserTeamsList
                         navigation={navigation}
                     />
@@ -98,20 +99,14 @@ const TeamScreen = ({ navigation }) => {
                         <>
                             {!showFormType ? (
                                 <>
-                                    <Button
-                                        onPress={() => setShowFormType('JOIN')}
-                                    >
-                                        <Body color="white">
-                                            JOIN A TEAM
-                                        </Body>
+                                    <Button onPress={() => setShowFormType('JOIN')}>
+                                        <Body color="white">JOIN A TEAM</Body>
                                     </Button>
                                     <Button
                                         variant="outline"
                                         onPress={() => setShowFormType('CREATE')}
                                     >
-                                        <Body color="accent">
-                                            CREATE A TEAM
-                                        </Body>
+                                        <Body color="accent">CREATE A TEAM</Body>
                                     </Button>
                                 </>
                             ) : (

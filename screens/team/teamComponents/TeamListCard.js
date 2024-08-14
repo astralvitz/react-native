@@ -15,13 +15,13 @@ const TeamListCard = ({ team, index, showRanking = true, leftContent }) => {
                     </Body>
 
                     <Caption>
-                        {team.total_images.toLocaleString()} PHOTOS
+                        {(team.total_images || 0).toLocaleString()} PHOTOS
                     </Caption>
                 </View>
             </View>
             <View style={styles.rightContainer}>
                 <Caption style={styles.alignRight}>
-                    {team.total_litter.toLocaleString()}
+                    {(team.total_litter || 0).toLocaleString()}
                 </Caption>
                 <Caption style={styles.alignRight}>LITTER</Caption>
             </View>

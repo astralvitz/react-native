@@ -2,37 +2,46 @@ import React, { useEffect } from 'react';
 import { StyleSheet, Pressable, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { SubTitle, Body, Caption, Colors } from '../../components';
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { getUserTeams, setSelectedTeam } from "../../../reducers/team_reducer";
 import TeamListCard from './TeamListCard';
 
-const UserTeamsList = () => {
+const UserTeamsList = ({ navigation }) => {
 
     const dispatch = useDispatch();
 
+    const token = useSelector(state => state.auth.token);
+
     useEffect(() => {
+        async function handleGetUserTeams(token) {
+            await dispatch(getUserTeams(token));
+        }
 
-        // dispatch(getUserTeams(token));
-
+        handleGetUserTeams(token);
     }, []);
 
-    // setTeam = team => {
-    //     this.props.setSelectedTeam(team);
-    //     this.props.navigation.navigate('TEAM_DETAILS');
-    // };
+    const setTeam = team => {
+        dispatch(setSelectedTeam(team));
 
-    const { userTeams, user } = this.props;
-    const activeTeam = user?.active_team;
+        navigation.navigate('TEAM_DETAILS');
+    };
+
+    const userTeams = useSelector(state => state.teams.userTeams);
+    const user = useSelector(state => state.auth.user);
+    const activeTeam = user?.active_team_id;
 
     return (
         <>
             {/* Users Teams */}
             <View style={[styles.headingRow, { marginTop: 20 }]}>
                 <SubTitle>My Teams</SubTitle>
-                {/* <Caption color="accent">View All</Caption> */}
+
+                <Caption color="accent">View All</Caption>
             </View>
+
             {userTeams?.map((team, index) => (
                 <Pressable
-                    onPress={() => this.setTeam(team)}
+                    onPress={() => setTeam(team)}
                     key={`${team.name}${index}`}
                 >
                     <TeamListCard
