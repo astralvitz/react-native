@@ -9,17 +9,20 @@ import { resetLitterState, suggestTags } from "../../../reducers/litter_reducer"
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-const LitterTextInput = ({ swiperIndex, navigation, lang }) => {
+const LitterTextInput = ({ swiperIndex, lang }) => {
 
     const dispatch = useDispatch();
 
     const [text, setText] = useState('');
     const [customTagError, setCustomTagError] = useState('');
 
-    const images = useSelector(state => state.images.images);
+    const images = useSelector(state => state.images.imagesArray);
     const suggestedTags = useSelector(state => state.litter.suggestedTags);
-    const previousTags = useSelector(state => state.litter.previousTags);
+    const previousTags = useSelector(state => state.images.previousTags);
     const isKeyboardOpen = useSelector(state => state.litter.isKeyboardOpen);
+
+    console.log({ suggestedTags });
+    console.log({ previousTags });
 
     /**
      * A tag has been selected
@@ -78,6 +81,11 @@ const LitterTextInput = ({ swiperIndex, navigation, lang }) => {
      * should be unique (case insensitive)
      */
     const validateCustomTag = async (inputText) => {
+
+        console.log({ inputText });
+        console.log({ swiperIndex });
+        console.log({ images });
+
         const customTagsArray = images[swiperIndex]?.customTags;
 
         let result = false;
@@ -131,16 +139,6 @@ const LitterTextInput = ({ swiperIndex, navigation, lang }) => {
     }
 
     /**
-     * Close the litter picker and go back to the gallery screen
-     */
-    const closeLitterPicker = () => {
-        // litter_reducer
-        dispatch(resetLitterState());
-
-        navigation.navigate('HOME');
-    }
-
-    /**
      * Render a suggested tag
      */
     const renderTag = ({ item }) => {
@@ -191,10 +189,7 @@ const LitterTextInput = ({ swiperIndex, navigation, lang }) => {
                     <View style={styles.suggest}>
                         <Caption
                             dictionary={`tag.suggested-tags`}
-                            values={{
-                                count:
-                                    text === '' ? previousTags.length : suggestedTags.length
-                            }}
+                            values={{ count: text === '' ? previousTags.length : suggestedTags.length }}
                         />
                     </View>
 

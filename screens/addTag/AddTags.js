@@ -414,9 +414,7 @@ const AddTags = ({ navigation, lang }) => {
                                     // height={height}
                                     lang={lang}
                                     swiperIndex={swiperIndex}
-                                    isKeyboardOpen={
-                                        isKeyboardOpen
-                                    }
+                                    isKeyboardOpen={isKeyboardOpen}
                                     navigation={navigation}
                                 />
                                 {!isKeyboardOpen && (

@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { useTranslation } from 'react-i18next';
+import i18n from "../i18n";
 
 import CATEGORIES from '../assets/data/categories';
 import LITTERKEYS from '../assets/data/litterkeys';
@@ -58,7 +58,7 @@ const litterSlice = createSlice({
          *
          * @return 'butts', 'facemask', etc.
          */
-        changeItem(state, action) {
+        changeItem (state, action) {
             state.item = action.payload;
             state.q = 1;
         },
@@ -69,7 +69,7 @@ const litterSlice = createSlice({
          * set quantityChanged to true so that next time Add Tag
          * is pressed before changing tag quantity in increased by 1;
          */
-        changeQ(state, action) {
+        changeQ (state, action) {
             state.q = action.payload;
             state.quantityChanged = true;
         },
@@ -98,7 +98,7 @@ const litterSlice = createSlice({
         /**
          * Content to show in the modal on LitterPicker
          */
-        showAllTags(state, action) {
+        showAllTags (state, action) {
             state.displayAllTags = action.payload;
         },
 
@@ -106,7 +106,7 @@ const litterSlice = createSlice({
          * Show the modal on LitterPicker.js
          * Need to set the content separately
          */
-        showInnerModal(state) {
+        showInnerModal (state) {
             state.tagsModalVisible = !state.tagsModalVisible;
         },
 
@@ -117,20 +117,21 @@ const litterSlice = createSlice({
          *
          * Note: We are passing auth.lang as a prop which could be access from auth_reducer
          */
-        suggestTags(state, action) {
+        suggestTags (state, action) {
 
             let suggestedTagsArray = [];
 
             Object.entries(LITTERKEYS).some(tags => {
                 tags[1].some(tag => {
-                    const translatedText = useTranslation(
-                        `${action.payload.lang}.litter.${tags[0]}.${tag}`
-                    );
+                    const translatedText = i18n.t(`litter.${tags[0]}.${tag}`);
+
                     if (translatedText !== 'Error Translation' && translatedText.toLowerCase().includes(action.payload.text.toLowerCase())) {
                         suggestedTagsArray.push({ category: tags[0], key: tag });
                     }
                 });
             });
+
+            console.log({ suggestedTagsArray });
 
             state.suggestedTags = suggestedTagsArray;
         },
@@ -140,7 +141,7 @@ const litterSlice = createSlice({
          */
         // INFO: This is not used currently
         // TODO: will need to change presence on particular image
-        toggleSwitch(state) {
+        toggleSwitch (state) {
             state.presence = !state.presence;
         },
 
@@ -149,9 +150,11 @@ const litterSlice = createSlice({
          */
         // TODO: Test this -- not sure if it works
         // payload.item is not passed from -litterTags
-        updateTagsXPos(state, action) {
+        updateTagsXPos (state, action) {
             const positions = {...state.positions};
+
             positions[action.payload.item] = action.payload.x;
+
             state.positions = positions;
         }
     }
