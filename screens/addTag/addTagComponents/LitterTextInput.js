@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { Dimensions, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useDispatch, useSelector } from "react-redux";
-// @ts-ignore
 import { useTranslation } from "react-i18next";
 import { Body, Caption, Colors, CustomTextInput } from '../../components';
 import { addCustomTagToImage, addTagToImage } from "../../../reducers/images_reducer";
-import { resetLitterState, suggestTags } from "../../../reducers/litter_reducer";
+import { suggestTags } from "../../../reducers/litter_reducer";
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-const LitterTextInput = ({ swiperIndex, lang }) => {
+const LitterTextInput = ({ swiperIndex, lang, suggestedTags, isKeyboardOpen }) => {
 
     const dispatch = useDispatch();
 
@@ -17,12 +16,7 @@ const LitterTextInput = ({ swiperIndex, lang }) => {
     const [customTagError, setCustomTagError] = useState('');
 
     const images = useSelector(state => state.images.imagesArray);
-    const suggestedTags = useSelector(state => state.litter.suggestedTags);
     const previousTags = useSelector(state => state.images.previousTags);
-    const isKeyboardOpen = useSelector(state => state.litter.isKeyboardOpen);
-
-    console.log({ suggestedTags });
-    console.log({ previousTags });
 
     /**
      * A tag has been selected
@@ -81,10 +75,6 @@ const LitterTextInput = ({ swiperIndex, lang }) => {
      * should be unique (case insensitive)
      */
     const validateCustomTag = async (inputText) => {
-
-        console.log({ inputText });
-        console.log({ swiperIndex });
-        console.log({ images });
 
         const customTagsArray = images[swiperIndex]?.customTags;
 
@@ -166,14 +156,12 @@ const LitterTextInput = ({ swiperIndex, lang }) => {
     // @ts-ignore
     return (
         <View>
-            <View style={{ paddingHorizontal: 20, marginBottom: 10}}>
+            <View style={{ paddingHorizontal: 20, marginBottom: 10 }}>
                 <CustomTextInput
                     autoCorrect={false}
                     style={styles.textFieldStyle}
-                    // @ts-ignore
                     placeholder={suggest}
                     placeholderTextColor={Colors.muted}
-                    // @ts-ignore
                     onChangeText={(text) => updateText(text)}
                     blurOnSubmit={false}
                     clearButtonMode="always"

@@ -417,6 +417,7 @@ const AddTags = ({ navigation, lang }) => {
                                     isKeyboardOpen={isKeyboardOpen}
                                     navigation={navigation}
                                 />
+
                                 {!isKeyboardOpen && (
                                     <LitterPickerWheels
                                         item={item}
@@ -426,6 +427,7 @@ const AddTags = ({ navigation, lang }) => {
                                         lang={lang}
                                     />
                                 )}
+
                                 {!isKeyboardOpen && (
                                     <LitterBottomButtons
                                         images={images}

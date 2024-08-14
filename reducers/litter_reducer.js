@@ -131,8 +131,6 @@ const litterSlice = createSlice({
                 });
             });
 
-            console.log({ suggestedTagsArray });
-
             state.suggestedTags = suggestedTagsArray;
         },
 
