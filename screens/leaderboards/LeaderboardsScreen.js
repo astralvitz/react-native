@@ -14,8 +14,8 @@ const LeaderboardsScreen = () => {
     const dispatch = useDispatch();
 
     const [loading, setLoading] = useState(true);
-
     const [flagsObj, setFlags] = useState({});
+    const [selectedValue, setSelectedValue] = useState('today');
 
     const [pickerItems, setPickerItems] = useState([
         {label: 'Today', value: 'today', visible: true},
@@ -27,17 +27,17 @@ const LeaderboardsScreen = () => {
 
     const paginated = useSelector(state => state.leaderboard.paginated);
 
-    const [selectedValue, setSelectedValue] = useState('today');
-
     useEffect(() => {
+        setFlags(flags);
+
         const fetchData = async () => {
-            dispatch(getLeaderboardData('today'));
-            setFlags(flags);
+            await dispatch(getLeaderboardData('today'));
+
             setLoading(false);
         };
 
         fetchData();
-    }, [dispatch]);
+    }, []);
 
     const setSelectedValueWrapper = async (value) => {
 
@@ -45,7 +45,7 @@ const LeaderboardsScreen = () => {
 
         setLoading(true);
 
-        dispatch(getLeaderboardData(value));
+        await dispatch(getLeaderboardData(value));
 
         setLoading(false);
     };
@@ -93,30 +93,35 @@ const LeaderboardsScreen = () => {
                 </Picker>
             </View>
 
-            <FlatList
-                data={paginated.users}
-                keyExtractor={user =>
-                    user.rank + user.username || user.rank + user.name
-                }
-                renderItem={({item}) => (
-                    <View style={styles.row}>
-                        <Text style={styles.rank}>{item.rank}</Text>
-                        <Image
-                            source={flagsObj[item.global_flag]}
-                            resizeMethod="auto"
-                            resizeMode="cover"
-                            style={{
-                                height: SCREEN_HEIGHT * 0.02,
-                                width: SCREEN_WIDTH * 0.05
-                            }}
-                        />
-                        <Text style={styles.username}>
-                            {item.username || item.name || 'Anon'}
-                        </Text>
-                        <Text style={styles.xp}>{item.xp} XP</Text>
+            {
+                !paginated.users.length ? (
+                    <View style={styles.loadingContainer}>
+                        <Text>No data found</Text>
                     </View>
-                )}
-            />
+                ) :
+                    <FlatList
+                        data={paginated.users}
+                        keyExtractor={user => user.rank + user.username || user.rank + user.name}
+                        renderItem={({item}) => (
+                            <View style={styles.row}>
+                                <Text style={styles.rank}>{item.rank}</Text>
+                                <Image
+                                    source={flagsObj[item.global_flag]}
+                                    resizeMethod="auto"
+                                    resizeMode="cover"
+                                    style={{
+                                        height: SCREEN_HEIGHT * 0.02,
+                                        width: SCREEN_WIDTH * 0.05
+                                    }}
+                                />
+                                <Text style={styles.username}>
+                                    {item.username || item.name || 'Anon'}
+                                </Text>
+                                <Text style={styles.xp}>{item.xp} XP</Text>
+                            </View>
+                        )}
+                    />
+            }
         </>
     );
 }

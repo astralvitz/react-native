@@ -27,28 +27,17 @@ import { getStats } from "../../reducers/stats_reducer";
 //     targetPercentageStart: number;
 // }
 
-// @ts-ignore
 const GlobalDataScreen = ({ navigation }) => {
 
     const dispatch = useDispatch();
 
-    const {
-        totalLitter,
-        totalPhotos,
-        totalUsers,
-        totalLittercoin,
-        litterTarget,
-        targetPercentage,
-        statsErrorMessage,
-    } = useSelector((state) => ({
-        totalLitter: state.stats.totalLitter,
-        totalPhotos: state.stats.totalPhotos,
-        totalUsers: state.stats.totalUsers,
-        totalLittercoin: state.stats.totalLittercoin,
-        litterTarget: state.stats.litterTarget,
-        targetPercentage: state.stats.targetPercentage,
-        statsErrorMessage: state.stats.statsErrorMessage,
-    }));
+    const totalLitter = useSelector(state => state.stats.totalLitter);
+    const totalPhotos = useSelector(state => state.stats.totalPhotos);
+    const totalUsers = useSelector(state => state.stats.totalUsers);
+    const totalLittercoin = useSelector(state => state.stats.totalLittercoin);
+    const litterTarget = useSelector(state => state.stats.litterTarget);
+    const targetPercentage = useSelector(state => state.stats.targetPercentage);
+    const statsErrorMessage = useSelector(state => state.stats.statsErrorMessage);
 
     const [isFocused, setIsFocused] = useState(false);
     const [litterStart, setLitterStart] = useState(0);
@@ -62,15 +51,20 @@ const GlobalDataScreen = ({ navigation }) => {
             setIsFocused(true);
         });
 
-        getDataFromStorage().then(r => console.log('Data from storage', r));
-        dispatch(getStats());
+        getDataFromStorage();
+
+        async function getStatsFunction () {
+            await dispatch(getStats());
+        }
+
+        getStatsFunction();
 
         return () => {
             if (focusListener) {
                 focusListener();
             }
         };
-    }, [navigation]);
+    }, []);
 
     const getDataFromStorage = async () => {
         const stats = await AsyncStorage.getItem('globalStats');
@@ -138,7 +132,7 @@ const GlobalDataScreen = ({ navigation }) => {
                     alignItems: 'center',
                     paddingHorizontal: 20
                 }}>
-                <Body style={{textAlign: 'center'}}>
+                <Body style={{ textAlign: 'center' }}>
                     {statsErrorMessage}
                 </Body>
                 <Pressable
@@ -149,7 +143,8 @@ const GlobalDataScreen = ({ navigation }) => {
                         borderWidth: 1,
                         borderRadius: 4,
                         marginTop: 20
-                    }}>
+                    }}
+                >
                     <Body>Try again</Body>
                 </Pressable>
             </View>
@@ -182,9 +177,7 @@ const GlobalDataScreen = ({ navigation }) => {
                     </View>
                 ) : (
                     <ScrollView
-                        contentContainerStyle={{
-                            paddingTop: 20
-                        }}
+                        contentContainerStyle={{ paddingTop: 20 }}
                         style={styles.container}
                         showsVerticalScrollIndicator={false}
                         alwaysBounceVertical={false}

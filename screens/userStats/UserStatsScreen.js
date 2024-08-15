@@ -11,10 +11,8 @@ const UserStatsScreen = ({ navigation }) => {
 
     const dispatch = useDispatch();
 
-    const { token, user } = useSelector((state) => ({
-        token: state.auth.token,
-        user: state.auth.user
-    }));
+    const token = useSelector(state => state.auth.token);
+    const user = useSelector(state => state.auth.user);
 
     const [xpStart, setXpStart] = useState(0);
     const [positionStart, setPositionStart] = useState(0);
@@ -31,7 +29,7 @@ const UserStatsScreen = ({ navigation }) => {
         const fetchData = async () => {
             await getDataFromStorage();
 
-            dispatch(fetchUser(token));
+            await dispatch(fetchUser(token));
 
             await fetchUserData();
         }

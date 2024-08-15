@@ -82,11 +82,9 @@ const MainRoutes = () => {
     } else {
         return (
             <Stack.Navigator
-                // @ts-ignore
                 presentation="modal"
-                screenOptions={{
-                    headerShown: false
-                }}>
+                screenOptions={{ headerShown: false }}
+            >
                 {token === null ? (
                     <Stack.Screen name="AUTH_HOME" component={AuthStack} />
                 ) : (

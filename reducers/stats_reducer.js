@@ -1,5 +1,6 @@
 import axios from "axios";
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { URL } from '../actions/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const initialState = {
@@ -56,9 +57,9 @@ const statsSlice = createSlice({
             })
             .addCase(getStats.fulfilled, (state, action) => {
 
-                const totalLitter = action.payload?.total_litter;
-                const totalPhotos = action.payload?.total_photos;
-                const totalUsers = action.payload?.total_users;
+                const totalLitter = action.payload?.total_litter || 1;
+                const totalPhotos = action.payload?.total_photos || 1;
+                const totalUsers = action.payload?.total_users || 1;
                 const totalLittercoin = parseInt(action.payload?.littercoin);
                 const litterTarget = {
                     previousTarget: action.payload.previousXp,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleProp, StyleSheet, Text, TextStyle } from 'react-native';
+import { StyleProp, Text, TextStyle } from 'react-native';
 import { Colors, Fonts } from '../theme';
 import { useTranslation } from 'react-i18next';
 
@@ -38,11 +38,5 @@ const StyledText: React.FC<StyledTextProps> = ({
 
     return renderText();
 };
-
-const styles = StyleSheet.create({
-    text: {
-        textAlign: 'left'
-    }
-});
 
 export default StyledText;

@@ -1,7 +1,7 @@
 import React from 'react';
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 import StyledText from './StyledText';
-import {Colors, Fonts} from '../theme';
+import { Colors, Fonts } from '../theme';
 
 interface BodyProps {
     family?: keyof typeof Fonts;

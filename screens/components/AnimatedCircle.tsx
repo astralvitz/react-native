@@ -1,8 +1,8 @@
 import * as React from 'react';
-import {Animated, StyleSheet, TextInput, TextStyle, View} from 'react-native';
-import Svg, {Circle, G} from 'react-native-svg';
-import {Body} from './typography';
-import {Colors} from './theme';
+import { Animated, StyleSheet, TextInput, TextStyle, View } from 'react-native';
+import Svg, { Circle, G } from 'react-native-svg';
+import { Body } from './typography';
+import { Colors } from './theme';
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
@@ -183,7 +183,8 @@ const AnimatedCircle: React.FC<AnimatedCircleProps> = ({
                             taglineStyles
                         ]}
                         dictionary={tagline}
-                        values={{count: nextTarget}}>
+                        values={{ count: nextTarget }}
+                    >
                         {tagline}
                     </Body>
                 </View>
