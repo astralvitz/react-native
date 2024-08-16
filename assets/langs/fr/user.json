@@ -1,8 +1,8 @@
 {
     "level": "Niveau",
-    "level-up": "{count} XP pour monter de niveau",
+    "level-up": "{{count}} XP pour monter de niveau",
     "littercoin": "Littercoin",
-    "next-littercoin": "{count}% Littercoin suivant",
+    "next-littercoin": "{{count}}% Littercoin suivant",
     "photos": "Photos",
     "rank": "Rang",
     "tags": "Mots clés",

@@ -266,7 +266,7 @@
     },
     "tags": {
         "type-to-suggest": "Digite para sugerir Tags",
-        "suggested": "Tags sugeridas {count}"
+        "suggested": "Tags sugeridas {{count}}"
     },
     "dogshit": {
         "poo": "Surpresa!",

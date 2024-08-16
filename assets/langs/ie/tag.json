@@ -2,7 +2,7 @@
     "add-tag": "Cuir Tag Leis",
     "confirm": "Deimhnigh",
     "type-to-suggest": "Cineál le haghaidh moltaí tagála",
-    "suggested-tags": "Moltaí Tagála: {count}",
+    "suggested-tags": "Moltaí Tagála: {{count}}",
     "alert": "Fógra",
     "still-there": "Tá an bruscar fós ann",
     "picked-up": "Tá an bruscar sroichte",

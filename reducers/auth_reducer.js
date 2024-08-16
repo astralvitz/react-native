@@ -5,11 +5,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { CLIENT_ID, CLIENT_SECRET, URL } from  '../actions/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// import * as RNLocalize from 'react-native-localize';
-// let lang = RNLocalize.getLocales().languageCode || 'en';
-
 const initialState = {
-    lang: 'en',
     appVersion: '',
     isSubmitting: false,
     token: null,
@@ -76,8 +72,6 @@ export const createAccount = createAsyncThunk(
                     'Content-Type': 'application/json'
                 }
             });
-            console.log('CreateAccount.response');
-            console.log(response);
 
             dispatch(userLogin({ email, password }));
 
@@ -85,9 +79,6 @@ export const createAccount = createAsyncThunk(
         }
         catch (error)
         {
-            console.log('CreateAccount.error');
-            console.log(error);
-
             if (error.response)
             {
                 const errorData = error.response.data.errors;
@@ -192,8 +183,6 @@ export const userLogin = createAsyncThunk(
                 }
             });
 
-            console.log(response);
-
             if (response.status === 200)
             {
                 const token = response.data.access_token;
@@ -204,12 +193,8 @@ export const userLogin = createAsyncThunk(
                 }
                 catch (error)
                 {
-                    console.log('userLogin.saveJWT', error);
-
                     return rejectWithValue('Unable to save token to asyncstore');
                 }
-
-                console.log({ token });
 
                 dispatch(fetchUser(token));
 
@@ -218,11 +203,6 @@ export const userLogin = createAsyncThunk(
                 return rejectWithValue('Login failed');
             }
         } catch (error) {
-            console.log('error');
-            console.log(error);
-
-            console.log('Error message:', error.response);
-
             // This handles any network or other errors
             return rejectWithValue(error.response?.data || error.message || 'Network error, please try again');
         }
@@ -240,14 +220,6 @@ const authSlice = createSlice({
         // changeActiveTeam (state, action) {
         //     state.user.active_team = action.payload;
         // },
-
-        /**
-         * Change app language
-         * Language changeable from WelcomeScreen -- LanguageFlags.js
-         */
-        changeLang (state, action) {
-            state.lang = action.payload;
-        },
 
         /**
          * Logout user

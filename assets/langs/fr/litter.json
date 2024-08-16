@@ -271,7 +271,7 @@
     },
     "tags": {
         "type-to-suggest": "Tapez pour suggérer des étiquette",
-        "suggested": "Etiquettes suggérées {count}"
+        "suggested": "Etiquettes suggérées {{count}}"
     },
     "dogshit": {
         "poo": "Surprise!",

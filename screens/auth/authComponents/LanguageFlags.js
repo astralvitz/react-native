@@ -6,19 +6,15 @@ import {
     StyleSheet,
     TouchableOpacity
 } from 'react-native';
-
-// setLang not working
-// import { getLanguage, setLanguage } from 'react-native-translation';
-// import * as Animatable from 'react-native-animatable';
-import { changeLang } from "../../../reducers/auth_reducer";
-import { useDispatch } from "react-redux";
+import { useTranslation } from 'react-i18next';
 
 // const SCREEN_HEIGHT = Dimensions.get('window').height;
 // const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const LanguageFlags = ({ lang }) => {
+const LanguageFlags = () => {
 
-    const dispatch = useDispatch();
+    const { i18n } = useTranslation();
+    const lang = i18n.language;
 
     const [show, setShow] = useState(false);
     const [langs, setLangs] = useState([
@@ -57,7 +53,7 @@ const LanguageFlags = ({ lang }) => {
     ]);
 
     const change = (lang) => {
-        dispatch(changeLang(lang));
+        i18n.changeLanguage(lang);
 
         toggle();
     }
@@ -114,7 +110,7 @@ const styles = StyleSheet.create({
     top: {
         position: 'absolute',
         top: Platform.OS === 'ios' ? 20 : 40,
-        left: 20,
+        right: 20,
         zIndex: 1
     },
     imageStyle: {borderRadius: 4, width: 60, height: 40}

@@ -274,7 +274,7 @@
     },
     "tags": {
         "type-to-suggest": "Cineál le haghaidh moltaí",
-        "suggested": "Moltaí {count} arna mholadh"
+        "suggested": "Moltaí {{count}} arna mholadh"
     },
     "dogshit": {
         "poo": "Ionadh!",

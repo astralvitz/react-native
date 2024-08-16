@@ -1,8 +1,8 @@
 {
     "level": "مستوى",
-    "level-up": " لرفع المستوى XP {count}",
+    "level-up": " لرفع المستوى XP {{count}}",
     "littercoin": "Littercoin",
-    "next-littercoin": "Littercoin التالي {count}%",
+    "next-littercoin": "Littercoin التالي {{count}}%",
     "photos": "الصور",
     "rank": "مرتبة",
     "tags": "العلامات",

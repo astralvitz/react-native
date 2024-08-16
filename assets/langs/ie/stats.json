@@ -1,6 +1,6 @@
 {
     "global-data": "Sonraí Domhanda",
-    "next-target": "An Chéad Sprioc Eile\n{count} Bruscar",
+    "next-target": "An Chéad Sprioc Eile\n{{count}} Bruscar",
     "total-litter": "Iomlán Bruscar",
     "total-photos": "Iomlán Grianghraif",
     "total-users": "Iomlán Úsáideoirí",

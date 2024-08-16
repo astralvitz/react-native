@@ -271,7 +271,7 @@
     },
     "tags": {
         "type-to-suggest": "Sugiere otras etiquetas",
-        "suggested": "Etiquetas sugeridas {count}"
+        "suggested": "Etiquetas sugeridas {{count}}"
     },
     "dogshit": {
         "poo": "¡Sorpresa!",

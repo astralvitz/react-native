@@ -21,8 +21,11 @@ const resources = {
     pt: { translation: pt }
 };
 
-// import * as RNLocalize from 'react-native-localize';
-// const lang = RNLocalize.getLocales().languageCode;
+// Set default language
+import * as RNLocalize from 'react-native-localize';
+const defaultLang = RNLocalize.getLocales()[0].languageCode;
+const langs = ['en', 'ar', 'de', 'es', 'fr', 'ie', 'nl', 'pt'];
+const lng = langs.includes(defaultLang) ? defaultLang : 'en';
 
 i18n.use(initReactI18next).init({
 
@@ -30,7 +33,7 @@ i18n.use(initReactI18next).init({
 
     resources,
 
-    lng: "en",
+    lng,
 
     fallbackLng: "en",
 

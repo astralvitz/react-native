@@ -94,7 +94,8 @@ const WelcomeScreen: FC = ({ navigation })  => {
                             />
                         </Pressable>
                     </View>
-                    {/*<LanguageFlags lang={lang} />*/}
+
+                    <LanguageFlags />
                 </View>
             </SafeAreaView>
         </>
