@@ -120,11 +120,13 @@ const AnimatedCircle: React.FC<AnimatedCircleProps> = ({
             style={{
                 justifyContent: 'center',
                 alignItems: 'center'
-            }}>
+            }}
+        >
             <Svg
                 height={radius * 2}
                 width={radius * 2}
-                viewBox={`0 0 ${halfCircle * 2} ${halfCircle * 2}`}>
+                viewBox={`0 0 ${halfCircle * 2} ${halfCircle * 2}`}
+            >
                 <G rotation="-90" origin={`${halfCircle}, ${halfCircle}`}>
                     <Circle
                         ref={circleRef}

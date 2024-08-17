@@ -1,4 +1,5 @@
 import axios from "axios";
+import { URL } from '../actions/types';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -54,7 +55,6 @@ export const deleteAccount = createAsyncThunk(
     }
 );
 
-
 export const saveSettings = createAsyncThunk(
     'settings/save',
     async ({ data, value, token }, { rejectWithValue }) => {
@@ -105,7 +105,6 @@ export const saveSettings = createAsyncThunk(
         }
     }
 );
-
 
 export const saveSocialAccounts = createAsyncThunk(
     'settings/saveSocialAccounts',
@@ -176,7 +175,6 @@ export const toggleSettingsSwitch = createAsyncThunk(
     }
 );
 
-
 const settingsSlice = createSlice({
 
     name: 'settings',
@@ -235,7 +233,9 @@ const settingsSlice = createSlice({
         /**
          * User wants to change text in SettingsComponent
          */
-        updateSettingsProp(state, action) {
+        updateSettingsProp (state, action) {
+
+            console.log('updateSettingsProp', action.payload);
             state.settingsEditProp = action.payload;
         }
     },

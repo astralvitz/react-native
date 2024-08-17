@@ -9,8 +9,8 @@ import { Body, Caption, Colors, Header, SubTitle, Title } from '../components';
 import SettingsComponent from './settingComponents/SettingsComponent';
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../reducers/auth_reducer";
-import {saveSettings, toggleSettingsModal, toggleSettingsSwitch} from "../../reducers/settings_reducer";
-import {changeLitterStatus, getUntaggedImages} from "../../reducers/images_reducer";
+import { saveSettings, toggleSettingsModal, toggleSettingsSwitch } from "../../reducers/settings_reducer";
+import { changeLitterStatus, getUntaggedImages } from "../../reducers/images_reducer";
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -23,14 +23,11 @@ const SettingsScreen = ({ navigation }) => {
     const [isCountryPickerVisible, setIsCountryPickerVisible] = useState(false);
     const [isFlagVisible, setIsFlagVisible] = useState(false);
 
-    const { settingsModalVisible, token, user, wait, settingsEdit } = useSelector((state) => ({
-        lang: state.auth.lang,
-        settingsModalVisible: state.settings.settingsModalVisible,
-        token: state.auth.token,
-        user: state.auth.user,
-        wait: state.settings.wait,
-        settingsEdit: state.settings.settingsEdit,
-    }));
+    const user = useSelector(state => state.auth.user);
+    const token = useSelector(state => state.auth.token);
+    const settingsModalVisible = useSelector(state => state.settings.settingsModalVisible);
+    const wait = useSelector(state => state.settings.wait);
+    const settingsEdit = useSelector(state => state.settings.settingsEdit);
 
     const countryCode = user?.global_flag && user?.global_flag?.toUpperCase();
 
@@ -62,9 +59,7 @@ const SettingsScreen = ({ navigation }) => {
                     >
                         <Body dictionary={`${item.title}`} />
 
-                        {/* dont show any data if key is social
-                            we dont have any particular data to show now
-                        */}
+                        {/* dont show any data if key is social; we dont have any particular data to show now */}
                         {item?.key !== 'social' && (
                             <Body>{getRowData(item.id, item?.key)}</Body>
                         )}
@@ -193,7 +188,7 @@ const SettingsScreen = ({ navigation }) => {
                         if (key === 'picked_up') {
                             // Toggle picked_up value
                             // sending opposite of current value to api
-                            dispatch(saveSettings({
+                            await dispatch(saveSettings({
                                 data: {id: 11, key: 'picked_up'},
                                 value: !user?.picked_up,
                                 token
@@ -208,7 +203,7 @@ const SettingsScreen = ({ navigation }) => {
                         }
                         else if (key === 'global_flag')
                         {
-                            dispatch(saveSettings({
+                            await dispatch(saveSettings({
                                 data: {key: 'global_flag'},
                                 value: countryCode.toLowerCase(),
                                 token
@@ -217,10 +212,10 @@ const SettingsScreen = ({ navigation }) => {
                         else if (key === 'enable_admin_tagging')
                         {
                             if (user.enable_admin_tagging) {
-                                dispatch(getUntaggedImages(token));
+                                await dispatch(getUntaggedImages(token));
                             }
 
-                            dispatch(saveSettings({
+                            await dispatch(saveSettings({
                                 data: { key: 'enable_admin_tagging' },
                                 value: !user.enable_admin_tagging,
                                 token
@@ -229,7 +224,7 @@ const SettingsScreen = ({ navigation }) => {
                         else
                         {
                             // Privacy Settings
-                            dispatch(toggleSettingsSwitch({ id, token }));
+                            await dispatch(toggleSettingsSwitch({ id, token }));
                         }
                     }
                 },
@@ -291,8 +286,7 @@ const SettingsScreen = ({ navigation }) => {
         <View style={{flex: 1}}>
             <Header
                 leftContent={
-                    <Pressable
-                        onPress={() => navigation.goBack()}>
+                    <Pressable onPress={() => navigation.goBack()}>
                         <Icon
                             name="chevron-back-outline"
                             color={Colors.white}
@@ -320,7 +314,8 @@ const SettingsScreen = ({ navigation }) => {
                 <Modal
                     animationType="slide"
                     transparent={true}
-                    visible={settingsModalVisible}>
+                    visible={settingsModalVisible}
+                >
                     {wait && (
                         <View style={styles.waitModal}>
                             <ActivityIndicator />
@@ -463,9 +458,8 @@ const SettingsScreen = ({ navigation }) => {
                                 style={{
                                     textAlign: 'center',
                                     marginVertical: 20
-                                }}>
-                                Version {DeviceInfo.getVersion()}
-                            </Caption>
+                                }}
+                            >Version {DeviceInfo.getVersion()}</Caption>
                         }
                     />
                 </View>
@@ -484,7 +478,8 @@ const SettingsScreen = ({ navigation }) => {
                         alignItems: 'center',
                         backgroundColor: 'white',
                         justifyContent: 'center'
-                    }}>
+                    }}
+                >
                     <Body style={{textAlign: 'center'}}>
                         Do you want to change picked up status of all the images ?
                     </Body>
@@ -493,7 +488,8 @@ const SettingsScreen = ({ navigation }) => {
                             marginTop: 20,
                             marginBottom: 40,
                             width: SCREEN_WIDTH - 40
-                        }}>
+                        }}
+                    >
                         <Pressable
                             onPress={() => {
                                 dispatch(changeLitterStatus(user?.picked_up));
@@ -506,12 +502,14 @@ const SettingsScreen = ({ navigation }) => {
                                     backgroundColor: Colors.accent,
                                     marginVertical: 20
                                 }
-                            ]}>
+                            ]}
+                        >
                             <Body color="white">Yes, Change</Body>
                         </Pressable>
                         <Pressable
                             onPress={actionSheetRef.current?.hide}
-                            style={[styles.actionButtonStyle]}>
+                            style={[styles.actionButtonStyle]}
+                        >
                             <Body color="accent">No, Don't Change</Body>
                         </Pressable>
                     </View>
