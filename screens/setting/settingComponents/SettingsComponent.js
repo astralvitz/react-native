@@ -20,8 +20,11 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {
     closeSecondSettingModal,
     deleteAccount,
+    saveSettings,
     saveSocialAccounts,
-    setDeleteAccountError, settingsInit, toggleSettingsModal,
+    setDeleteAccountError,
+    settingsInit,
+    toggleSettingsModal,
     updateSettingsProp
 } from "../../../reducers/settings_reducer";
 
@@ -63,7 +66,8 @@ const SettingsComponent = () => {
         const validationSchema = Yup.object().shape(getSchema(formDataToEdit.key));
 
         // form for name, username, email
-        if (key.includes(formDataToEdit.key)) {
+        if (key.includes(formDataToEdit.key))
+        {
             return (
                 {settingsEditProp} && (
                     <Formik
@@ -72,8 +76,11 @@ const SettingsComponent = () => {
                         innerRef={formikRef}
                         validationSchema={validationSchema}
                         onSubmit={values => {
-                            console.log({ values });
-                            // dispatch(saveSettings({ formDataToEdit, settingsEditProp, token }));
+                            dispatch(saveSettings({
+                                dataKey: formDataToEdit.key,
+                                dataValue: values[formDataToEdit.key],
+                                token
+                            }));
                         }}
                     >
                         {({
@@ -106,7 +113,9 @@ const SettingsComponent = () => {
                     </Formik>
                 )
             );
-        } else if (formDataToEdit.key === 'social') {
+        }
+        else if (formDataToEdit.key === 'social')
+        {
             const formFields = [
                 'twitter',
                 'facebook',
@@ -241,7 +250,6 @@ const SettingsComponent = () => {
     };
 
     const changeTextHandler = (txt) => {
-
         setPassword(txt);
 
         if (deleteAccountError !== '') {
@@ -361,7 +369,7 @@ const SettingsComponent = () => {
         return edit + ' ' + text;
     }
 
-    const saveSettings = () => {
+    const handleSaveSettings = () => {
         if (formikRef.current) {
             formikRef.current.handleSubmit();
         }
@@ -426,7 +434,7 @@ const SettingsComponent = () => {
                 }
                 rightContent={
                     dataToEdit.key !== 'delete-account' ? (
-                        <Pressable onPress={saveSettings}>
+                        <Pressable onPress={handleSaveSettings}>
                             <Body
                                 color="white"
                                 dictionary={`settings.save`}

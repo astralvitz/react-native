@@ -2,6 +2,8 @@ import axios from "axios";
 import { URL } from '../actions/types';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { updateUserObject } from './auth_reducer';
+import { clearUploadedWebImages } from './images_reducer';
 
 const initialState = {
     model: '',
@@ -57,7 +59,7 @@ export const deleteAccount = createAsyncThunk(
 
 export const saveSettings = createAsyncThunk(
     'settings/save',
-    async ({ data, value, token }, { rejectWithValue }) => {
+    async ({ dataKey, dataValue, token }, { rejectWithValue, dispatch }) => {
 
         const keyMap = {
             name: 'Name',
@@ -68,7 +70,7 @@ export const saveSettings = createAsyncThunk(
             enable_admin_tagging: 'enable_admin_tagging'
         };
 
-        const key = keyMap[data.key] || data.key; // Default to the original key if not mapped
+        const key = keyMap[dataKey] || dataKey; // Default to the original key if not mapped
 
         try
         {
@@ -81,18 +83,36 @@ export const saveSettings = createAsyncThunk(
                 },
                 data: {
                     key,
-                    value
+                    value: dataValue
                 }
             });
 
-            console.log('saveSettings', response.data);
-
             if (response.data.success) {
+                // Get user and parse json to Object
+                let user = await AsyncStorage.getItem('user');
+
+                user = JSON.parse(user);
+
+                // update user object
+                user[key] = dataValue;
+
+                // save updated user data
+                await AsyncStorage.setItem('user', JSON.stringify(user));
+
+                dispatch(updateUserObject(user));
+
+                if (key === 'enable_admin_tagging') {
+                    // value is what we just applied
+                    if (dataValue) {
+                        dispatch(clearUploadedWebImages());
+                    }
+                }
+
                 return {
-                    key: data.key,
-                    value: data.value,
+                    key: dataKey,
+                    value: dataValue,
                     message: 'SUCCESS',
-                    clearUploadedImages: key === 'enable_admin_tagging' && value
+                    clearUploadedImages: key === 'enable_admin_tagging' && dataValue
                 };
             } else {
                 rejectWithValue('Failed to update settings');
@@ -108,7 +128,7 @@ export const saveSettings = createAsyncThunk(
 
 export const saveSocialAccounts = createAsyncThunk(
     'settings/saveSocialAccounts',
-    async ({ value, token }, { rejectWithValue }) => {
+    async ({ value, token }, { rejectWithValue, dispatch }) => {
         try
         {
             const response = await axios({
@@ -124,6 +144,14 @@ export const saveSocialAccounts = createAsyncThunk(
             });
 
             if (response?.data?.message === 'success') {
+
+                let user = await AsyncStorage.getItem('user');
+                user = JSON.parse(user);
+                user.settings = value;
+                await AsyncStorage.setItem('user', JSON.stringify(user));
+
+                dispatch(updateUserObject(user));
+
                 return 'SUCCESS';
             } else {
                 rejectWithValue('ERROR');
@@ -131,7 +159,7 @@ export const saveSocialAccounts = createAsyncThunk(
         }
         catch (error)
         {
-            console.log('saveSettings', error);
+            console.log('saveSocialAccounts', error);
             return rejectWithValue('ERROR');
         }
     }
@@ -139,7 +167,7 @@ export const saveSocialAccounts = createAsyncThunk(
 
 export const toggleSettingsSwitch = createAsyncThunk(
     'settings/toggleSwitch',
-    async ({ id, token }, { rejectWithValue }) => {
+    async ({ id, token }, { rejectWithValue, dispatch }) => {
         const endpointMap = {
             4: 'maps/name',
             5: 'maps/username',
@@ -164,6 +192,23 @@ export const toggleSettingsSwitch = createAsyncThunk(
             console.log('Response: toggleSettingsSwitch', response.data);
 
             if (response.status === 200) {
+
+                const key = Object.keys(action.payload)[0];
+                let value = Object.values(action.payload)[0];
+
+                // Convert boolean values to 0 or 1 for certain keys
+                if (key !== 'show_name' && key !== 'show_username') {
+                    value = value === false ? 0 : 1;
+                }
+
+                let user = await AsyncStorage.getItem('user');
+                user = JSON.parse(user);
+                user[key] = value;
+
+                await AsyncStorage.setItem('user', JSON.stringify(user));
+
+                dispatch(updateUserObject(user));
+
                 return response.data;
             } else {
                 rejectWithValue('Failed to update settings');
@@ -234,8 +279,6 @@ const settingsSlice = createSlice({
          * User wants to change text in SettingsComponent
          */
         updateSettingsProp (state, action) {
-
-            console.log('updateSettingsProp', action.payload);
             state.settingsEditProp = action.payload;
         }
     },
@@ -260,34 +303,8 @@ const settingsSlice = createSlice({
                 state.secondSettingsModalVisible = true;
                 state.updatingSettings = true;
             })
-            .addCase(saveSettings.fulfilled, async (state, action) => {
-
-                // Get user and parse json to Object
-                let user = await AsyncStorage.getItem('user');
-
-                user = JSON.parse(user);
-
-                // update user object
-                user[action.payload.key] = action.payload.value;
-
-                // save updated user data
-                await AsyncStorage.setItem('user', JSON.stringify(user));
-
-                // dispatch({
-                //     type: UPDATE_USER_OBJECT,
-                //     payload: user
-                // });
-
+            .addCase(saveSettings.fulfilled, (state, action) => {
                 state.updateSettingsStatusMessage = action.payload.message;
-
-                // if (key === 'enable_admin_tagging') {
-                //     // value is what we just applied
-                //     if (value) {
-                //         dispatch({
-                //             type: 'CLEAR_UPLOADED_WEB_IMAGES'
-                //         });
-                //     }
-                // }
             })
             .addCase(saveSettings.rejected, (state, action) => {
                 state.updateSettingsStatusMessage = payload.action;
@@ -299,17 +316,6 @@ const settingsSlice = createSlice({
                 state.updatingSettings = true;
             })
             .addCase(saveSocialAccounts.fulfilled, async (state, action) => {
-
-                let user = await AsyncStorage.getItem('user');
-                user = JSON.parse(user);
-                user.settings = value;
-                await AsyncStorage.setItem('user', JSON.stringify(user));
-
-                // dispatch({
-                //     type: UPDATE_USER_OBJECT,
-                //     payload: user
-                // });
-
                 state.updateSettingsStatusMessage = action.payload.message;
             })
             .addCase(saveSocialAccounts.rejected, (state, action) => {
@@ -320,26 +326,6 @@ const settingsSlice = createSlice({
                 state.wait = true;
             })
             .addCase(toggleSettingsSwitch.fulfilled, async (state, action) => {
-
-                const key = Object.keys(action.payload)[0];
-                let value = Object.values(action.payload)[0];
-
-                // Convert boolean values to 0 or 1 for certain keys
-                if (key !== 'show_name' && key !== 'show_username') {
-                    value = value === false ? 0 : 1;
-                }
-
-                let user = await AsyncStorage.getItem('user');
-                user = JSON.parse(user);
-                user[key] = value;
-
-                await AsyncStorage.setItem('user', JSON.stringify(user));
-
-                // dispatch({
-                //     type: UPDATE_USER_OBJECT,
-                //     payload: user
-                // });
-
                 state.wait = false;
             })
             .addCase(toggleSettingsSwitch.rejected, (state) => {
