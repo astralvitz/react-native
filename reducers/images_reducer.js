@@ -89,9 +89,6 @@ export const getUntaggedImages = createAsyncThunk(
         }
         catch (error)
         {
-            console.error('getUntaggedImages error:', error.response || error.message);
-            console.log(error);
-
             // Return a reject action with value if an error occurs
             return rejectWithValue(error.response?.data || 'Network Error');
         }
@@ -126,8 +123,6 @@ export const uploadImage = createAsyncThunk(
         }
         catch (error)
         {
-            console.error('uploadImage.error', error);
-
             let errorMessage = 'none';
 
             if (error.response)
@@ -375,9 +370,6 @@ const imagesSlice = createSlice({
 
         /**
          * Changes litter picked up status of all images
-         * to payload
-         *
-         * action.payload -- {boolean}
          */
         changeLitterStatus (state, action) {
             state.imagesArray.map(img => (img.picked_up = action.payload));

@@ -2,7 +2,7 @@ import axios from "axios";
 import { URL } from '../actions/types';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { updateUserObject } from './auth_reducer';
+import {changeUsersPickedUp, updateUserObject} from './auth_reducer';
 import { clearUploadedWebImages } from './images_reducer';
 
 const initialState = {
@@ -93,7 +93,6 @@ export const saveSettings = createAsyncThunk(
 
                 user = JSON.parse(user);
 
-                // update user object
                 user[key] = dataValue;
 
                 // save updated user data
@@ -102,7 +101,6 @@ export const saveSettings = createAsyncThunk(
                 dispatch(updateUserObject(user));
 
                 if (key === 'enable_admin_tagging') {
-                    // value is what we just applied
                     if (dataValue) {
                         dispatch(clearUploadedWebImages());
                     }
@@ -128,7 +126,9 @@ export const saveSettings = createAsyncThunk(
 
 export const saveSocialAccounts = createAsyncThunk(
     'settings/saveSocialAccounts',
-    async ({ value, token }, { rejectWithValue, dispatch }) => {
+    async ({ values, token }, { rejectWithValue, dispatch }) => {
+
+        console.log({ values });
         try
         {
             const response = await axios({
@@ -139,15 +139,17 @@ export const saveSocialAccounts = createAsyncThunk(
                     'content-type': 'application/json'
                 },
                 data: {
-                    ...value
+                    ...values
                 }
             });
+
+            console.log(response.data);
 
             if (response?.data?.message === 'success') {
 
                 let user = await AsyncStorage.getItem('user');
                 user = JSON.parse(user);
-                user.settings = value;
+                user.settings = values;
                 await AsyncStorage.setItem('user', JSON.stringify(user));
 
                 dispatch(updateUserObject(user));
@@ -192,9 +194,8 @@ export const toggleSettingsSwitch = createAsyncThunk(
             console.log('Response: toggleSettingsSwitch', response.data);
 
             if (response.status === 200) {
-
-                const key = Object.keys(action.payload)[0];
-                let value = Object.values(action.payload)[0];
+                const key = Object.keys(response.data)[0];
+                let value = Object.values(response.data)[0];
 
                 // Convert boolean values to 0 or 1 for certain keys
                 if (key !== 'show_name' && key !== 'show_username') {
@@ -255,6 +256,8 @@ const settingsSlice = createSlice({
          * to be used as initial value in textfield in edit modal
          */
         settingsInit (state, action) {
+
+            console.log('settingsInit', action.payload);
             state.settingsEditProp = action.payload;
         },
 
@@ -307,7 +310,7 @@ const settingsSlice = createSlice({
                 state.updateSettingsStatusMessage = action.payload.message;
             })
             .addCase(saveSettings.rejected, (state, action) => {
-                state.updateSettingsStatusMessage = payload.action;
+                state.updateSettingsStatusMessage = action.payload;
             })
 
             // Save Social Accounts
@@ -315,20 +318,20 @@ const settingsSlice = createSlice({
                 state.secondSettingsModalVisible = true;
                 state.updatingSettings = true;
             })
-            .addCase(saveSocialAccounts.fulfilled, async (state, action) => {
-                state.updateSettingsStatusMessage = action.payload.message;
+            .addCase(saveSocialAccounts.fulfilled, (state, action) => {
+                state.updateSettingsStatusMessage = action.payload;
             })
             .addCase(saveSocialAccounts.rejected, (state, action) => {
                 state.updateSettingsStatusMessage = action.payload;
             })
 
-            .addCase(toggleSettingsSwitch.pending, (state) => {
+            .addCase(toggleSettingsSwitch.pending, (state, action) => {
                 state.wait = true;
             })
-            .addCase(toggleSettingsSwitch.fulfilled, async (state, action) => {
+            .addCase(toggleSettingsSwitch.fulfilled, (state, action) => {
                 state.wait = false;
             })
-            .addCase(toggleSettingsSwitch.rejected, (state) => {
+            .addCase(toggleSettingsSwitch.rejected, (state, action) => {
                 state.wait = false;
             });
 

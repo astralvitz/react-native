@@ -225,7 +225,7 @@ const authSlice = createSlice({
          * Logout user
          * reset state to initial
          */
-        logout (state) {
+        logout () {
             AsyncStorage.clear();
 
             return initialState;
@@ -340,9 +340,13 @@ const authSlice = createSlice({
 });
 
 export const {
-    changeActiveTeam, changeLang,
-    accountCreated, logout, loginOrSignupReset, tokenIsValid,
-    userFound, updateUserObject
+    accountCreated,
+    changeActiveTeam,
+    logout,
+    loginOrSignupReset,
+    tokenIsValid,
+    userFound,
+    updateUserObject
 } = authSlice.actions;
 
 export default authSlice.reducer;

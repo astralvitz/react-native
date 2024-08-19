@@ -91,7 +91,9 @@ const TabRoutes: React.FC = () => (
                 tabBarShowIcon: true,
                 tabBarShowLabel: false,
                 tabBarIconStyle: {
-                    height: 50
+                    height: 50,
+                    justifyContent: 'center',
+                    alignItems: 'center'
                 },
                 pressColor: 'white',
                 pressOpacity: 0,

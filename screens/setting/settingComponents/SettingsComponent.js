@@ -54,12 +54,8 @@ const SettingsComponent = () => {
     const updatingSettings = useSelector(state => state.settings.updatingSettings);
     const deleteAccountError = useSelector(state => state.settings.deleteAccountError);
 
-    console.log({ dataToEdit });
-    console.log({ settingsEditProp });
-
     const getForm = (formDataToEdit) => {
 
-        console.log('getForm', formDataToEdit);
         const key = ['name', 'username', 'email'];
 
         // get conditional validation schema
@@ -97,11 +93,7 @@ const SettingsComponent = () => {
 
                                 <CustomTextInput
                                     style={styles.content}
-                                    // ref={this.usernameRef}
-                                    onChangeText={text => {
-                                        setFieldValue(`${formDataToEdit.key}`, text);
-                                        // dispatch(updateSettingsProp({ text }));
-                                    }}
+                                    onChangeText={text => { setFieldValue(`${formDataToEdit.key}`, text); }}
                                     value={values[`${formDataToEdit.key}`]}
                                     name={`${formDataToEdit.key}`}
                                     autoCapitalize="none"
@@ -117,38 +109,37 @@ const SettingsComponent = () => {
         else if (formDataToEdit.key === 'social')
         {
             const formFields = [
-                'twitter',
-                'facebook',
-                'instagram',
-                'linkedin',
-                'reddit',
-                'personal'
+                'social_twitter',
+                'social_facebook',
+                'social_instagram',
+                'social_linkedin',
+                'social_reddit',
+                'social_personal'
             ];
             const placeholders = [
-                'https://twitter.com/olm',
-                'https://www.facebook.com/olm',
-                'https://www.instagram.com/olm',
-                'https://www.linkedin.com/olm',
-                'https://www.reddit.com/user/olm/',
-                'https://www.openlittermap.com'
+                'https://twitter.com/openlittermap',
+                'https://facebook.com/openlittermap',
+                'https://instagram.com/openlittermap',
+                'https://linkedin.com/openlittermap',
+                'https://reddit.com/r/openlittermap/',
+                'https://openlittermap.com'
             ];
             return (
                 <Formik
                     initialValues={{
-                        twitter: settingsEditProp?.social_twitter,
-                        facebook: settingsEditProp?.social_facebook,
-                        instagram:
-                        settingsEditProp?.social_instagram,
-                        linkedin: settingsEditProp?.social_linkedin,
-                        reddit: settingsEditProp?.social_reddit,
-                        personal: settingsEditProp?.social_personal
+                        social_twitter: settingsEditProp?.social_twitter,
+                        social_facebook: settingsEditProp?.social_facebook,
+                        social_instagram: settingsEditProp?.social_instagram,
+                        social_linkedin: settingsEditProp?.social_linkedin,
+                        social_reddit: settingsEditProp?.social_reddit,
+                        social_personal: settingsEditProp?.social_personal
                     }}
+                    enableReinitialize={true}
                     innerRef={formikRef}
                     validationSchema={validationSchema}
                     onSubmit={values => {
                         dispatch(saveSocialAccounts({
-                            formDataToEdit,
-                            settingsEditProp,
+                            values,
                             token
                         }));
                     }}
@@ -164,25 +155,11 @@ const SettingsComponent = () => {
                                     <Body>{field.toLocaleUpperCase()}</Body>
                                     <CustomTextInput
                                         style={styles.content}
-                                        onEndEditing={() =>
-                                            setFieldTouched(`${field}`, true)
-                                        }
+                                        onEndEditing={() => setFieldTouched(`${field}`, true)}
                                         onChangeText={text => {
                                             setFieldValue(`${field}`, text);
-
-                                            // updateSettingsProp(
-                                            //     {
-                                            //         ...this.props
-                                            //             .settingsEditProp,
-                                            //         [`social_${field}`]: text
-                                            //     },
-                                            //     'social'
-                                            // );
                                         }}
-                                        value={
-                                            settingsEditProp &&
-                                            settingsEditProp[`social_${field}`]
-                                        }
+                                        value={settingsEditProp && settingsEditProp[`${field}`]}
                                         name={`${field}`}
                                         autoCapitalize="none"
                                         error={errors[`${field}`] && `settings.${errors[`${field}`]}`}
@@ -308,9 +285,16 @@ const SettingsComponent = () => {
      * render modal messages based on vale of updateSettingsStatusMessage
      * ERROR || SUCCESS
      */
-    const renderStatusMessage = (status, lang) => {
-        let success = status === 'SUCCESS';
-        let error = status === 'ERROR';
+    const renderStatusMessage = (status) => {
+        const success = status === 'SUCCESS';
+        const error = status === 'ERROR';
+
+        const successTitle = t(`settings.success`);
+        const successMessage = t(`settings.value-updated`);
+        const errorTitle = t(`settings.error`);
+        const errorMessage = t(`settings.value-not-updated`);
+
+        const goBackMessage = t(`settings.go-back`);
 
         if (success || error)
         {
@@ -325,11 +309,11 @@ const SettingsComponent = () => {
                     {/*/>*/}
 
                     <Text style={styles.innerModalHeader}>
-                        t({success ? `settings.success` : `settings.error`})
+                        { success ? successTitle : errorTitle }
                     </Text>
 
                     <Text>
-                        t({ success ? `settings.value-updated` : `settings.value-not-updated`})
+                        { success ? successMessage : errorMessage }
                     </Text>
 
                     <TouchableHighlight
@@ -339,7 +323,7 @@ const SettingsComponent = () => {
                         onPress={goBack}
                     >
                         <Text style={styles.buttonText}>
-                            t(`settings.go-back`)
+                            { goBackMessage }
                         </Text>
                     </TouchableHighlight>
                 </View>

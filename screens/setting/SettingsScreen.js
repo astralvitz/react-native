@@ -1,9 +1,9 @@
 import React, { createRef, useState } from 'react';
 import { ActivityIndicator, Alert, Dimensions, Modal, Pressable, SectionList, StyleSheet, Switch, View} from 'react-native';
-import { useTranslation } from 'react-i18next';
 import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ActionSheet from 'react-native-actions-sheet';
+import { useTranslation } from "react-i18next";
 // import CountryPicker, {Flag} from 'react-native-country-picker-modal';
 import { Body, Caption, Colors, Header, SubTitle, Title } from '../components';
 import SettingsComponent from './settingComponents/SettingsComponent';
@@ -19,6 +19,7 @@ const SettingsScreen = ({ navigation }) => {
 
     const dispatch = useDispatch();
     const actionSheetRef = createRef();
+    const { t } = useTranslation();
 
     const [isCountryPickerVisible, setIsCountryPickerVisible] = useState(false);
     const [isFlagVisible, setIsFlagVisible] = useState(false);
@@ -162,8 +163,8 @@ const SettingsScreen = ({ navigation }) => {
         let title = '';
         let subtitle = '';
 
-        const ok = useTranslation(`settings.ok`);
-        const cancel = useTranslation(`settings.cancel`);
+        const ok = t(`settings.ok`);
+        const cancel = t(`settings.cancel`);
 
         // Needs translation
         if (key === 'enable_admin_tagging') {
@@ -185,27 +186,23 @@ const SettingsScreen = ({ navigation }) => {
                 {
                     text: ok,
                     onPress: async () => {
-                        if (key === 'picked_up') {
+
+                        if (key === 'picked-up') {
+
                             // Toggle picked_up value
-                            // sending opposite of current value to api
                             await dispatch(saveSettings({
-                                data: {id: 11, key: 'picked_up'},
-                                value: !user?.picked_up,
+                                dataKey: 'picked_up',
+                                dataValue: !user?.picked_up,
                                 token
                             }));
 
                             actionSheetRef.current?.setModalVisible();
-
-                            // changeLitterStatus(
-                            //     user?.picked_up
-                            // );
-
                         }
                         else if (key === 'global_flag')
                         {
                             await dispatch(saveSettings({
-                                data: {key: 'global_flag'},
-                                value: countryCode.toLowerCase(),
+                                dataKey: 'global_flag',
+                                dataValue: countryCode.toLowerCase(),
                                 token
                             }));
                         }
@@ -216,8 +213,8 @@ const SettingsScreen = ({ navigation }) => {
                             }
 
                             await dispatch(saveSettings({
-                                data: { key: 'enable_admin_tagging' },
-                                value: !user.enable_admin_tagging,
+                                dataKey: 'enable_admin_tagging',
+                                dataValue: !user.enable_admin_tagging,
                                 token
                             }));
                         }
@@ -273,7 +270,7 @@ const SettingsScreen = ({ navigation }) => {
             // case 10:
             //     return user?.previous_tag;
             //     break;
-            case 'settings.picked-up':
+            case 'picked-up':
                 return user?.picked_up === false ? 0 : 1;
             case 'enable_admin_tagging':
                 return Number(user?.enable_admin_tagging);
@@ -361,11 +358,6 @@ const SettingsScreen = ({ navigation }) => {
                                     {
                                         id: 4,
                                         key: 'social',
-                                        title: 'settings.social'
-                                    },
-                                    {
-                                        id: 5,
-                                        key: 'country',
                                         title: 'settings.social'
                                     }
                                 ]
