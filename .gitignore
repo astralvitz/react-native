@@ -35,6 +35,10 @@ local.properties
 *.keystore
 !debug.keystore
 
+# Exclude Android Signing Keys
+/android/app/OpenLitterMap.bak.jks
+/android/app/OpenLitterMapNew.p12
+
 # node.js
 #
 node_modules/

@@ -1,4 +1,4 @@
-package com.openlittermap
+package com.geotech.openlittermap
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

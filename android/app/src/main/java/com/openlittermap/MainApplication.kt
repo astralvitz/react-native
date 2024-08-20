@@ -1,4 +1,4 @@
-package com.openlittermap
+package com.geotech.openlittermap
 
 import android.app.Application
 import com.facebook.react.PackageList
