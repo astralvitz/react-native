@@ -12,16 +12,12 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TeamDetailsScreen = ({ navigation }) =>{
 
     const dispatch = useDispatch();
-
     const actionSheetRef = useRef();
-
     const [isLoading, setIsLoading] = useState(false);
 
-    const { selectedTeam, user, token } = useSelector(state => ({
-        token: state.auth.token,
-        user: state.auth.user,
-        selectedTeam: state.teams.selectedTeam
-    }));
+    const { selectedTeam } = useSelector(state => state.teams.selectedTeam);
+    const { user } = useSelector(state => state.auth.user);
+    const { token } = useSelector(state => state.auth.token);
 
     /**
      * activate team

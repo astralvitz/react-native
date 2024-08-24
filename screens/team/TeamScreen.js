@@ -43,6 +43,10 @@ const TeamScreen = ({ navigation }) => {
         dispatch(clearTeamsForm());
     };
 
+    const navigateToTopTeams = () => {
+        navigation.navigate('TOP_TEAMS');
+    }
+
     return (
         <>
             <Header
@@ -73,7 +77,7 @@ const TeamScreen = ({ navigation }) => {
                     {/* Top Teams */}
                     <View style={styles.headingRow}>
                         <SubTitle>Top Teams</SubTitle>
-                        <Pressable onPress={() => navigation.navigate('TOP_TEAMS') }>
+                        <Pressable onPress={navigateToTopTeams} style={{ backgroundColor: 'red', padding: 5 }}>
                             <Caption color="accent">View All</Caption>
                         </Pressable>
                     </View>

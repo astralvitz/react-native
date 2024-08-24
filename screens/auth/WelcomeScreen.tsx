@@ -1,6 +1,7 @@
 import React, { FC } from 'react';
 import {
     Dimensions,
+    Platform,
     Pressable,
     SafeAreaView,
     StatusBar,
@@ -49,6 +50,8 @@ const WelcomeScreen: FC = ({ navigation })  => {
         });
     }
 
+    const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight : 0;
+
     /**
      * Welcome on-boarding screen [1,2,3]
      */
@@ -56,11 +59,10 @@ const WelcomeScreen: FC = ({ navigation })  => {
         <>
             <StatusBar
                 translucent
-                // hidden
                 barStyle="dark-content"
                 backgroundColor={`${Colors.accentLight}`}
             />
-            <SafeAreaView style={{flex: 1, backgroundColor: Colors.accentLight}}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: Colors.accentLight, paddingTop: statusBarHeight }}>
 
                 <View style={{ flex: 1, backgroundColor: Colors.accentLight }}>
 

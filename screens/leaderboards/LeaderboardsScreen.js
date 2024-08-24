@@ -105,15 +105,28 @@ const LeaderboardsScreen = () => {
                         renderItem={({item}) => (
                             <View style={styles.row}>
                                 <Text style={styles.rank}>{item.rank}</Text>
-                                <Image
-                                    source={flagsObj[item.global_flag]}
-                                    resizeMethod="auto"
-                                    resizeMode="cover"
-                                    style={{
-                                        height: SCREEN_HEIGHT * 0.02,
-                                        width: SCREEN_WIDTH * 0.05
-                                    }}
-                                />
+
+                                {
+                                    item.global_flag ? (
+                                        <Image
+                                            source={flagsObj[item.global_flag]}
+                                            resizeMethod="auto"
+                                            resizeMode="cover"
+                                            style={{
+                                                height: SCREEN_HEIGHT * 0.02,
+                                                width: SCREEN_WIDTH * 0.05
+                                            }}
+                                        />
+                                    ) : (
+                                        <View
+                                            style={{
+                                                height: SCREEN_HEIGHT * 0.02,
+                                                width: SCREEN_WIDTH * 0.05
+                                            }}
+                                        />
+                                    )
+                                }
+
                                 <Text style={styles.username}>
                                     {item.username || item.name || 'Anon'}
                                 </Text>

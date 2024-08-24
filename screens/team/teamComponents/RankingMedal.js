@@ -1,6 +1,7 @@
 import React from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import {Dimensions, Image, StyleSheet, View} from 'react-native';
 import { Body } from '../../components';
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const medals = {
     gold: require('../../../assets/icons/gold-medal.png'),
@@ -36,7 +37,7 @@ const RankingMedal = ({index}) => {
                 />
             ) : (
                 <View style={[styles.container]}>
-                    <Body style={{textAlign: 'center'}}>{index + 1}</Body>
+                    <Body style={{textAlign: 'center', width: SCREEN_WIDTH * 0.1 }}>{index + 1}</Body>
                 </View>
             )}
         </>

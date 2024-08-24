@@ -9,8 +9,10 @@ import TeamListCard from './TeamListCard';
 const UserTeamsList = ({ navigation }) => {
 
     const dispatch = useDispatch();
-
     const token = useSelector(state => state.auth.token);
+    const userTeams = useSelector(state => state.teams.userTeams);
+    const user = useSelector(state => state.auth.user);
+    const activeTeam = user?.active_team_id;
 
     useEffect(() => {
         async function handleGetUserTeams(token) {
@@ -26,9 +28,9 @@ const UserTeamsList = ({ navigation }) => {
         navigation.navigate('TEAM_DETAILS');
     };
 
-    const userTeams = useSelector(state => state.teams.userTeams);
-    const user = useSelector(state => state.auth.user);
-    const activeTeam = user?.active_team_id;
+    const navigateToTeamDetails = () => {
+        navigation.navigate('TEAM_DETAILS');
+    }
 
     return (
         <>
@@ -36,7 +38,12 @@ const UserTeamsList = ({ navigation }) => {
             <View style={[styles.headingRow, { marginTop: 20 }]}>
                 <SubTitle>My Teams</SubTitle>
 
-                <Caption color="accent">View All</Caption>
+                <Pressable onPress={navigateToTeamDetails}>
+                    <Caption
+                        color="accent"
+                        style={{ backgroundColor: 'red', padding: 5 }}
+                    >View All</Caption>
+                </Pressable>
             </View>
 
             {userTeams?.map((team, index) => (

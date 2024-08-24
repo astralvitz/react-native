@@ -206,8 +206,6 @@ export const getTopTeams = createAsyncThunk(
                 }
             });
 
-            console.log('getTopTeams.response');
-
             if (!response.data) {
                 return rejectWithValue('No data received');
             }

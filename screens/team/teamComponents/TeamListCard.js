@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import {Dimensions, StyleSheet, View} from 'react-native';
 import React from 'react';
 import RankingMedal from './RankingMedal';
 import { Body, Caption } from '../../components';
