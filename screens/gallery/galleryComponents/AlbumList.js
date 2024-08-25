@@ -1,54 +1,50 @@
-import React, { Component } from 'react';
+import React, { useEffect} from 'react';
 import { StyleSheet, View, ActivityIndicator } from 'react-native';
-import { connect } from 'react-redux';
-import * as actions from '../../../actions';
+import { useDispatch, useSelector } from 'react-redux';
 import { Colors, Body } from '../../components';
 import AlbumCard from './AlbumCard';
+import { getPhotosFromCameraroll } from "../../../reducers/gallery_reducer";
 
-class AlbumList extends Component {
-    constructor(props) {
-        super(props);
-    }
-    componentDidMount() {
-        this.props.getPhotosFromCameraroll();
+const AlbumList = () => {
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(getPhotosFromCameraroll())
+    }, [])
+
+    const { imagesLoading, geotaggedImages } = useSelector(state => state.gallery);
+
+    if (geotaggedImages?.length > 0) {
+        return (
+            <AlbumCard
+                albumName="Geotagged"
+                thumbnail={geotaggedImages[0]?.uri}
+                counter={geotaggedImages.length}
+                navigation={navigation}
+            />
+        );
     }
 
-    render() {
-        if (this.props.geotaggedImages?.length > 0) {
-            return (
-                <AlbumCard
-                    albumName="Geotagged"
-                    thumbnail={this.props.geotaggedImages[0]?.uri}
-                    counter={this.props.geotaggedImages.length}
-                    navigation={this.props.navigation}
+    if (imagesLoading)
+    {
+        return (
+            <View style={styles.container}>
+                <ActivityIndicator
+                    color={Colors.accent}
                 />
-            );
-        }
-        if (this.props.imagesLoading) {
-            return (
-                <View style={styles.container}>
-                    <ActivityIndicator color={Colors.accent} />
-                </View>
-            );
-        } else if (this.props.geotaggedImages?.length === 0) {
-            return (
-                <View style={styles.container}>
-                    <Body>No geotagged photos found</Body>
-                </View>
-            );
-        }
+            </View>
+        );
+    }
+    else if (geotaggedImages?.length === 0)
+    {
+        return (
+            <View style={styles.container}>
+                <Body>No geotagged photos found</Body>
+            </View>
+        );
     }
 }
-
-const mapStateToProps = (state) => {
-    return {
-        imagesLoading: state.gallery.imagesLoading,
-        geotaggedImages: state.gallery.geotaggedImages,
-        images: state.images.imagesArray
-    };
-};
-
-export default connect(mapStateToProps, actions)(AlbumList);
 
 const styles = StyleSheet.create({
     container: {
@@ -57,3 +53,5 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     }
 });
+
+export default AlbumList;

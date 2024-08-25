@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import {Dimensions, StyleSheet, View} from 'react-native';
 import React from 'react';
 import RankingMedal from './RankingMedal';
 import { Body, Caption } from '../../components';
@@ -15,21 +15,19 @@ const TeamListCard = ({ team, index, showRanking = true, leftContent }) => {
                     </Body>
 
                     <Caption>
-                        {team.total_images.toLocaleString()} PHOTOS
+                        {(team.total_images || 0).toLocaleString()} PHOTOS
                     </Caption>
                 </View>
             </View>
             <View style={styles.rightContainer}>
                 <Caption style={styles.alignRight}>
-                    {team.total_litter.toLocaleString()}
+                    {(team.total_litter || 0).toLocaleString()}
                 </Caption>
                 <Caption style={styles.alignRight}>LITTER</Caption>
             </View>
         </View>
     );
 };
-
-export default TeamListCard;
 
 const styles = StyleSheet.create({
     itemContainer: {
@@ -51,3 +49,5 @@ const styles = StyleSheet.create({
     },
     rightContainer: { marginLeft: 20 }
 });
+
+export default TeamListCard;

@@ -1,7 +1,7 @@
 import React from 'react';
-import {StyleProp, StyleSheet, Text, TextStyle} from 'react-native';
-import {Colors, Fonts} from '../theme';
-import {TransText} from 'react-native-translation';
+import { StyleProp, Text, TextStyle } from 'react-native';
+import { Colors, Fonts } from '../theme';
+import { useTranslation } from 'react-i18next';
 
 interface StyledTextProps {
     family?: keyof typeof Fonts;
@@ -23,27 +23,20 @@ const StyledText: React.FC<StyledTextProps> = ({
 }) => {
     const textColor = Colors[color as keyof typeof Colors];
     const font = Fonts[family as keyof typeof Fonts];
+    const { t } = useTranslation();
 
-    if (dictionary) {
-        return (
-            <TransText
-                values={values}
-                dictionary={dictionary}
-                style={[styles.text, {color: textColor}, font, style]}
-            />
-        );
-    }
-    return (
-        <Text {...rest} style={[styles.text, {color: textColor}, font, style]}>
+    const renderText = () => {
+        if (dictionary) {
+            return <Text style={[{ color: textColor }, font, style]} {...rest}>
+                {t(dictionary, values)}
+            </Text>;
+        }
+        return <Text style={[{ color: textColor }, font, style]} {...rest}>
             {children}
-        </Text>
-    );
-};
+        </Text>;
+    };
 
-const styles = StyleSheet.create({
-    text: {
-        textAlign: 'left'
-    }
-});
+    return renderText();
+};
 
 export default StyledText;

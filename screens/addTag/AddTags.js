@@ -1,4 +1,4 @@
-import React, {Component, createRef} from 'react';
+import React, {createRef, useEffect, useState} from 'react';
 import {
     Animated,
     Dimensions,
@@ -12,11 +12,9 @@ import {
     View
 } from 'react-native';
 import Swiper from 'react-native-swiper';
-import {StackActions} from '@react-navigation/native';
-import {connect} from 'react-redux';
+import { StackActions } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 import ActionSheet from 'react-native-actions-sheet';
-import * as actions from '../../actions';
 import CATEGORIES from '../../assets/data/categories';
 import {
     LitterBottomButtons,
@@ -26,90 +24,97 @@ import {
     LitterTags,
     LitterTextInput
 } from './addTagComponents';
-import {Body, Colors} from '../components';
+import { Body, Colors } from '../components';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { deleteWebImage } from "../../reducers/images_reducer";
+import { useDispatch, useSelector } from "react-redux";
+import {changeSwiperIndex} from "../../reducers/litter_reducer";
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 const AnimatedSwiper = Animated.createAnimatedComponent(Swiper);
 
-class AddTags extends Component {
-    constructor(props) {
-        super(props);
+const AddTags = ({ navigation, lang }) => {
 
-        this.state = {
-            categoryAnimation: new Animated.Value(100),
-            sheetAnimation: new Animated.Value(0),
-            opacityAnimation: new Animated.Value(1),
-            isCategoriesVisible: true,
-            isKeyboardOpen: false,
-            keyboardHeight: 0,
-            animation: new Animated.Value(0)
-        };
-        this.actionSheetRef = createRef();
-        this.swiper = createRef();
+    const dispatch = useDispatch();
 
-        // positions category and for tagging/bottom container
-        this.categoryContainerPosition = 300;
-        this.taggingContainerPosition = 400;
-    }
+    const [categoryAnimation, setCategoryAnimation] = useState(new Animated.Value(100));
+    const [sheetAnimation, setSheetAnimation] = useState(new Animated.Value(0));
+    const [opacityAnimation, setOpacityAnimation] = useState(new Animated.Value(1));
+    const [isCategoriesVisible, setIsCategoriesVisible] = useState(true);
+    const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+    const [keyboardHeight, setKeyboardHeight] = useState(0);
+    const [animation, setAnimation] = useState(new Animated.Value(0));
 
-    async componentDidMount() {
-        this.keyboardDidShowSubscription = Keyboard.addListener(
+    const actionSheetRef = createRef();
+    const swiper = createRef();
+
+    // positions category and for tagging/bottom container
+    const categoryContainerPosition = 300;
+    const taggingContainerPosition = 400;
+
+    // get images from global state
+    const images = useSelector(state => state.images.imagesArray);
+    const swiperIndex = useSelector(state => state.litter.swiperIndex);
+    const token = useSelector(state => state.auth.token);
+    const category = useSelector(state => state.litter.category);
+    const item = useSelector(state => state.litter.item);
+    const model = useSelector(state => state.litter.model);
+    const q = useSelector(state => state.litter.q);
+    const suggestedTags = useSelector(state => state.litter.suggestedTags);
+    const items = useSelector(state => state.litter.items);
+    const quantityChanged = useSelector(state => state.litter.quantityChanged);
+
+    useEffect(() => {
+
+        const keyboardDidShowSubscription = Keyboard.addListener(
             'keyboardDidShow',
-            e => {
-                this.setState({
-                    isKeyboardOpen: true,
-                    keyboardHeight: e.endCoordinates.height
-                });
-
-                // start keyboard animation
-                this.keyboardStartAnimation();
+            (e) => {
+                setIsKeyboardOpen(true);
+                setKeyboardHeight(e.endCoordinates.height);
+                keyboardStartAnimation();
             }
         );
-        this.keyboardDidHideSubscription = Keyboard.addListener(
+
+        const keyboardDidHideSubscription = Keyboard.addListener(
             'keyboardDidHide',
             () => {
-                this.setState({isKeyboardOpen: false, keyboardHeight: 0});
-                this.startAnimation();
+                setIsKeyboardOpen(false);
+                setKeyboardHeight(0);
+                startAnimation();
             }
         );
 
-        // react navigation subscription to check if stack navigation animation transaction have ended
-        this.openModalTransitionSubscription =
-            this.props.navigation.addListener('transitionEnd', () => {
-                // initially open tagging container
-                this.openTaggingContainer();
-            });
-    }
+        const openModalTransitionSubscription = navigation.addListener('transitionEnd', () => {
+            openTaggingContainer();
+        });
 
-    /**
-     * Cancel event listeners
-     */
-    componentWillUnmount() {
-        this.keyboardDidShowSubscription.remove();
-        this.keyboardDidHideSubscription.remove();
-        this.openModalTransitionSubscription();
-    }
+        return () => {
+            keyboardDidShowSubscription.remove();
+            keyboardDidHideSubscription.remove();
+            openModalTransitionSubscription();
+        };
 
-    keyboardStartAnimation = () => {
+    }, []);
+
+    const keyboardStartAnimation = () => {
         // Animate keyboard only for ios
         // TODO: need testing on other android devices
 
         const sheetPosition = -(
-            this.state.keyboardHeight + this.taggingContainerPosition
+            keyboardHeight + taggingContainerPosition
         );
 
         Platform.OS === 'ios' &&
-            Animated.timing(this.state.sheetAnimation, {
+            Animated.timing(sheetAnimation, {
                 toValue: sheetPosition,
                 duration: 500,
                 useNativeDriver: true,
                 easing: Easing.elastic(1)
             }).start();
 
-        Animated.timing(this.state.categoryAnimation, {
+        Animated.timing(categoryAnimation, {
             toValue: 0,
             duration: 500,
             useNativeDriver: true,
@@ -122,16 +127,17 @@ class AddTags extends Component {
      * animates categories from top
      * and Tags sheet with search box from bottom
      */
-    startAnimation = () => {
-        Animated.timing(this.state.categoryAnimation, {
+    const startAnimation = () => {
+        Animated.timing(categoryAnimation, {
             // extra 50 for height of container
-            toValue: this.categoryContainerPosition + 50,
+            toValue: categoryContainerPosition + 50,
             duration: 500,
             useNativeDriver: true,
             easing: Easing.elastic(1)
         }).start();
-        Animated.timing(this.state.sheetAnimation, {
-            toValue: -this.taggingContainerPosition,
+
+        Animated.timing(sheetAnimation, {
+            toValue: -taggingContainerPosition,
             duration: 500,
             useNativeDriver: true,
             easing: Easing.elastic(1)
@@ -144,19 +150,16 @@ class AddTags extends Component {
      * @param pressType --> "LONG" | "REGULAR"
      * if pressType === LONG hide categories and tag section but dont show Meta details
      */
-    returnAnimation = (pressType = 'REGULAR') => {
-        Animated.timing(this.state.categoryAnimation, {
-            toValue: -this.categoryContainerPosition,
+    const returnAnimation = (pressType = 'REGULAR') => {
+        Animated.timing(categoryAnimation, {
+            toValue: -categoryContainerPosition,
             duration: 500,
             useNativeDriver: true,
             easing: Easing.elastic(1)
         }).start(() => {
-            pressType === 'REGULAR' &&
-                this.setState({
-                    isCategoriesVisible: true
-                });
+            pressType === 'REGULAR' && setIsCategoriesVisible(true);
         });
-        Animated.timing(this.state.sheetAnimation, {
+        Animated.timing(sheetAnimation, {
             toValue: 100,
             duration: 500,
             useNativeDriver: true,
@@ -167,11 +170,10 @@ class AddTags extends Component {
     /**
      * fn to open tagging containers with animation
      */
-    openTaggingContainer = () => {
-        this.startAnimation();
-        this.setState({
-            isCategoriesVisible: true
-        });
+    const openTaggingContainer = () => {
+        startAnimation();
+
+        setIsCategoriesVisible(true);
     };
 
     /**
@@ -181,316 +183,86 @@ class AddTags extends Component {
      * if WEB image hit api and delete uploaded image and then delete from state
      *  else delete from state by id
      */
-    deleteImage = async () => {
+    const deleteImage = async () => {
         // length of all images in state
-        const length = this.props.images.length;
-        const currentIndex = this.props.swiperIndex;
+        const length = images.length;
+        const currentIndex = swiperIndex;
 
-        const {id, type} = this.props.images[currentIndex];
+        const {id, type} = images[currentIndex];
 
         if (type === 'WEB') {
-            const photoId = this.props.images[currentIndex].photoId;
-            this.props.deleteWebImage(this.props.token, photoId, id);
+            const photoId = images[currentIndex].photoId;
+
+            dispatch(deleteWebImage({ token, photoId, id }));
         } else {
-            await this.props.deleteImage(id);
+            await deleteImage(id);
         }
         // close delete confirmation action sheet
         // if last image is deleted close AddTags modal
         // else hide delete modal
         // swiper index is changed by onIndexChanged fn of Swiper
 
-        if (currentIndex === length - 1) {
-            this.actionSheetRef.current?.hide();
-            this.props.navigation.dispatch(StackActions.popToTop());
-        } else if (currentIndex < length - 1) {
-            this.actionSheetRef.current?.hide();
+        if (currentIndex === length - 1)
+        {
+            actionSheetRef.current?.hide();
+            navigation.dispatch(StackActions.popToTop());
+        }
+        else if (currentIndex < length - 1) {
+            actionSheetRef.current?.hide();
         }
     };
 
-    outerViewClicked = () => {
-        if (this.state.isKeyboardOpen) {
-            this.handleCloseKeyboard();
+    const outerViewClicked = () => {
+        if (isKeyboardOpen) {
+            handleCloseKeyboard();
         }
     };
 
-    handleCloseKeyboard = () => {
-        this.setState({isKeyboardOpen: false, keyboardHeight: 0});
-        this.startAnimation();
+    const handleCloseKeyboard = () => {
+        setIsKeyboardOpen(false);
+
+        setKeyboardHeight(0);
+
+        startAnimation();
+
         Keyboard.dismiss();
     };
-
-    /**
-     * The Add Tags component
-     */
-    render() {
-        const {lang} = this.props;
-
-        const categoryAnimatedStyle = {
-            transform: [{translateY: this.state.categoryAnimation}]
-        };
-        const sheetAnimatedStyle = {
-            transform: [{translateY: this.state.sheetAnimation}]
-        };
-
-        // Had a bug with this since upgrading react-native from 0.63 -> 0.72
-        // swiper was perfect, but now rarely detected
-        // removing the style/containerStyle prop seems to have helped a bit.
-        // const animatedStyle = {
-        //     transform: [{translateY: this.state.animation}]
-        // };
-
-        const opacityStyle = {
-            opacity: this.state.opacityAnimation
-        };
-        return (
-            <View style={{flex: 1}}>
-                <View style={{flex: 1}}>
-                    <View style={styles.container}>
-                        {/* Hide status bar on this screen */}
-                        <StatusBar hidden />
-
-                        {/* Images swiper */}
-                        <AnimatedSwiper
-                            ref={this.swiper}
-                            showsButtons={!this.state.isKeyboardOpen}
-                            prevButton={
-                                <View style={styles.slideButtonStyle}>
-                                    <Icon
-                                        name="ios-chevron-back"
-                                        color={Colors.accent}
-                                        size={32}
-                                    />
-                                </View>
-                            }
-                            nextButton={
-                                <View style={styles.slideButtonStyle}>
-                                    <Icon
-                                        name="ios-chevron-forward"
-                                        color={Colors.accent}
-                                        size={32}
-                                    />
-                                </View>
-                            }
-                            index={this.props.swiperIndex}
-                            loop={false}
-                            loadMinimal //
-                            loadMinimalSize={2} // loads only 2 images at a time
-                            showsPagination={false}
-                            keyboardShouldPersistTaps="handled"
-                            onIndexChanged={index => {
-                                this.swiperIndexChanged(index);
-                            }}>
-                            {this._renderLitterImage()}
-                        </AnimatedSwiper>
-
-                        {/* Top nav */}
-                        {/* index/total && Close X */}
-                        <View
-                            style={{
-                                position: 'absolute',
-                                top: 20,
-                                left: 20,
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                width: SCREEN_WIDTH - 40
-                            }}>
-                            {/* ImgIndex/Total */}
-                            <View style={styles.indexStyle}>
-                                <Body color="text">
-                                    {this.props.swiperIndex + 1}/
-                                    {this.props.images.length}
-                                </Body>
-                            </View>
-                            {/* Close X */}
-                            <Pressable
-                                onPress={() =>
-                                    this.props.navigation.navigate('HOME')
-                                }
-                                style={styles.closeButton}>
-                                <Icon
-                                    name="ios-close-outline"
-                                    color="black"
-                                    size={24}
-                                />
-                            </Pressable>
-                        </View>
-
-                        {/* Category component -- show only if add tag button is clicked
-                            hidden when backdrop is pressed
-                        */}
-                        <Animated.View
-                            style={[
-                                {
-                                    position: 'absolute',
-                                    top: -this.categoryContainerPosition,
-                                    zIndex: 2
-                                },
-                                categoryAnimatedStyle,
-                                opacityStyle
-                            ]}>
-                            <LitterCategories
-                                categories={CATEGORIES}
-                                category={this.props.category}
-                                lang={this.props.lang}
-                            />
-                        </Animated.View>
-
-                        {/* Bottom action sheet with Tags picker and add tags section */}
-                        <Animated.View
-                            style={[
-                                {bottom: -this.taggingContainerPosition},
-                                styles.bottomSheet,
-                                sheetAnimatedStyle,
-                                opacityStyle
-                            ]}>
-                            <TouchableWithoutFeedback
-                                onPress={this.outerViewClicked}>
-                                <View
-                                    style={[
-                                        {maxWidth: SCREEN_WIDTH},
-                                        this.state.isKeyboardOpen
-                                            ? {paddingTop: SCREEN_HEIGHT * 0.15}
-                                            : null
-                                    ]}>
-                                    <LitterTags
-                                        tags={
-                                            this.props.images[
-                                                this.props.swiperIndex
-                                            ]?.tags
-                                        }
-                                        customTags={
-                                            this.props.images[
-                                                this.props.swiperIndex
-                                            ]?.customTags
-                                        }
-                                        lang={this.props.lang}
-                                        swiperIndex={this.props.swiperIndex}
-                                    />
-
-                                    <LitterTextInput
-                                        suggestedTags={this.props.suggestedTags}
-                                        // height={this.state.height}
-                                        lang={this.props.lang}
-                                        swiperIndex={this.props.swiperIndex}
-                                        isKeyboardOpen={
-                                            this.state.isKeyboardOpen
-                                        }
-                                        navigation={this.props.navigation}
-                                    />
-                                    {!this.state.isKeyboardOpen && (
-                                        <LitterPickerWheels
-                                            item={this.props.item}
-                                            items={this.props.items}
-                                            model={this.props.model}
-                                            category={this.props.category}
-                                            lang={this.props.lang}
-                                        />
-                                    )}
-                                    {!this.state.isKeyboardOpen && (
-                                        <LitterBottomButtons
-                                            images={this.props.images}
-                                            swiperIndex={this.props.swiperIndex}
-                                            lang={lang}
-                                            category={this.props.category}
-                                            item={this.props.item}
-                                            quantityChanged={
-                                                this.props.quantityChanged
-                                            }
-                                            q={this.props.q}
-                                            navigation={this.props.navigation}
-                                            deleteButtonPressed={() => {
-                                                this.actionSheetRef.current?.show();
-                                            }}
-                                        />
-                                    )}
-                                </View>
-                            </TouchableWithoutFeedback>
-                        </Animated.View>
-                    </View>
-                </View>
-
-                {/* delete confirmation action sheet */}
-                <ActionSheet ref={this.actionSheetRef}>
-                    <View
-                        style={{
-                            padding: 40,
-                            alignItems: 'center'
-                        }}>
-                        <LottieView
-                            source={require('../../assets/lottie/trash_can_lottie.json')}
-                            autoPlay
-                            loop
-                            style={{width: 80, height: 80, marginBottom: 20}}
-                        />
-                        <Body
-                            style={{textAlign: 'center'}}
-                            dictionary={`${lang}.tag.delete-message`}
-                        />
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-around',
-                                marginVertical: 40,
-                                width: SCREEN_WIDTH - 40
-                            }}>
-                            <Pressable
-                                onPress={this.actionSheetRef.current?.hide}
-                                style={[styles.actionButtonStyle]}>
-                                <Body dictionary={`${lang}.tag.cancel`} />
-                            </Pressable>
-                            <Pressable
-                                onPress={this.deleteImage}
-                                style={[
-                                    styles.actionButtonStyle,
-                                    {backgroundColor: Colors.error}
-                                ]}>
-                                <Body
-                                    color="white"
-                                    dictionary={`${lang}.tag.delete`}
-                                />
-                            </Pressable>
-                        </View>
-                    </View>
-                </ActionSheet>
-            </View>
-        );
-    }
 
     /**
      * The user has swiped left or right across an array of all photo types.
      *
      * This function gives us the new index the user has swiped to.
      */
-    swiperIndexChanged = newGlobalIndex => {
+    const handleSwiperIndexChanged = newGlobalIndex => {
         // Without this, we get "cannot update a component from within the function body of another component"
         setTimeout(() => {
             // litter.js swiperIndex
-            this.props.swiperIndexChanged(newGlobalIndex);
+            dispatch(changeSwiperIndex(newGlobalIndex));
         }, 0);
     };
 
     /**
      * Array of images to swipe through
      */
-    _renderLitterImage = () => {
+    const renderLitterImage = () => {
         // Return an array of all photos
-        return this.props.images.map((image, index) => {
+        return images.map((image, index) => {
             return (
                 <LitterImage
                     key={image.id}
-                    category={this.props.category}
-                    lang={this.props.lang}
+                    category={category}
+                    lang={lang}
                     photoSelected={image}
-                    swiperIndex={this.props.swiperIndex}
-                    navigation={this.props.navigation}
+                    swiperIndex={swiperIndex}
+                    navigation={navigation}
                     // hide all tagging containers
-                    onLongPressStart={() => this.returnAnimation('LONG')}
+                    onLongPressStart={() => returnAnimation('LONG')}
                     // show all tagging containers
-                    onLongPressEnd={() => this.startAnimation()}
+                    onLongPressEnd={() => startAnimation()}
                     // hide tagging containers and show meta containers
                     onImageTap={() => {
                         console.log('image tapped');
-                        // if (this.state.isCategoriesVisible) {
+                        // if (isCategoriesVisible) {
                         //     this.returnAnimation('REGULAR');
                         // }
                     }}
@@ -498,6 +270,226 @@ class AddTags extends Component {
             );
         });
     };
+
+    /**
+     * The Add Tags component
+     */
+    const categoryAnimatedStyle = {
+        transform: [{translateY: categoryAnimation}]
+    };
+
+    const sheetAnimatedStyle = {
+        transform: [{translateY: sheetAnimation}]
+    };
+
+    // Had a bug with this since upgrading react-native from 0.63 -> 0.72
+    // swiper was perfect, but now rarely detected
+    // removing the style/containerStyle prop seems to have helped a bit.
+    // const animatedStyle = {
+    //     transform: [{translateY: animation}]
+    // };
+
+    const opacityStyle = {
+        opacity: opacityAnimation
+    };
+
+    return (
+        <View style={{flex: 1}}>
+            <View style={{flex: 1}}>
+                <View style={styles.container}>
+                    {/* Hide status bar on this screen */}
+                    <StatusBar hidden />
+
+                    {/* Images swiper */}
+                    <AnimatedSwiper
+                        ref={swiper}
+                        showsButtons={!isKeyboardOpen}
+                        prevButton={
+                            <View style={styles.slideButtonStyle}>
+                                <Icon
+                                    name="chevron-back"
+                                    color={Colors.accent}
+                                    size={32}
+                                />
+                            </View>
+                        }
+                        nextButton={
+                            <View style={styles.slideButtonStyle}>
+                                <Icon
+                                    name="chevron-forward"
+                                    color={Colors.accent}
+                                    size={32}
+                                />
+                            </View>
+                        }
+                        index={swiperIndex}
+                        loop={false}
+                        loadMinimal //
+                        loadMinimalSize={2} // loads only 2 images at a time
+                        showsPagination={false}
+                        keyboardShouldPersistTaps="handled"
+                        onIndexChanged={index => { handleSwiperIndexChanged(index); }}
+                    >
+                        { renderLitterImage() }
+                    </AnimatedSwiper>
+
+                    {/* Top nav */}
+                    {/* index/total && Close X */}
+                    <View
+                        style={{
+                            position: 'absolute',
+                            top: 20,
+                            left: 20,
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            width: SCREEN_WIDTH - 40
+                        }}>
+                        {/* ImgIndex/Total */}
+                        <View style={styles.indexStyle}>
+                            <Body color="text">
+                                {swiperIndex + 1}/
+                                {images.length}
+                            </Body>
+                        </View>
+                        {/* Close X */}
+                        <Pressable
+                            onPress={() => navigation.navigate('HOME') }
+                            style={styles.closeButton}
+                        >
+                            <Icon
+                                name="close-outline"
+                                color="black"
+                                size={24}
+                            />
+                        </Pressable>
+                    </View>
+
+                    {/* Category component -- show only if add tag button is clicked
+                        hidden when backdrop is pressed
+                    */}
+                    <Animated.View
+                        style={[
+                            {
+                                position: 'absolute',
+                                top: -categoryContainerPosition,
+                                zIndex: 2
+                            },
+                            categoryAnimatedStyle,
+                            opacityStyle
+                        ]}
+                    >
+                        <LitterCategories
+                            categories={CATEGORIES}
+                            selectedCategory={category}
+                            lang={lang}
+                        />
+                    </Animated.View>
+
+                    {/* Bottom action sheet with Tags picker and add tags section */}
+                    <Animated.View
+                        style={[
+                            {bottom: -taggingContainerPosition},
+                            styles.bottomSheet,
+                            sheetAnimatedStyle,
+                            opacityStyle
+                        ]}>
+                        <TouchableWithoutFeedback
+                            onPress={outerViewClicked}
+                        >
+                            <View
+                                style={[
+                                    { maxWidth: SCREEN_WIDTH },
+                                    isKeyboardOpen ? { paddingTop: SCREEN_HEIGHT * 0.15 } : null
+                                ]}
+                            >
+                                <LitterTags
+                                    tags={images[swiperIndex]?.tags}
+                                    customTags={images[swiperIndex]?.customTags}
+                                    lang={lang}
+                                    swiperIndex={swiperIndex}
+                                />
+
+                                <LitterTextInput
+                                    suggestedTags={suggestedTags}
+                                    // height={height}
+                                    lang={lang}
+                                    swiperIndex={swiperIndex}
+                                    isKeyboardOpen={isKeyboardOpen}
+                                    navigation={navigation}
+                                />
+
+                                {!isKeyboardOpen && (
+                                    <LitterPickerWheels
+                                        item={item}
+                                        items={items}
+                                        model={model}
+                                        category={category}
+                                        lang={lang}
+                                    />
+                                )}
+
+                                {!isKeyboardOpen && (
+                                    <LitterBottomButtons
+                                        images={images}
+                                        swiperIndex={swiperIndex}
+                                        lang={lang}
+                                        category={category}
+                                        item={item}
+                                        quantityChanged={quantityChanged}
+                                        q={q}
+                                        navigation={navigation}
+                                        deleteButtonPressed={() => { actionSheetRef.current?.show(); }}
+                                    />
+                                )}
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </Animated.View>
+                </View>
+            </View>
+
+            {/* delete confirmation action sheet */}
+            <ActionSheet ref={actionSheetRef}>
+                <View style={{ padding: 40, alignItems: 'center'}}>
+                    <LottieView
+                        source={require('../../assets/lottie/trash_can_lottie.json')}
+                        autoPlay
+                        loop
+                        style={{width: 80, height: 80, marginBottom: 20}}
+                    />
+                    <Body
+                        style={{textAlign: 'center'}}
+                        dictionary={`tag.delete-message`}
+                    />
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-around',
+                            marginVertical: 40,
+                            width: SCREEN_WIDTH - 40
+                        }}>
+                        <Pressable
+                            onPress={actionSheetRef.current?.hide}
+                            style={[styles.actionButtonStyle]}
+                        >
+                            <Body dictionary={`tag.cancel`} />
+                        </Pressable>
+                        <Pressable
+                            onPress={deleteImage}
+                            style={[
+                                styles.actionButtonStyle,
+                                { backgroundColor: Colors.error }
+                            ]}
+                        >
+                            <Body
+                                color="white"
+                                dictionary={`tag.delete`}
+                            />
+                        </Pressable>
+                    </View>
+                </View>
+            </ActionSheet>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -560,23 +552,4 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = state => {
-    return {
-        category: state.litter.category,
-        item: state.litter.item,
-        items: state.litter.items,
-        lang: state.auth.lang,
-        model: state.settings.model,
-        photoSelected: state.litter.photoSelected,
-        suggestedTags: state.litter.suggestedTags,
-        swiperIndex: state.litter.swiperIndex,
-        tags: state.litter.tags,
-        tagsModalVisible: state.litter.tagsModalVisible,
-        token: state.auth.token,
-        q: state.litter.q,
-        quantityChanged: state.litter.quantityChanged,
-        images: state.images.imagesArray
-    };
-};
-
-export default connect(mapStateToProps, actions)(AddTags);
+export default AddTags;

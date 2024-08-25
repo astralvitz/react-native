@@ -1,7 +1,7 @@
 import React from 'react';
-import {View} from 'react-native';
-import {CountUp} from 'use-count-up';
-import {Body, Caption, Title} from '../../components';
+import { View } from 'react-native';
+import { CountUp } from 'use-count-up';
+import { Body, Caption, Title } from '../../components';
 
 const ProgressStatCard = ({
     value,
@@ -24,7 +24,7 @@ const ProgressStatCard = ({
             ]}>
             <Title style={{color}}>
                 <CountUp
-                    isCounting={startValue === value ? false : true}
+                    isCounting={startValue !== value}
                     start={startValue}
                     end={value}
                     duration={5}

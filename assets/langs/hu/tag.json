@@ -2,7 +2,7 @@
     "add-tag": "Címke hozzáadása",
     "confirm": "Megerősít",
     "type-to-suggest": "Irja be a javasolt címkéit",
-    "suggested-tags": "Javasolt címkék: {count}",
+    "suggested-tags": "Javasolt címkék: {{count}}",
     "alert": "Riasztás",
     "still-there": "Az hulladék még mindig ott van",
     "picked-up": "Az Hulladékot összeszedték",

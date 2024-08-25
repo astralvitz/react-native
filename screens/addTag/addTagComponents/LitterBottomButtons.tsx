@@ -1,18 +1,9 @@
-import React, {PureComponent} from 'react';
-import {
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View
-} from 'react-native';
-import {Colors, SubTitle} from '../../components';
-import {
-    addTagToImage,
-    changeQuantityStatus,
-    togglePickedUp
-} from '../../../actions';
-import {connect} from 'react-redux';
+import React from 'react';
+import { useDispatch } from "react-redux";
+import { Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Colors, SubTitle } from '../../components';
+import { addTagToImage, togglePickedUp } from "../../../reducers/images_reducer";
+import { changeQuantityStatus } from "../../../reducers/litter_reducer";
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -26,7 +17,7 @@ interface LitterBottomButtonsProps {
     quantityChanged?: boolean;
 
     // functions
-    addTagToImage: (payload: {
+    addTagToImage?: (payload: {
         tag: {category: string; title: string; quantity: number};
         currentIndex: number;
         quantityChanged?: boolean;
@@ -35,72 +26,32 @@ interface LitterBottomButtonsProps {
     deleteButtonPressed: () => void;
 }
 
-class LitterBottomButtons extends PureComponent<LitterBottomButtonsProps> {
-    render() {
-        return (
-            // @ts-ignore
-            <View style={styles.pb5}>
-                <ScrollView
-                    bounces={false}
-                    horizontal={true}
-                    showsHorizontalScrollIndicator={false}>
-                    <TouchableOpacity
-                        onPress={() => this.togglePickedUp()}
-                        style={styles.pickedUpButton}>
-                        {this.props.images[this.props.swiperIndex]
-                            ?.picked_up ? (
-                            <SubTitle
-                                color="white"
-                                dictionary={`${this.props.lang}.tag.picked-thumb`}
-                            />
-                        ) : (
-                            <SubTitle
-                                color="white"
-                                dictionary={`${this.props.lang}.tag.not-picked-thumb`}
-                            />
-                        )}
-                    </TouchableOpacity>
+const LitterBottomButtons: React.FC<LitterBottomButtonsProps> = ({
+    images,
+    swiperIndex,
+    category,
+    item,
+    q,
+    quantityChanged,
+}) => {
 
-                    <TouchableOpacity
-                        onPress={() => this.addTag()}
-                        style={styles.buttonStyle}>
-                        <SubTitle
-                            color="white"
-                            dictionary={`${this.props.lang}.tag.add-tag`}
-                        />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        onPress={this.props.deleteButtonPressed}
-                        style={styles.buttonStyle}>
-                        <SubTitle
-                            color="white"
-                            dictionary={`${this.props.lang}.tag.delete-image`}
-                        />
-                    </TouchableOpacity>
-                </ScrollView>
-            </View>
-        );
-    }
+    const dispatch = useDispatch();
 
     /**
      * Add tag on a specific image
      */
-    addTag(): void {
+    const addTag = () => {
         const tag = {
-            category: this.props.category.title.toString(),
-            title: this.props.item.toString(),
-            quantity: this.props.q
+            category: category.title.toString(),
+            title: item.toString(),
+            quantity: q
         };
 
-        // currentGlobalIndex
-        const currentIndex = this.props.swiperIndex;
-
-        this.props.addTagToImage({
+        dispatch(addTagToImage({
             tag,
-            currentIndex,
-            quantityChanged: this.props.quantityChanged ?? false
-        });
+            currentIndex: swiperIndex,
+            quantityChanged: quantityChanged ?? false
+        }));
 
         /**
          * If quantityChanged is true -- then while clicking Add Tag button
@@ -112,18 +63,63 @@ class LitterBottomButtons extends PureComponent<LitterBottomButtonsProps> {
          * here we are changing status to false once Add tag button is pressed
          */
         // @ts-ignore
-        this.props.changeQuantityStatus(false);
+        dispatch(changeQuantityStatus(false));
     }
 
     /**
      * Toggle the picked-up status of 1 image in our array
      */
-    togglePickedUp = (): void => {
-        // @ts-ignore
-        this.props.togglePickedUp(
-            this.props.images[this.props.swiperIndex]?.id
-        );
+    const handleTogglePickedUp = (): void => {
+        dispatch(togglePickedUp(images[swiperIndex]?.id));
     };
+
+    return (
+        // @ts-ignore
+        <View style={styles.pb5}>
+            <ScrollView
+                bounces={false}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+            >
+                <TouchableOpacity
+                    onPress={() => handleTogglePickedUp()}
+                    style={styles.pickedUpButton}
+                >
+                    {images[swiperIndex]?.picked_up ? (
+                        <SubTitle
+                            color="white"
+                            dictionary={`tag.picked-thumb`}
+                        />
+                    ) : (
+                        <SubTitle
+                            color="white"
+                            dictionary={`tag.not-picked-thumb`}
+                        />
+                    )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={() => addTag()}
+                    style={styles.buttonStyle}
+                >
+                    <SubTitle
+                        color="white"
+                        dictionary={`tag.add-tag`}
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    // onPress={this.props.deleteButtonPressed}
+                    style={styles.buttonStyle}
+                >
+                    <SubTitle
+                        color="white"
+                        dictionary={`tag.delete-image`}
+                    />
+                </TouchableOpacity>
+            </ScrollView>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -152,22 +148,4 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapDispatchToProps = (dispatch: any) => ({
-    addTagToImage: (payload: {
-        tag: {category: string; title: string; quantity: number};
-        currentIndex: number;
-        quantityChanged?: boolean;
-    }) => {
-        dispatch(addTagToImage(payload));
-    },
-
-    changeQuantityStatus: (status: boolean) => {
-        dispatch(changeQuantityStatus(status));
-    },
-
-    togglePickedUp: (id: number) => {
-        dispatch(togglePickedUp(id));
-    }
-});
-
-export default connect(null, mapDispatchToProps)(LitterBottomButtons);
+export default LitterBottomButtons;

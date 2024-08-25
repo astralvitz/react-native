@@ -1,5 +1,6 @@
 import React from 'react';
 import {Dimensions, StyleSheet, View} from 'react-native';
+// @ts-ignore
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import IconStatsCard from './IconStatsCard';

@@ -1,32 +1,36 @@
 import React from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {Colors} from '../../components';
+import { Colors } from '../../components';
 
-const ActionButton = ({navigation, status, onPress}) => {
+const ActionButton = ({ status, onPress }) => {
     let iconName;
+
     const disabled = status === 'SELECTING';
+
     switch (status) {
         case 'NO_IMAGES':
-            iconName = 'ios-images-outline';
+            iconName = 'images-outline';
             break;
         case 'SELECTING':
-            iconName = 'ios-trash-outline';
+            iconName = 'trash-outline';
             break;
         case 'SELECTED':
-            iconName = 'ios-trash-outline';
+            iconName = 'trash-outline';
             break;
         default:
             iconName = 'camera-outline';
             break;
     }
+
     return (
         <View>
             <Pressable
                 disabled={disabled}
                 onPress={() => onPress()}
-                style={styles.containerStyle}>
+                style={styles.containerStyle}
+            >
                 <LinearGradient
                     colors={
                         disabled
@@ -44,7 +48,8 @@ const ActionButton = ({navigation, status, onPress}) => {
                         {
                             opacity: disabled ? 0.3 : 1
                         }
-                    ]}>
+                    ]}
+                >
                     {/* <Body>{status}</Body> */}
                     <Icon name={iconName} color={'white'} size={32} />
                 </LinearGradient>
@@ -52,7 +57,6 @@ const ActionButton = ({navigation, status, onPress}) => {
         </View>
     );
 };
-export default ActionButton;
 
 const styles = StyleSheet.create({
     containerStyle: {
@@ -70,3 +74,5 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     }
 });
+
+export default ActionButton;

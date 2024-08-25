@@ -1,30 +1,32 @@
-import { applyMiddleware, createStore } from "redux";
-import thunk from "redux-thunk";
-import { persistCombineReducers, persistStore } from "redux-persist";
-// import AsyncStorage from '@react-native-community/async-storage';
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import reducers from "../reducers";
+import { configureStore } from '@reduxjs/toolkit';
+import { persistReducer, persistStore } from 'redux-persist';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { rootReducer } from '../reducers';
 
-const config = {
-  key: "root",
+// Configuration for Redux Persist
+const persistConfig = {
+  key: 'root',
   storage: AsyncStorage,
-  whitelist: ["auth", "images"],
+  whitelist: ['auth'], // Specify which reducers should be stored
 };
 
-const middleware = __DEV__
-  ? [require("redux-immutable-state-invariant").default(), thunk]
-  : [thunk];
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-const reducer = persistCombineReducers(config, reducers);
-
-export default function configurationStore(initialState = {}) {
-  const store = createStore(
-    reducer,
-    initialState,
-    applyMiddleware(...middleware),
-  );
+export default function configureAppStore(initialState = {}) {
+  const store = configureStore({
+    reducer: persistedReducer,
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          serializableCheck: {
+            // Ignore these action types in the serializability check
+            ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+          },
+        }).concat(__DEV__ ? [require('redux-immutable-state-invariant').default()] : []),
+    preloadedState: initialState,
+    devTools: __DEV__, // Automatically enable/disable Redux DevTools
+  });
 
   const persistor = persistStore(store);
 
-  return { persistor, store };
+  return { store, persistor };
 }

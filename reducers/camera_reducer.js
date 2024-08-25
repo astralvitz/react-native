@@ -1,20 +1,24 @@
-import { SET_GPS_COORDINATES } from '../actions/types';
+import { createSlice } from '@reduxjs/toolkit';
 
-const INITIAL_STATE = {
+const initialState = {
     lat: null,
     lon: null
 };
 
-export default function(state = INITIAL_STATE, action) {
-    switch (action.type) {
-        case SET_GPS_COORDINATES:
-            return {
-                ...state,
-                lat: action.payload.lat,
-                lon: action.payload.lon
-            };
+const cameraSlice = createSlice({
 
-        default:
-            return state;
+    name: 'camera',
+
+    initialState,
+
+    reducers: {
+        setGpsCoordinates(state, action) {
+            state.lat = action.payload.lat;
+            state.lon = action.payload.lon;
+        }
     }
-}
+});
+
+export const { setGpsCoordinates } = cameraSlice.actions;
+
+export default cameraSlice.reducer;

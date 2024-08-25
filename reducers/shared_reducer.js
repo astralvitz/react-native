@@ -1,15 +1,8 @@
-import { produce } from 'immer';
-import {
-    CANCEL_UPLOAD,
-    CHECK_APP_VERSION,
-    CLOSE_THANK_YOU_MESSAGES,
-    SHOW_THANK_YOU_MESSAGES_AFTER_UPLOAD,
-    START_UPLOADING,
-    TOGGLE_THANK_YOU,
-    TOGGLE_UPLOAD,
-} from '../actions/types';
+import axios from 'axios';
+import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk } from '@reduxjs/toolkit';
 
-const INITIAL_STATE = {
+const initialState = {
     appVersion: null,
     isSelecting: false,
     isUploading: false,
@@ -18,71 +11,112 @@ const INITIAL_STATE = {
     showThankYouMessages: false,
 };
 
-export default function(state = INITIAL_STATE, action) {
-    return produce(state, draft => {
-        switch (action.type) {
-            /**
-             * During upload, the user pressed cancel.
-             */
-            case CANCEL_UPLOAD:
-                draft.showModal = false;
-                draft.isUploading = false;
-                break;
+/**
+ * API calls
+ *
+ * - createAppVersion
+ */
 
-            /**
-             * Gets and saves latest app version available on playstores
-             */
-            case CHECK_APP_VERSION:
-                draft.appVersion = action.payload;
-                break;
+export const checkAppVersion = createAsyncThunk(
+    'app/checkAppVersion',
+    async (_, { rejectWithValue }) => {
+        try
+        {
+            const response = await axios({
+                url: URL + '/api/mobile-app-version',
+                method: 'GET',
+                headers: {
+                    Accept: 'application/json'
+                }
+            });
 
-            /**
-             * After uploading,
-             * Thank you messages are shown,
-             * Now we hide the modal and messages.
-             */
-            case CLOSE_THANK_YOU_MESSAGES:
-                draft.showModal = false;
-                draft.showThankYouMessages = false;
-                break;
-
-            /**
-             * Show Thank You + upload messages after uploading
-             */
-            case SHOW_THANK_YOU_MESSAGES_AFTER_UPLOAD:
-                draft.isUploading = false;
-                draft.showThankYouMessages = true;
-                break;
-
-            /**
-             * We have begun uploading
-             *
-             * 1. Show the modal
-             * 2. Show the Uploading component
-             */
-            case START_UPLOADING:
-                draft.showModal = true;
-                draft.isUploading = true;
-                break;
-
-            // /**
-            //  * Toggles thank you modal after image uploaded
-            //  */
-            // case TOGGLE_THANK_YOU:
-            //     draft.showModal = !draft.showModal;
-            //     draft.thankYouVisible = !draft.thankYouVisible;
-            //     break;
-
-            // /**
-            //  * Toggle the modal and the upload component
-            //  */
-            // case TOGGLE_UPLOAD:
-            //     draft.showModal = !draft.showModal;
-            //     draft.isUploading = !draft.isUploading;
-            //     break;
-
-            default:
-                return draft;
+            return response.data;
         }
-    });
-}
+        catch (error)
+        {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+const sharedSlice = createSlice({
+
+    name: 'shared',
+
+    initialState,
+
+    reducers: {
+
+        /**
+         * During upload, the user pressed cancel.
+         */
+        cancelUpload (state) {
+            state.showModal = false;
+            state.isUploading = false;
+        },
+
+        /**
+         * After uploading,
+         * Thank you messages are shown,
+         * Now we hide the modal and messages.
+         */
+        closeThankYouMessages(state) {
+            state.showModal = false;
+            state.showThankYouMessages = false;
+        },
+
+        /**
+         * Show Thank You + upload messages after uploading
+         */
+        showThankYouMessagesAfterUpload (state) {
+            state.isUploading = false;
+            state.showThankYouMessages = true;
+        },
+
+        /**
+         * We have begun uploading
+         *
+         * 1. Show the modal
+         * 2. Show the Uploading component
+         */
+        startUploading (state) {
+            state.showModal = true;
+            state.isUploading = true;
+        },
+    },
+
+    extraReducers: (builder) => {
+
+        builder
+
+            .addCase(checkAppVersion.fulfilled, (state, action) => {
+                state.appVersion = action.payload;
+            });
+    }
+});
+
+export const {
+    cancelUpload,
+    closeThankYouMessages,
+    showThankYouMessagesAfterUpload,
+    startUploading,
+} = sharedSlice.actions;
+
+export default sharedSlice.reducer;
+
+// /**
+//  * Toggles thank you modal after image uploaded
+//  */
+// case TOGGLE_THANK_YOU:
+//     draft.showModal = !draft.showModal;
+//     draft.thankYouVisible = !draft.thankYouVisible;
+//     break;
+
+// /**
+//  * Toggle the modal and the upload component
+//  */
+// case TOGGLE_UPLOAD:
+//     draft.showModal = !draft.showModal;
+//     draft.isUploading = !draft.isUploading;
+//     break;
+

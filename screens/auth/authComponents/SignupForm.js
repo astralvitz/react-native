@@ -1,13 +1,12 @@
-import React, {Component} from 'react';
-import {ActivityIndicator, Pressable, StyleSheet, View} from 'react-native';
-import {Formik} from 'formik';
+import React, { useRef, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {connect} from 'react-redux';
-import {getTranslation} from 'react-native-translation';
-import {createAccount} from '../../../actions';
-
-import {Colors, CustomTextInput, SubTitle} from '../../components';
+import { useTranslation } from "react-i18next";
+import { createAccount } from "../../../reducers/auth_reducer";
+import { useDispatch, useSelector } from "react-redux";
+import { Colors, CustomTextInput, SubTitle } from '../../components';
 import StatusMessage from './StatusMessage';
 
 /**
@@ -25,62 +24,68 @@ const SignupSchema = Yup.object().shape({
         .matches(/^(?=.*[A-Z])(?=.*[0-9]).{6,}$/, 'must-contain')
 });
 
-class SignupForm extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            isPasswordVisible: false
-        };
-        this.usernameRef = React.createRef();
-        this.emailRef = React.createRef();
-        this.passwordRef = React.createRef();
-    }
+const SignupForm = () => {
 
-    render() {
-        // translation text
-        const {lang, isSubmitting, serverStatusText} = this.props;
+    const dispatch = useDispatch();
 
-        const emailTranslation = getTranslation(`${lang}.auth.email-address`);
-        const passwordTranslation = getTranslation(`${lang}.auth.password`);
-        const usernameTranslation = getTranslation(
-            `${lang}.auth.unique-username`
-        );
-        return (
-            <Formik
-                initialValues={{email: '', password: '', username: ''}}
-                validationSchema={SignupSchema}
-                onSubmit={({email, password, username}) => {
-                    this.props.createAccount({
-                        email: email,
-                        username: username,
-                        password: password
-                    });
-                }}>
-                {({
-                    handleChange,
-                    setFieldValue,
-                    handleSubmit,
-                    values,
-                    errors,
-                    touched
-                }) => (
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+    const emailRef = useRef(null);
+    const passwordRef = useRef(null);
+    const usernameRef = useRef(null);
+
+    const { serverStatusText, isSubmitting } = useSelector(state => state.auth);
+
+    const { t } = useTranslation();
+    const emailTranslation = t('auth.email-address');
+    const passwordTranslation = t('auth.password');
+    const usernameTranslation = t('auth.unique-username');
+
+    return (
+        <Formik
+            initialValues={{ email: '', password: '', username: '' }}
+            validationSchema={SignupSchema}
+            onSubmit={({ email, password, username }) => {
+                dispatch(createAccount({
+                    email: email,
+                    username: username,
+                    password: password
+                }));
+            }}
+        >
+            {({
+                handleChange,
+                setFieldValue,
+                handleSubmit,
+                values,
+                errors,
+                touched
+            }) => {
+                let infoMessage = "";
+
+                if (serverStatusText) {
+                    infoMessage = serverStatusText
+                } else if (errors?.username) {
+                    infoMessage = t(`auth.${errors.username}`);
+                } else if (errors?.email) {
+                    infoMessage = t(`auth.${errors.email}`);
+                } else if (errors?.password) {
+                    infoMessage = t(`auth.${errors.password}`);
+                }
+
+                return (
                     <View style={{flex: 1, justifyContent: 'center'}}>
-                        {/* username input */}
 
+                        {/* username input */}
                         <CustomTextInput
-                            ref={this.usernameRef}
-                            onSubmitEditing={() =>
-                                this.emailRef.current.focus()
-                            }
-                            style={{marginBottom: 10}}
+                            ref={usernameRef}
+                            onSubmitEditing={() => emailRef?.current?.focus()}
+                            style={{ marginBottom: 10 }}
                             onChangeText={handleChange('username')}
                             value={values.username}
                             name="username"
-                            error={
-                                errors.username &&
-                                `${this.props.lang}.auth.${errors.username}`
-                            }
-                            touched={touched.username}
+                            error={errors?.username}
+                            touched={touched?.username}
                             placeholder={usernameTranslation}
                             leftIconName="at-outline"
                             returnKeyType="next"
@@ -88,26 +93,16 @@ class SignupForm extends Component {
 
                         {/* email input */}
                         <CustomTextInput
-                            ref={this.emailRef}
-                            style={{marginBottom: 10}}
-                            onSubmitEditing={() =>
-                                this.passwordRef.current.focus()
-                            }
-                            onChangeText={e =>
-                                setFieldValue(
-                                    'email',
-                                    e.trim().toLocaleLowerCase()
-                                )
-                            }
+                            ref={emailRef}
+                            style={{ marginBottom: 10 }}
+                            onSubmitEditing={() => passwordRef?.current?.focus()}
+                            onChangeText={e => setFieldValue('email', e.trim().toLowerCase())}
                             value={values.email}
                             name="email"
-                            error={
-                                errors.email &&
-                                `${this.props.lang}.auth.${errors.email}`
-                            }
-                            touched={touched.email}
+                            error={errors?.email}
+                            touched={touched?.email}
                             placeholder={emailTranslation}
-                            leftIconName="ios-mail"
+                            leftIconName="mail-outline"
                             returnKeyType="next"
                             keyboardType="email-address"
                             multiline
@@ -115,44 +110,32 @@ class SignupForm extends Component {
 
                         {/* password input */}
                         <CustomTextInput
-                            ref={this.passwordRef}
+                            ref={passwordRef}
+                            style={{ marginBottom: 10 }}
                             onChangeText={handleChange('password')}
                             value={values.password}
                             name="password"
-                            error={
-                                errors.password &&
-                                `${this.props.lang}.auth.${errors.password}`
-                            }
-                            touched={touched.password}
+                            error={errors?.password}
+                            touched={touched?.password}
                             placeholder={passwordTranslation}
-                            leftIconName="ios-key"
-                            secureTextEntry={!this.state.isPasswordVisible}
+                            leftIconName="key-outline"
+                            secureTextEntry={!isPasswordVisible}
                             returnKeyType="done"
-                            // eye icon --> display/hide
                             rightContent={
-                                <Pressable
-                                    onPress={() =>
-                                        this.setState(prevState => ({
-                                            isPasswordVisible:
-                                                !prevState.isPasswordVisible
-                                        }))
-                                    }>
+                                <Pressable onPress={() =>setIsPasswordVisible(!isPasswordVisible)}>
                                     <Icon
-                                        style={styles.textfieldIcon}
-                                        name={
-                                            this.state.isPasswordVisible
-                                                ? 'ios-eye'
-                                                : 'ios-eye-off'
-                                        }
+                                        style={styles.textFieldIcon}
+                                        name={isPasswordVisible ? 'eye' : 'eye-off'}
                                         size={28}
                                         color={Colors.muted}
                                     />
                                 </Pressable>
                             }
                         />
+
                         <StatusMessage
                             isSubmitting={isSubmitting}
-                            serverStatusText={serverStatusText}
+                            serverStatusText={infoMessage}
                         />
 
                         <Pressable
@@ -164,16 +147,17 @@ class SignupForm extends Component {
                             ) : (
                                 <SubTitle
                                     color="accentLight"
-                                    dictionary={`${this.props.lang}.auth.create-account`}>
+                                    dictionary={'auth.create-account'}
+                                >
                                     Create Account
                                 </SubTitle>
                             )}
                         </Pressable>
                     </View>
-                )}
-            </Formik>
-        );
-    }
+                );
+            }}
+        </Formik>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -188,21 +172,9 @@ const styles = StyleSheet.create({
         width: '100%',
         marginTop: 20
     },
-    textfieldIcon: {
+    textFieldIcon: {
         padding: 10
     }
 });
 
-const mapStateToProps = state => {
-    return {
-        lang: state.auth.lang,
-        serverStatusText: state.auth.serverStatusText,
-        success: state.auth.success,
-        user: state.auth.user,
-        username: state.auth.username,
-        isSubmitting: state.auth.isSubmitting
-    };
-};
-
-// bind all action creators to AuthScreen
-export default connect(mapStateToProps, {createAccount})(SignupForm);
+export default SignupForm;

@@ -1,289 +1,43 @@
-import React, {Component, createRef} from 'react';
-import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    Modal,
-    Pressable,
-    SectionList,
-    StyleSheet,
-    Switch,
-    View
-} from 'react-native';
-import {getTranslation} from 'react-native-translation';
+import React, { createRef, useState } from 'react';
+import { ActivityIndicator, Alert, Dimensions, Modal, Pressable, SectionList, StyleSheet, Switch, View} from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/Ionicons';
-import * as actions from '../../actions';
-import {connect} from 'react-redux';
 import ActionSheet from 'react-native-actions-sheet';
+import { useTranslation } from "react-i18next";
 // import CountryPicker, {Flag} from 'react-native-country-picker-modal';
-import {Body, Caption, Colors, Header, SubTitle, Title} from '../components';
+import { Body, Caption, Colors, Header, SubTitle, Title } from '../components';
 import SettingsComponent from './settingComponents/SettingsComponent';
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../reducers/auth_reducer";
+import { saveSettings, toggleSettingsModal, toggleSettingsSwitch } from "../../reducers/settings_reducer";
+import { changeLitterStatus, getUntaggedImages } from "../../reducers/images_reducer";
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-class SettingsScreen extends Component {
-    constructor(props) {
-        super(props);
-        this.actionSheetRef = createRef();
+const SettingsScreen = ({ navigation }) => {
 
-        this.state = {
-            isCountryPickerVisible: false,
-            countryCode:
-                this.props.user?.global_flag &&
-                this.props.user?.global_flag?.toUpperCase(),
-            isFlagVisible: false
-        };
-    }
+    const dispatch = useDispatch();
+    const actionSheetRef = createRef();
+    const { t } = useTranslation();
 
-    render() {
-        const lang = this.props.lang;
+    const [isCountryPickerVisible, setIsCountryPickerVisible] = useState(false);
+    const [isFlagVisible, setIsFlagVisible] = useState(false);
 
-        return (
-            <View style={{flex: 1}}>
-                <Header
-                    leftContent={
-                        <Pressable
-                            onPress={() => this.props.navigation.goBack()}>
-                            <Icon
-                                name="ios-chevron-back-outline"
-                                color={Colors.white}
-                                size={24}
-                            />
-                        </Pressable>
-                    }
-                    centerContent={
-                        <Title
-                            color="white"
-                            dictionary={`${lang}.settings.settings`}
-                        />
-                    }
-                    centerContainerStyle={{flex: 2}}
-                    rightContent={
-                        <Pressable onPress={() => this.props.logout()}>
-                            <Body
-                                color="white"
-                                dictionary={`${lang}.settings.logout`}
-                            />
-                        </Pressable>
-                    }
-                />
-                <View style={{flex: 1}}>
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={this.props.settingsModalVisible}>
-                        {this.props.wait && (
-                            <View style={styles.waitModal}>
-                                <ActivityIndicator />
-                            </View>
-                        )}
-                        {this.props.settingsEdit && (
-                            <View style={styles.modal}>
-                                <SettingsComponent />
-                            </View>
-                        )}
-                    </Modal>
+    const user = useSelector(state => state.auth.user);
+    const token = useSelector(state => state.auth.token);
+    const settingsModalVisible = useSelector(state => state.settings.settingsModalVisible);
+    const wait = useSelector(state => state.settings.wait);
+    const settingsEdit = useSelector(state => state.settings.settingsEdit);
 
-                    <View style={styles.container}>
-                        <SectionList
-                            alwaysBounceVertical={false}
-                            stickySectionHeadersEnabled={false}
-                            renderSectionHeader={({section: {title}}) => (
-                                <SubTitle
-                                    color="muted"
-                                    style={styles.sectionHeaderTitle}
-                                    dictionary={`${lang}.${title}`}
-                                />
-                            )}
-                            sections={[
-                                {
-                                    title: 'settings.my-account',
-                                    data: [
-                                        {
-                                            id: 1,
-                                            key: 'name',
-                                            title: 'settings.name'
-                                        },
-                                        {
-                                            id: 2,
-                                            key: 'username',
-                                            title: 'settings.username'
-                                        },
-                                        {
-                                            id: 3,
-                                            key: 'email',
-                                            title: 'settings.email'
-                                        },
-                                        {
-                                            id: 4,
-                                            key: 'social',
-                                            title: 'settings.social'
-                                        },
-                                        {
-                                            id: 5,
-                                            key: 'country',
-                                            title: 'settings.social'
-                                        }
-                                    ]
-                                },
-                                {
-                                    title: 'settings.picked-up',
-                                    data: [
-                                        {
-                                            id: 11,
-                                            key: 'picked-up',
-                                            title: 'settings.litter-picked-up'
-                                        }
-                                    ]
-                                },
-                                {
-                                    title: 'settings.tagging',
-                                    data: [
-                                        {
-                                            id: 12,
-                                            key: 'enable_admin_tagging',
-                                            title: 'settings.enable_admin_tagging'
-                                        }
-                                    ]
-                                },
-                                {
-                                    title: 'settings.privacy',
-                                    data: [
-                                        {
-                                            id: 4,
-                                            key: 'name-maps',
-                                            title: 'settings.show-name-maps'
-                                        },
-                                        {
-                                            id: 5,
-                                            key: 'username-maps',
-                                            title: 'settings.show-username-maps'
-                                        },
-                                        {
-                                            id: 6,
-                                            key: 'name-leaderboard',
-                                            title: 'settings.show-name-leaderboards'
-                                        },
-                                        {
-                                            id: 7,
-                                            key: 'username-leaderboard',
-                                            title: 'settings.show-username-leaderboards'
-                                        },
-                                        {
-                                            id: 8,
-                                            key: 'name-createdby',
-                                            title: 'settings.show-name-createdby'
-                                        },
-                                        {
-                                            id: 9,
-                                            key: 'username-createdby',
-                                            title: 'settings.show-username-createdby'
-                                        }
-                                    ]
-                                },
-                                {
-                                    title: 'settings.delete-account',
-                                    data: [
-                                        {
-                                            id: 13,
-                                            key: 'delete-account',
-                                            title: 'settings.delete-your-account'
-                                        }
-                                    ]
-                                }
-                                // Temp commented out. This feature will be fixed in a future release.
-                                // {
-                                //     title: 'settings.tags',
-                                //     data: [
-                                //         {
-                                //             id: 10,
-                                //             title: 'settings.show-previous-tags'
-                                //         }
-                                //     ]
-                                // }
-                            ]}
-                            renderItem={({item, index, section}) => (
-                                <View style={styles.sectionRow} key={index}>
-                                    {this._renderRow(item)}
-                                </View>
-                            )}
-                            keyExtractor={(item, index) => item + index}
-                            showsVerticalScrollIndicator={false}
-                            ListFooterComponent={
-                                <Caption
-                                    style={{
-                                        textAlign: 'center',
-                                        marginVertical: 20
-                                    }}>
-                                    Version {DeviceInfo.getVersion()}
-                                </Caption>
-                            }
-                        />
-                    </View>
-                </View>
-
-                <ActionSheet
-                    closeOnTouchBackdrop={false}
-                    ref={this.actionSheetRef}>
-                    <View
-                        style={{
-                            height: 300,
-                            padding: 40,
-                            borderTopLeftRadius: 8,
-                            borderTopRightRadius: 8,
-                            alignItems: 'center',
-                            backgroundColor: 'white',
-                            justifyContent: 'center'
-                        }}>
-                        <Body style={{textAlign: 'center'}}>
-                            Do you want to change picked up status of all the
-                            images ?
-                        </Body>
-                        <View
-                            style={{
-                                marginTop: 20,
-                                marginBottom: 40,
-                                width: SCREEN_WIDTH - 40
-                            }}>
-                            <Pressable
-                                onPress={() => {
-                                    this.props.changeLitterStatus(
-                                        this.props?.user?.picked_up
-                                    );
-
-                                    this.actionSheetRef.current?.hide();
-                                }}
-                                style={[
-                                    styles.actionButtonStyle,
-                                    {
-                                        backgroundColor: Colors.accent,
-                                        marginVertical: 20
-                                    }
-                                ]}>
-                                <Body color="white">Yes, Change</Body>
-                            </Pressable>
-                            <Pressable
-                                onPress={this.actionSheetRef.current?.hide}
-                                style={[styles.actionButtonStyle]}>
-                                <Body color="accent">No, Don't Change</Body>
-                            </Pressable>
-                        </View>
-                    </View>
-                </ActionSheet>
-
-                {/* <SafeAreaView style={{ flex: 0, backgroundColor: '#f7f7f7' }} /> */}
-            </View>
-        );
-    }
+    const countryCode = user?.global_flag && user?.global_flag?.toUpperCase();
 
     /**
      * fn to render setting rows
      * if item.key is "name", "username", "email"
      * show values else show toggle switch
      */
-    _renderRow(item) {
+    const renderRow = (item) => {
         const dataKeys = [
             'name',
             'username',
@@ -296,21 +50,19 @@ class SettingsScreen extends Component {
             return (
                 <Pressable
                     style={{flex: 1, padding: 10}}
-                    onPress={() =>
-                        this._rowPressed(item.id, item.title, item.key)
-                    }>
+                    onPress={() => rowPressed(item.id, item.title, item.key)}
+                >
                     <View
                         style={{
                             flexDirection: 'row',
                             justifyContent: 'space-between'
-                        }}>
-                        <Body dictionary={`${this.props.lang}.${item.title}`} />
+                        }}
+                    >
+                        <Body dictionary={`${item.title}`} />
 
-                        {/* dont show any data if key is social
-                            we dont have any particular data to show now
-                        */}
+                        {/* dont show any data if key is social; we dont have any particular data to show now */}
                         {item?.key !== 'social' && (
-                            <Body>{this._getRowData(item.id, item?.key)}</Body>
+                            <Body>{getRowData(item.id, item?.key)}</Body>
                         )}
                     </View>
                 </Pressable>
@@ -325,17 +77,17 @@ class SettingsScreen extends Component {
                     {/*            justifyContent: 'center',*/}
                     {/*            padding: 10*/}
                     {/*        },*/}
-                    {/*        countryCode: this.state.countryCode,*/}
+                    {/*        countryCode: countryCode,*/}
                     {/*        withCountryNameButton: true,*/}
                     {/*        onSelect: async country => {*/}
-                    {/*            this.setState({countryCode: country.cca2});*/}
-                    {/*            this._toggleSwitch(5, 'global_flag');*/}
+                    {/*            setState({countryCode: country.cca2});*/}
+                    {/*            toggleSwitch(5, 'global_flag');*/}
                     {/*        },*/}
                     {/*        withAlphaFilter: true*/}
                     {/*    }}*/}
-                    {/*    visible={this.state.isCountryPickerVisible}*/}
+                    {/*    visible={isCountryPickerVisible}*/}
                     {/*    onClose={() =>*/}
-                    {/*        this.setState({isCountryPickerVisible: false})*/}
+                    {/*        setState({isCountryPickerVisible: false})*/}
                     {/*    }*/}
                     {/*    // onSelect={country => console.log(country)}*/}
                     {/*    renderFlagButton={() => {*/}
@@ -347,15 +99,15 @@ class SettingsScreen extends Component {
                     {/*                    alignItems: 'center'*/}
                     {/*                }}*/}
                     {/*                onPress={() =>*/}
-                    {/*                    this.setState({*/}
+                    {/*                    setState({*/}
                     {/*                        isCountryPickerVisible: true*/}
                     {/*                    })*/}
                     {/*                }>*/}
                     {/*                <Body>Select Country</Body>*/}
-                    {/*                {this.state.countryCode && (*/}
+                    {/*                {countryCode && (*/}
                     {/*                    <Flag*/}
                     {/*                        flagSize={24}*/}
-                    {/*                        countryCode={this.state.countryCode}*/}
+                    {/*                        countryCode={countryCode}*/}
                     {/*                    />*/}
                     {/*                )}*/}
                     {/*            </Pressable>*/}
@@ -367,9 +119,9 @@ class SettingsScreen extends Component {
         } else {
             return (
                 <View style={styles.switchRow}>
-                    <Body dictionary={`${this.props.lang}.${item.title}`} />
+                    <Body dictionary={`${item.title}`} />
 
-                    {this._getRowData(item.id, item.key)}
+                    {getRowData(item.id, item.key)}
                 </View>
             );
         }
@@ -378,18 +130,18 @@ class SettingsScreen extends Component {
     /**
      * Return the value for each row
      */
-    _getRowData(id, key) {
+    const getRowData = (id, key) => {
         switch (key) {
             case 'name':
-                return this.props?.user?.name;
+                return user?.name;
             case 'username':
-                return this.props?.user?.username;
+                return user?.username;
             case 'email':
-                return this.props?.user?.email;
+                return user?.email;
             case 'delete-account':
                 return (
                     <Icon
-                        name="ios-chevron-forward-outline"
+                        name="chevron-forward-outline"
                         color={Colors.muted}
                         size={24}
                     />
@@ -397,8 +149,8 @@ class SettingsScreen extends Component {
             default:
                 return (
                     <Switch
-                        onValueChange={() => this._toggleSwitch(id, key)}
-                        value={this._getSwitchValue(key) !== 0}
+                        onValueChange={() => toggleSwitch(id, key)}
+                        value={getSwitchValue(key) !== 0}
                     />
                 );
         }
@@ -407,23 +159,20 @@ class SettingsScreen extends Component {
     /**
      * Toggle the Switch - Send post request to database
      */
-    _toggleSwitch(id, key) {
-        const lang = this.props.lang;
-
-        // const alert = getTranslation(`${lang}.settings.alert`);
+    const toggleSwitch = (id, key) => {
         let title = '';
         let subtitle = '';
 
-        const ok = getTranslation(`${lang}.settings.ok`);
-        const cancel = getTranslation(`${lang}.settings.cancel`);
+        const ok = t(`settings.ok`);
+        const cancel = t(`settings.cancel`);
 
         // Needs translation
         if (key === 'enable_admin_tagging') {
-            title = this.props.user.enable_admin_tagging
+            title = user.enable_admin_tagging
                 ? 'Turn off'
                 : 'Turn on';
 
-            subtitle += this.props.user.enable_admin_tagging
+            subtitle += user.enable_admin_tagging
                 ? ' \n' + 'Only you will be able to tag your uploads'
                 : ' \n' + 'Our volunteers will tag your uploads';
         } else {
@@ -437,46 +186,53 @@ class SettingsScreen extends Component {
                 {
                     text: ok,
                     onPress: async () => {
-                        if (key === 'picked_up') {
+
+                        if (key === 'picked-up') {
+
                             // Toggle picked_up value
-                            // sending opposite of current value to api
-                            await this.props.saveSettings(
-                                {id: 11, key: 'picked_up'},
-                                !this.props?.user?.picked_up,
-                                this.props.token
-                            );
-                            this.actionSheetRef.current?.setModalVisible();
-                            // this.props.changeLitterStatus(
-                            //     this.props?.user?.picked_up
-                            // );
-                        } else if (key === 'global_flag') {
-                            this.props.saveSettings(
-                                {key: 'global_flag'},
-                                this.state.countryCode.toLowerCase(),
-                                this.props.token
-                            );
-                        } else if (key === 'enable_admin_tagging') {
-                            if (this.props.user.enable_admin_tagging) {
-                                this.props.getUntaggedImages(this.props.token);
+                            await dispatch(saveSettings({
+                                dataKey: 'picked_up',
+                                dataValue: !user?.picked_up,
+                                token
+                            }));
+
+                            actionSheetRef.current?.setModalVisible();
+                        }
+                        else if (key === 'global_flag')
+                        {
+                            await dispatch(saveSettings({
+                                dataKey: 'global_flag',
+                                dataValue: countryCode.toLowerCase(),
+                                token
+                            }));
+                        }
+                        else if (key === 'enable_admin_tagging')
+                        {
+                            if (user.enable_admin_tagging) {
+                                await dispatch(getUntaggedImages(token));
                             }
 
-                            this.props.saveSettings(
-                                {key: 'enable_admin_tagging'},
-                                !this.props?.user?.enable_admin_tagging,
-                                this.props.token
-                            );
-                        } else {
+                            await dispatch(saveSettings({
+                                dataKey: 'enable_admin_tagging',
+                                dataValue: !user.enable_admin_tagging,
+                                token
+                            }));
+                        }
+                        else
+                        {
                             // Privacy Settings
-                            this.props.toggleSettingsSwitch(
-                                id,
-                                this.props.token
-                            );
+                            await dispatch(toggleSettingsSwitch({ id, token }));
                         }
                     }
                 },
-                {text: cancel, onPress: () => console.log('cancel pressed')}
+                {
+                    text: cancel,
+                    onPress: () => console.log('cancel pressed')
+                }
             ],
-            {cancelable: true}
+            {
+                cancelable: true
+            }
         );
     }
 
@@ -485,8 +241,8 @@ class SettingsScreen extends Component {
      *
      * Open modal to show settings options
      */
-    _rowPressed(id, title, key = '') {
-        this.props.toggleSettingsModal(id, title, key);
+    const rowPressed = (id, title, key = '') => {
+        dispatch(toggleSettingsModal({ id, title, key }));
     }
 
     /**
@@ -497,31 +253,264 @@ class SettingsScreen extends Component {
      *
      * rest have 0 & 1
      */
-    _getSwitchValue(key) {
+    const getSwitchValue = (key) => {
         switch (key) {
             case 'name-maps':
-                return this.props?.user?.show_name_maps;
+                return user?.show_name_maps;
             case 'username-maps':
-                return this.props?.user?.show_username_maps;
+                return user?.show_username_maps;
             case 'name-leaderboard':
-                return this.props?.user?.show_name === false ? 0 : 1;
+                return user?.show_name === false ? 0 : 1;
             case 'username-leaderboard':
-                return this.props?.user?.show_username === false ? 0 : 1;
+                return user?.show_username === false ? 0 : 1;
             case 'name-createdby':
-                return this.props?.user?.show_name_createdby;
+                return user?.show_name_createdby;
             case 'username-createdby':
-                return this.props?.user?.show_username_createdby;
+                return user?.show_username_createdby;
             // case 10:
-            //     return this.props?.user?.previous_tag;
+            //     return user?.previous_tag;
             //     break;
-            case 'settings.picked-up':
-                return this.props?.user?.picked_up === false ? 0 : 1;
+            case 'picked-up':
+                return user?.picked_up === false ? 0 : 1;
             case 'enable_admin_tagging':
-                return Number(this.props?.user?.enable_admin_tagging);
+                return Number(user?.enable_admin_tagging);
             default:
                 break;
         }
     }
+
+    return (
+        <View style={{flex: 1}}>
+            <Header
+                leftContent={
+                    <Pressable onPress={() => navigation.goBack()}>
+                        <Icon
+                            name="chevron-back-outline"
+                            color={Colors.white}
+                            size={24}
+                        />
+                    </Pressable>
+                }
+                centerContent={
+                    <Title
+                        color="white"
+                        dictionary={`settings.settings`}
+                    />
+                }
+                centerContainerStyle={{flex: 2}}
+                rightContent={
+                    <Pressable onPress={() => dispatch(logout())}>
+                        <Body
+                            color="white"
+                            dictionary={`settings.logout`}
+                        />
+                    </Pressable>
+                }
+            />
+            <View style={{flex: 1}}>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={settingsModalVisible}
+                >
+                    {wait && (
+                        <View style={styles.waitModal}>
+                            <ActivityIndicator />
+                        </View>
+                    )}
+                    {settingsEdit && (
+                        <View style={styles.modal}>
+                            <SettingsComponent />
+                        </View>
+                    )}
+                </Modal>
+
+                <View style={styles.container}>
+                    <SectionList
+                        alwaysBounceVertical={false}
+                        stickySectionHeadersEnabled={false}
+                        renderSectionHeader={({section: {title}}) => (
+                            <SubTitle
+                                color="muted"
+                                style={styles.sectionHeaderTitle}
+                                dictionary={`${title}`}
+                            />
+                        )}
+                        sections={[
+                            {
+                                title: 'settings.my-account',
+                                data: [
+                                    {
+                                        id: 1,
+                                        key: 'name',
+                                        title: 'settings.name'
+                                    },
+                                    {
+                                        id: 2,
+                                        key: 'username',
+                                        title: 'settings.username'
+                                    },
+                                    {
+                                        id: 3,
+                                        key: 'email',
+                                        title: 'settings.email'
+                                    },
+                                    {
+                                        id: 4,
+                                        key: 'social',
+                                        title: 'settings.social'
+                                    }
+                                ]
+                            },
+                            {
+                                title: 'settings.picked-up',
+                                data: [
+                                    {
+                                        id: 11,
+                                        key: 'picked-up',
+                                        title: 'settings.litter-picked-up'
+                                    }
+                                ]
+                            },
+                            {
+                                title: 'settings.tagging',
+                                data: [
+                                    {
+                                        id: 12,
+                                        key: 'enable_admin_tagging',
+                                        title: 'settings.enable_admin_tagging'
+                                    }
+                                ]
+                            },
+                            {
+                                title: 'settings.privacy',
+                                data: [
+                                    {
+                                        id: 4,
+                                        key: 'name-maps',
+                                        title: 'settings.show-name-maps'
+                                    },
+                                    {
+                                        id: 5,
+                                        key: 'username-maps',
+                                        title: 'settings.show-username-maps'
+                                    },
+                                    {
+                                        id: 6,
+                                        key: 'name-leaderboard',
+                                        title: 'settings.show-name-leaderboards'
+                                    },
+                                    {
+                                        id: 7,
+                                        key: 'username-leaderboard',
+                                        title: 'settings.show-username-leaderboards'
+                                    },
+                                    {
+                                        id: 8,
+                                        key: 'name-createdby',
+                                        title: 'settings.show-name-createdby'
+                                    },
+                                    {
+                                        id: 9,
+                                        key: 'username-createdby',
+                                        title: 'settings.show-username-createdby'
+                                    }
+                                ]
+                            },
+                            {
+                                title: 'settings.delete-account',
+                                data: [
+                                    {
+                                        id: 13,
+                                        key: 'delete-account',
+                                        title: 'settings.delete-your-account'
+                                    }
+                                ]
+                            }
+                            // Temp commented out. This feature will be fixed in a future release.
+                            // {
+                            //     title: 'settings.tags',
+                            //     data: [
+                            //         {
+                            //             id: 10,
+                            //             title: 'settings.show-previous-tags'
+                            //         }
+                            //     ]
+                            // }
+                        ]}
+                        renderItem={({item, index, section}) => (
+                            <View style={styles.sectionRow} key={index}>
+                                {renderRow(item)}
+                            </View>
+                        )}
+                        keyExtractor={(item, index) => item + index}
+                        showsVerticalScrollIndicator={false}
+                        ListFooterComponent={
+                            <Caption
+                                style={{
+                                    textAlign: 'center',
+                                    marginVertical: 20
+                                }}
+                            >Version {DeviceInfo.getVersion()}</Caption>
+                        }
+                    />
+                </View>
+            </View>
+
+            <ActionSheet
+                closeOnTouchBackdrop={false}
+                ref={actionSheetRef}
+            >
+                <View
+                    style={{
+                        height: 300,
+                        padding: 40,
+                        borderTopLeftRadius: 8,
+                        borderTopRightRadius: 8,
+                        alignItems: 'center',
+                        backgroundColor: 'white',
+                        justifyContent: 'center'
+                    }}
+                >
+                    <Body style={{textAlign: 'center'}}>
+                        Do you want to change picked up status of all the images ?
+                    </Body>
+                    <View
+                        style={{
+                            marginTop: 20,
+                            marginBottom: 40,
+                            width: SCREEN_WIDTH - 40
+                        }}
+                    >
+                        <Pressable
+                            onPress={() => {
+                                dispatch(changeLitterStatus(user?.picked_up));
+
+                                actionSheetRef.current?.hide();
+                            }}
+                            style={[
+                                styles.actionButtonStyle,
+                                {
+                                    backgroundColor: Colors.accent,
+                                    marginVertical: 20
+                                }
+                            ]}
+                        >
+                            <Body color="white">Yes, Change</Body>
+                        </Pressable>
+                        <Pressable
+                            onPress={actionSheetRef.current?.hide}
+                            style={[styles.actionButtonStyle]}
+                        >
+                            <Body color="accent">No, Don't Change</Body>
+                        </Pressable>
+                    </View>
+                </View>
+            </ActionSheet>
+
+            {/* <SafeAreaView style={{ flex: 0, backgroundColor: '#f7f7f7' }} /> */}
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -604,15 +593,4 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = state => {
-    return {
-        lang: state.auth.lang,
-        settingsModalVisible: state.settings.settingsModalVisible,
-        token: state.auth.token,
-        user: state.auth.user,
-        wait: state.settings.wait,
-        settingsEdit: state.settings.settingsEdit
-    };
-};
-
-export default connect(mapStateToProps, actions)(SettingsScreen);
+export default SettingsScreen;

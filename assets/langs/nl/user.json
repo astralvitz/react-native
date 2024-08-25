@@ -1,8 +1,8 @@
 {
     "level": "Peil",
-    "level-up": "{count} XP om een niveau omhoog te gaan",
+    "level-up": "{{count}} XP om een niveau omhoog te gaan",
     "littercoin": "Littercoin",
-    "next-littercoin": "{count}% Volgende Littercoin",
+    "next-littercoin": "{{count}}% Volgende Littercoin",
     "photos": "Foto's",
     "rank": "Rang",
     "tags": "Tags",

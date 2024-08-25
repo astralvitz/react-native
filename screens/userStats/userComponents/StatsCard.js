@@ -1,9 +1,9 @@
 import React from 'react';
-import {Dimensions, StyleSheet, View} from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
 import PropTypes from 'prop-types';
-import {Colors, SubTitle, Title} from '../../components';
+import { Colors, SubTitle, Title } from '../../components';
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const StatsCard = ({
     style,
@@ -21,8 +21,6 @@ const StatsCard = ({
         </View>
     );
 };
-
-export default StatsCard;
 
 StatsCard.propTypes = {
     value: PropTypes.string.isRequired,
@@ -43,3 +41,5 @@ const styles = StyleSheet.create({
         // flex: 1
     }
 });
+
+export default StatsCard;

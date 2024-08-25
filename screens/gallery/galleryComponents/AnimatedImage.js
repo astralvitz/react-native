@@ -18,14 +18,14 @@ const AnimatedImage = ({ image, isImageGeotagged, selected, onPress }) => {
      *
      * run animation and call fn this.props.onPress() which will mark the image as selected
      */
-    onImagePress = () => {
+    const onImagePress = () => {
         if (isImageGeotagged) {
             onPress();
         }
     };
 
     return (
-        <Pressable key={image.uri} onPress={this.onImagePress}>
+        <Pressable key={image.uri} onPress={onImagePress}>
             <View style={styles.grid}>
                 <Image
                     source={{ uri: image.uri }}
@@ -49,7 +49,7 @@ const AnimatedImage = ({ image, isImageGeotagged, selected, onPress }) => {
                     {/* Selected check mark icon */}
                     <View style={[styles.selectedIcon, styles.iconBorderStyle]}>
                         <Icon
-                            name="ios-checkmark-outline"
+                            name="checkmark-outline"
                             size={20}
                             color="white"
                         />
@@ -65,8 +65,6 @@ const AnimatedImage = ({ image, isImageGeotagged, selected, onPress }) => {
         </Pressable>
     );
 };
-
-export default AnimatedImage;
 
 const styles = StyleSheet.create({
     grid: {
@@ -103,3 +101,5 @@ const styles = StyleSheet.create({
         height: '100%'
     }
 });
+
+export default AnimatedImage;

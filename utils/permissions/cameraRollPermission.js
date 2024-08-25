@@ -1,5 +1,5 @@
-import {Platform} from 'react-native';
-import {check, PERMISSIONS, request} from 'react-native-permissions';
+import { Platform } from 'react-native';
+import { check, PERMISSIONS, request } from 'react-native-permissions';
 
 export const requestCameraRollPermission = async () => {
     let result;
@@ -11,11 +11,8 @@ export const requestCameraRollPermission = async () => {
             // needs to request READ_MEDIA_IMAGES and ACCESS_MEDIA_LOCATION
             if (Platform.Version >= 33) {
                 result = await request(PERMISSIONS.ANDROID.READ_MEDIA_IMAGES);
-                console.log('READ_MEDIA_IMAGES: ' + result);
 
                 const mediaLocation = await request(PERMISSIONS.ANDROID.ACCESS_MEDIA_LOCATION);
-
-                console.log('ACCESS_MEDIA_LOCATION: ' + mediaLocation);
 
                 if (result === 'granted' && mediaLocation === 'granted') {
                     return 'granted';
@@ -25,8 +22,6 @@ export const requestCameraRollPermission = async () => {
             } else {
                 // Android 12 and below needs to request READ_EXTERNAL_STORAGE
                 result = await request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE);
-
-                console.log('READ_EXTERNAL_STORAGE: ' + result);
             }
         }
     } catch (error) {
@@ -38,7 +33,6 @@ export const requestCameraRollPermission = async () => {
 };
 
 /**
- *
  * @returns {Promise<"limited"|"denied"|"blocked"|"unavailable"|"granted">}
  */
 export const checkCameraRollPermission = async () => {

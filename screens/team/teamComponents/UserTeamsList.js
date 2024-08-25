@@ -1,71 +1,77 @@
+import React, { useEffect } from 'react';
 import { StyleSheet, Pressable, View } from 'react-native';
-import React, { Component } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { SubTitle, Body, Caption, Colors } from '../../components';
-import * as actions from '../../../actions';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from "react-redux";
+import { getUserTeams, setSelectedTeam } from "../../../reducers/team_reducer";
 import TeamListCard from './TeamListCard';
 
-class UserTeamsList extends Component {
-    componentDidMount() {
-        this.props.getUserTeams(this.props.token);
-    }
+const UserTeamsList = ({ navigation }) => {
 
-    setTeam = team => {
-        this.props.setSelectedTeam(team);
-        this.props.navigation.navigate('TEAM_DETAILS');
+    const dispatch = useDispatch();
+    const token = useSelector(state => state.auth.token);
+    const userTeams = useSelector(state => state.teams.userTeams);
+    const user = useSelector(state => state.auth.user);
+    const activeTeam = user?.active_team_id;
+
+    useEffect(() => {
+        async function handleGetUserTeams(token) {
+            await dispatch(getUserTeams(token));
+        }
+
+        handleGetUserTeams(token);
+    }, []);
+
+    const setTeam = team => {
+        dispatch(setSelectedTeam(team));
+
+        navigation.navigate('TEAM_DETAILS');
     };
 
-    render() {
-        const { userTeams, user } = this.props;
-        const activeTeam = user?.active_team;
-        return (
-            <>
-                {/* Users Teams */}
-                <View style={[styles.headingRow, { marginTop: 20 }]}>
-                    <SubTitle>My Teams</SubTitle>
-                    {/* <Caption color="accent">View All</Caption> */}
-                </View>
-                {userTeams?.map((team, index) => (
-                    <Pressable
-                        onPress={() => this.setTeam(team)}
-                        key={`${team.name}${index}`}>
-                        <TeamListCard
-                            team={team}
-                            index={index}
-                            showRanking={false}
-                            leftContent={
-                                <View style={{ height: 24, width: 24 }}>
-                                    {activeTeam === team.id && (
-                                        <Icon
-                                            name="ios-star-sharp"
-                                            size={24}
-                                            color={Colors.accent}
-                                        />
-                                    )}
-                                </View>
-                            }
-                        />
-                    </Pressable>
-                ))}
-            </>
-        );
+    const navigateToTeamDetails = () => {
+        navigation.navigate('TEAM_DETAILS');
     }
+
+    return (
+        <>
+            {/* Users Teams */}
+            <View style={[styles.headingRow, { marginTop: 20 }]}>
+                <SubTitle>My Teams</SubTitle>
+
+                <Pressable onPress={navigateToTeamDetails}>
+                    <Caption
+                        color="accent"
+                        style={{ backgroundColor: 'red', padding: 5 }}
+                    >View All</Caption>
+                </Pressable>
+            </View>
+
+            {userTeams?.map((team, index) => (
+                <Pressable
+                    onPress={() => setTeam(team)}
+                    key={`${team.name}${index}`}
+                >
+                    <TeamListCard
+                        team={team}
+                        index={index}
+                        showRanking={false}
+                        leftContent={
+                            <View style={{ height: 24, width: 24 }}>
+                                {activeTeam === team.id && (
+                                    <Icon
+                                        name="star-sharp"
+                                        size={24}
+                                        color={Colors.accent}
+                                    />
+                                )}
+                            </View>
+                        }
+                    />
+                </Pressable>
+            ))}
+        </>
+    );
 }
-
-const mapStateToProps = state => {
-    return {
-        lang: state.auth.lang,
-        token: state.auth.token,
-        user: state.auth.user,
-        userTeams: state.teams.userTeams
-    };
-};
-
-export default connect(
-    mapStateToProps,
-    actions
-)(UserTeamsList);
 
 const styles = StyleSheet.create({
     headingRow: {
@@ -77,3 +83,5 @@ const styles = StyleSheet.create({
         textAlign: 'right'
     }
 });
+
+export default UserTeamsList;

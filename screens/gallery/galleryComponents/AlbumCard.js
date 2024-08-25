@@ -2,26 +2,18 @@ import React, { Component } from 'react';
 import { Text, StyleSheet, View, Pressable, Image } from 'react-native';
 import { Colors } from '../../components';
 
-export default class AlbumCard extends Component {
-    constructor(props) {
-        super(props);
-    }
-    render() {
-        let { albumName, thumbnail, counter, navigation } = this.props;
-        return (
-            <Pressable
-                style={[styles.base]}
-                onPress={() => navigation.navigate('GALLERY')}>
-                <Image source={{ uri: thumbnail }} style={styles.thumb} />
-                <View style={styles.textWrapper}>
-                    <Text style={styles.name}>{albumName}</Text>
-                    <Text style={styles.counter}>{`${counter} ${
-                        counter && counter > 1 ? 'Photos' : 'Photo'
-                    }`}</Text>
-                </View>
-            </Pressable>
-        );
-    }
+const AlbumCard = ({ albumName, thumbnail, counter, navigation }) => {
+    return (
+        <Pressable
+            style={[styles.base]}
+            onPress={() => navigation.navigate('GALLERY')}>
+            <Image source={{ uri: thumbnail }} style={styles.thumb} />
+            <View style={styles.textWrapper}>
+                <Text style={styles.name}>{albumName}</Text>
+                <Text style={styles.counter}>{`${counter} ${counter && counter > 1 ? 'Photos' : 'Photo'}`}</Text>
+            </View>
+        </Pressable>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -52,3 +44,5 @@ const styles = StyleSheet.create({
         fontSize: 12
     }
 });
+
+export default AlbumCard;

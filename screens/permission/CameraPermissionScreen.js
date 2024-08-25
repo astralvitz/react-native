@@ -1,18 +1,7 @@
-import React, {Component} from 'react';
-import {
-    AppState,
-    StyleSheet,
-    View,
-    Image,
-    Pressable,
-    Platform,
-    Linking,
-    Dimensions
-} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { AppState, StyleSheet, View, Image, Pressable, Platform, Linking, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {connect} from 'react-redux';
-import * as actions from '../../actions';
-import {Title, Body, Colors, Caption} from '../components';
+import { Title, Body, Colors, Caption } from '../components';
 import {
     checkCameraPermission,
     checkLocationPermission,
@@ -20,156 +9,77 @@ import {
     requestLocationPermission
 } from '../../utils/permissions';
 
-const {width} = Dimensions.get('window');
-class CameraPermissionScreen extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            appState: AppState.currentState
+const width = Dimensions.get('window').width;
+
+const CameraPermissionScreen = ({ navigation, lang }) => {
+    const [appState, setAppState] = useState(AppState.currentState);
+
+    useEffect(() => {
+        const handleAppStateChange = (nextAppState) => {
+            if (appState.match(/inactive|background/) && nextAppState === 'active') {
+                checkPermissions();
+            }
+            setAppState(nextAppState);
         };
-    }
 
-    componentDidMount() {
-        /**
-         * App state event listner to check if app is in foreground/active
-         * or in background/inactive
-         */
-        AppState.addEventListener('change', this.handleAppStateChange);
-    }
+        const subscription = AppState.addEventListener('change', handleAppStateChange);
 
-    componentWillUnmount() {
-        /**
-         * remove appState subscription
-         */
-        AppState.removeEventListener('change', this.handleAppStateChange);
-    }
-    /**
-     * fn that is called when app state changes
-     *
-     * if app comes back from inactive/background to active state
-     * {@link CameraPermissionScreen.checkPermissions} gallery permission is again checked
-     * @param {"active" | "background" | "inactive"} nextAppState
-     * "inactive" is IOS only
-     */
-    handleAppStateChange = nextAppState => {
-        if (
-            this.state.appState.match(/inactive|background/) &&
-            nextAppState === 'active'
-        ) {
-            this.checkPermissions();
-        }
-        this.setState({appState: nextAppState});
-    };
+        return () => {
+            subscription.remove();
+        };
+    }, [appState]);
 
-    /**
-     * fn to check for camera permissions
-     * if permissions granted go back to home, else do nothing
-     */
-    async checkPermissions() {
+    const checkPermissions = async () => {
         const cameraPermission = await checkCameraPermission();
         const locationPermission = await checkLocationPermission();
 
-        if (
-            cameraPermission === 'granted' &&
-            locationPermission === 'granted'
-        ) {
-            this.props.navigation.navigate('CAMERA');
+        if (cameraPermission === 'granted' && locationPermission === 'granted') {
+            navigation.navigate('CAMERA');
         }
-    }
+    };
 
-    /**
-     * fn to request permission for accessing camera
-     *
-     * if asked earlier and user denied / ("BLOCKED")
-     * it then take user to app setting
-     *
-     * if user granted access go back
-     */
-    async requestPermissions() {
+    const requestPermissions = async () => {
         const cameraResult = await requestCameraPermission();
         const locationResult = await requestLocationPermission();
         if (cameraResult === 'granted' && locationResult === 'granted') {
-            this.props.navigation.navigate('CAMERA');
+            navigation.navigate('CAMERA');
         } else {
-            Platform.OS === 'ios'
-                ? Linking.openURL('app-settings:')
-                : Linking.openSettings();
+            Platform.OS === 'ios' ? Linking.openURL('app-settings:') : Linking.openSettings();
         }
-    }
+    };
 
-    render() {
-        const {navigation, lang} = this.props;
-        return (
-            <View style={styles.container}>
-                <Image
-                    source={require('../../assets/illustrations/camera_permission.png')}
-                    style={styles.imageStyle}
-                />
-                <Title
-                    dictionary={`${lang}.permission.please-give-permissions`}
-                />
-                {/* 1 */}
-                <View style={styles.permissionContainer}>
-                    <View
-                        style={[
-                            styles.permissionItem,
-                            lang === 'ar' && {flexDirection: 'row-reverse'}
-                        ]}>
-                        <Icon name="ios-camera" size={32} color={Colors.text} />
-                        <View style={styles.itemBody}>
-                            <Body
-                                style={lang === 'ar' && {textAlign: 'right'}}
-                                dictionary={`${lang}.permission.camera-access`}
-                            />
-                            <Caption
-                                style={lang === 'ar' && {textAlign: 'right'}}
-                                dictionary={`${lang}.permission.camera-access-body`}
-                            />
-                        </View>
-                    </View>
-
-                    {/* 2 */}
-                    <View
-                        style={[
-                            styles.permissionItem,
-                            lang === 'ar' && {flexDirection: 'row-reverse'}
-                        ]}>
-                        <Icon name="ios-location" size={32} />
-                        <View style={styles.itemBody}>
-                            <Body
-                                style={lang === 'ar' && {textAlign: 'right'}}
-                                dictionary={`${lang}.permission.location-access`}
-                            />
-                            <Caption
-                                style={lang === 'ar' && {textAlign: 'right'}}
-                                dictionary={`${lang}.permission.location-body`}
-                            />
-                        </View>
+    return (
+        <View style={styles.container}>
+            <Image
+                source={require('../../assets/illustrations/camera_permission.png')}
+                style={styles.imageStyle}
+            />
+            <Title dictionary={'permission.please-give-permissions'} />
+            <View style={styles.permissionContainer}>
+                <View style={[styles.permissionItem, lang === 'ar' && {flexDirection: 'row-reverse'}]}>
+                    <Icon name="camera" size={32} color={Colors.text} />
+                    <View style={styles.itemBody}>
+                        <Body style={lang === 'ar' && {textAlign: 'right'}} dictionary={'permission.camera-access'} />
+                        <Caption style={lang === 'ar' && {textAlign: 'right'}} dictionary={'permission.camera-access-body'} />
                     </View>
                 </View>
-                <Pressable
-                    style={styles.buttonStyle}
-                    onPress={() => this.requestPermissions()}>
-                    <Body
-                        color="white"
-                        dictionary={`${lang}.permission.allow-permission`}
-                    />
-                </Pressable>
-                <Pressable onPress={() => navigation.navigate('HOME')}>
-                    <Body dictionary={`${lang}.permission.not-now`} />
-                </Pressable>
+                <View style={[styles.permissionItem, lang === 'ar' && {flexDirection: 'row-reverse'}]}>
+                    <Icon name="location" size={32} color={Colors.text} />
+                    <View style={styles.itemBody}>
+                        <Body style={lang === 'ar' && {textAlign: 'right'}} dictionary={'permission.location-access'} />
+                        <Caption style={lang === 'ar' && {textAlign: 'right'}} dictionary={'permission.location-body'} />
+                    </View>
+                </View>
             </View>
-        );
-    }
-}
-
-const mapStateToProps = state => {
-    return {
-        lang: state.auth.lang
-    };
+            <Pressable style={styles.buttonStyle} onPress={requestPermissions}>
+                <Body color="white" dictionary={'permission.allow-permission'} />
+            </Pressable>
+            <Pressable onPress={() => navigation.navigate('HOME')}>
+                <Body dictionary={'permission.not-now'} />
+            </Pressable>
+        </View>
+    );
 };
-
-export default connect(mapStateToProps, actions)(CameraPermissionScreen);
 
 const styles = StyleSheet.create({
     container: {
@@ -182,10 +92,6 @@ const styles = StyleSheet.create({
         width: 300,
         height: 300
     },
-    bodyText: {
-        textAlign: 'center',
-        marginVertical: 20
-    },
     permissionContainer: {
         width: width - 80,
         marginTop: 20
@@ -195,7 +101,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 20
     },
-    itemBody: {flexShrink: 1, marginHorizontal: 20},
+    itemBody: { flexShrink: 1, marginHorizontal: 20 },
     buttonStyle: {
         paddingHorizontal: 28,
         paddingVertical: 20,
@@ -204,3 +110,5 @@ const styles = StyleSheet.create({
         marginVertical: 32
     }
 });
+
+export default CameraPermissionScreen;

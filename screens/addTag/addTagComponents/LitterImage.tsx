@@ -1,21 +1,8 @@
-import React, {PureComponent} from 'react';
-import {
-    ActivityIndicator,
-    Animated,
-    Dimensions,
-    ImageSourcePropType,
-    Pressable,
-    StyleSheet
-} from 'react-native';
-import * as actions from '../../../actions';
-import {connect} from 'react-redux';
+import React, { useState, useRef } from 'react';
+import { ActivityIndicator, Animated, Dimensions, ImageSourcePropType, Pressable, StyleSheet } from 'react-native';
 import GestureRecognizer from 'react-native-swipe-gestures';
-import {
-    GestureHandlerRootView,
-    PinchGestureHandler,
-    State
-} from 'react-native-gesture-handler';
-import {NavigationProp} from '@react-navigation/native';
+import { GestureHandlerRootView, PinchGestureHandler, State } from 'react-native-gesture-handler';
+import { NavigationProp } from '@react-navigation/native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -24,119 +11,100 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface LitterImageProps {
     photoSelected: {
-        uri: string;
+        uri: string|null;
+        filename: string|null;
     };
     navigation: NavigationProp<any>;
     onLongPressStart: () => void;
     onLongPressEnd: () => void;
     category: string;
-    item: string;
-    items: string[];
-    q: number;
-    quantityChanged: boolean;
+    item?: string;
+    items?: string[];
+    q?: number;
+    quantityChanged?: boolean;
 }
 
-interface LitterImageState {
-    imageLoaded: boolean;
-    isLongPress: boolean;
-}
+const LitterImage: React.FC<LitterImageProps> = ({
+    photoSelected,
+    onLongPressStart,
+    onLongPressEnd,
+    navigation
+}) => {
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const [isLongPress, setIsLongPress] = useState(false);
 
-class LitterImage extends PureComponent<LitterImageProps, LitterImageState> {
-    scale: Animated.Value;
-    focalX: Animated.Value;
-    focalY: Animated.Value;
-    onPinchGestureEvent: (...args: any[]) => void;
+    const scale = useRef(new Animated.Value(1)).current;
+    const focalX = useRef(new Animated.Value(0)).current;
+    const focalY = useRef(new Animated.Value(0)).current;
 
-    constructor(props: LitterImageProps) {
-        super(props);
-
-        this.state = {
-            imageLoaded: false,
-            isLongPress: false
-        };
-
-        this.scale = new Animated.Value(1);
-        this.focalX = new Animated.Value(0);
-        this.focalY = new Animated.Value(0);
-        this.onPinchGestureEvent = Animated.event(
-            [
-                {
-                    nativeEvent: {
-                        scale: this.scale,
-                        focalX: this.focalX,
-                        focalY: this.focalY
-                    }
+    const onPinchGestureEvent = Animated.event(
+        [
+            {
+                nativeEvent: {
+                    scale,
+                    focalX,
+                    focalY
                 }
-            ],
-            {useNativeDriver: true}
-        );
-    }
+            }
+        ],
+        { useNativeDriver: true }
+    );
 
-    _imageLoaded = () => {
-        this.setState({imageLoaded: true});
+    const _imageLoaded = () => {
+        setImageLoaded(true);
     };
 
-    onPinchHandlerStateChange = (event: any) => {
+    const onPinchHandlerStateChange = (event: any) => {
         if (event.nativeEvent.oldState === State.ACTIVE) {
-            Animated.spring(this.scale, {
+            Animated.spring(scale, {
                 toValue: 1,
                 useNativeDriver: true
             }).start();
         }
     };
 
-    render() {
-        const {photoSelected, onLongPressStart, onLongPressEnd, navigation} =
-            this.props;
-
-        return (
-            <GestureHandlerRootView>
-                <GestureRecognizer
-                    onSwipeDown={state => {
-                        console.log('swipe down', state);
-                        navigation.navigate('HOME');
-                    }}>
-                    <PinchGestureHandler
-                        onGestureEvent={this.onPinchGestureEvent}
-                        onHandlerStateChange={this.onPinchHandlerStateChange}>
-                        <AnimatedPressable
-                            onPress={() => {
-                                this.setState({isLongPress: false});
-                            }}
-                            onLongPress={() => {
-                                this.setState({isLongPress: true});
-                                onLongPressStart();
-                            }}
-                            onPressOut={() => {
-                                this.state.isLongPress && onLongPressEnd();
-                            }}
-                            style={{backgroundColor: 'black'}}>
-                            <Animated.Image
-                                resizeMode="contain"
-                                source={
-                                    {
-                                        uri: photoSelected.uri
-                                    } as ImageSourcePropType
+    return (
+        <GestureHandlerRootView>
+            <GestureRecognizer
+                onSwipeDown={state => { navigation.navigate('HOME'); }}
+            >
+                <PinchGestureHandler
+                    onGestureEvent={onPinchGestureEvent}
+                    onHandlerStateChange={onPinchHandlerStateChange}>
+                    <AnimatedPressable
+                        onPress={() => { setIsLongPress(false); }}
+                        onLongPress={() => {
+                            setIsLongPress(true);
+                            onLongPressStart();
+                        }}
+                        onPressOut={() => {
+                            isLongPress && onLongPressEnd();
+                        }}
+                        style={{backgroundColor: 'black'}}
+                    >
+                        <Animated.Image
+                            resizeMode="contain"
+                            source={
+                                { uri: photoSelected.uri === null ? photoSelected.filename : photoSelected.uri } as ImageSourcePropType
+                            }
+                            style={[
+                                styles.image,
+                                {
+                                    transform: [{scale: scale}]
                                 }
-                                style={[
-                                    styles.image,
-                                    {
-                                        transform: [{scale: this.scale}]
-                                    }
-                                ]}
-                                onLoad={this._imageLoaded}
-                            />
+                            ]}
+                            onLoad={_imageLoaded}
+                        />
 
-                            <ActivityIndicator
-                                style={styles.activityIndicator}
-                                animating={!this.state.imageLoaded}
-                            />
-                        </AnimatedPressable>
-                    </PinchGestureHandler>
-                </GestureRecognizer>
-            </GestureHandlerRootView>
-        );
-    }
+                        <ActivityIndicator
+                            style={styles.activityIndicator}
+                            animating={!imageLoaded}
+                        />
+                    </AnimatedPressable>
+                </PinchGestureHandler>
+            </GestureRecognizer>
+        </GestureHandlerRootView>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -153,14 +121,4 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = (state: any) => {
-    return {
-        category: state.litter.category,
-        item: state.litter.item,
-        items: state.litter.items,
-        q: state.litter.q,
-        quantityChanged: state.litter.quantityChanged
-    };
-};
-
-export default connect(mapStateToProps, actions)(LitterImage);
+export default LitterImage;

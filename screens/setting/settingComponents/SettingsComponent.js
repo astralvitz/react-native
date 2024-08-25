@@ -1,4 +1,4 @@
-import React, {Component, createRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     ActivityIndicator,
     Dimensions,
@@ -11,228 +11,158 @@ import {
     TouchableHighlight,
     View
 } from 'react-native';
-import {Formik} from 'formik';
+import { useDispatch, useSelector } from "react-redux";
+import { Formik } from 'formik';
 import * as Yup from 'yup';
-import {getTranslation, TransText} from 'react-native-translation';
-// import {Icon as ElementIcon} from '@rneui/base';
-import {connect} from 'react-redux';
-import {
-    Body,
-    Colors,
-    CustomTextInput,
-    Header,
-    SubTitle
-} from '../../components';
+import { useTranslation } from 'react-i18next';
+import { Body, Colors, CustomTextInput, Header, SubTitle } from '../../components';
 import Icon from 'react-native-vector-icons/Ionicons';
-import * as actions from '../../../actions';
+import {
+    closeSecondSettingModal,
+    deleteAccount,
+    saveSettings,
+    saveSocialAccounts,
+    setDeleteAccountError,
+    settingsInit,
+    toggleSettingsModal,
+    updateSettingsProp
+} from "../../../reducers/settings_reducer";
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-class SettingsComponent extends Component {
-    constructor(props) {
-        super(props);
-        this._getTextInputValue();
-        this.formikRef = createRef();
-        this.state = {
-            password: ''
-        };
-    }
+const SettingsComponent = () => {
 
-    render() {
-        const {lang, dataToEdit} = this.props;
+    const { t } = useTranslation();
+    const dispatch = useDispatch();
 
-        return (
-            <>
-                <Header
-                    leftContent={
-                        <Pressable onPress={() => this._closeModal()}>
-                            <Icon
-                                name="ios-close-outline"
-                                size={32}
-                                color="white"
-                            />
-                        </Pressable>
-                    }
-                    centerContent={
-                        <SubTitle
-                            color="white"
-                            style={{
-                                textAlign: 'center'
-                            }}>
-                            {this._getHeaderName()}
-                        </SubTitle>
-                    }
-                    rightContent={
-                        dataToEdit.key !== 'delete-account' ? (
-                            <Pressable onPress={() => this._saveSettings()}>
-                                <Body
-                                    color="white"
-                                    dictionary={`${lang}.settings.save`}
-                                />
-                            </Pressable>
-                        ) : (
-                            ''
-                        )
-                    }
-                />
+    const formikRef = useRef(null);
+    const [password, setPassword] = useState('');
 
-                {this.getForm(dataToEdit, lang)}
+    useEffect(() => {
+        // This will initialize the settings.settingsEditProp
+        initSettingsEditProp();
+    }, []);
 
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={this.props.secondSettingsModalVisible}>
-                    <View style={styles.modalContainer}>
-                        {this.renderStatusMessage(
-                            this.props.updateSettingsStatusMessage,
-                            lang
-                        )}
-                        {this.props.updatingSettings &&
-                            this.props.updateSettingsStatusMessage === '' && (
-                                <ActivityIndicator />
-                            )}
-                    </View>
-                </Modal>
-            </>
-        );
-    }
+    const settingsEditProp = useSelector(state => state.settings.settingsEditProp);
+    const dataToEdit = useSelector(state => state.settings.dataToEdit);
+    const user = useSelector(state => state.auth.user);
+    const token = useSelector(state => state.auth.token);
 
-    getForm = (dataToEdit, lang) => {
+    const secondSettingsModalVisible = useSelector(state => state.settings.secondSettingsModalVisible);
+    const updateSettingsStatusMessage = useSelector(state => state.settings.updateSettingsStatusMessage);
+    const updatingSettings = useSelector(state => state.settings.updatingSettings);
+    const deleteAccountError = useSelector(state => state.settings.deleteAccountError);
+
+    const getForm = (formDataToEdit) => {
+
         const key = ['name', 'username', 'email'];
 
         // get conditional validation schema
-        const validationSchema = Yup.object().shape(
-            this.getSchema(dataToEdit.key)
-        );
-        // form for name, username, email
-        if (key.includes(dataToEdit.key)) {
-            return (
-                <Formik
-                    initialValues={{
-                        [dataToEdit.key]: this.props.settingsEditProp
-                    }}
-                    innerRef={this.formikRef}
-                    validationSchema={validationSchema}
-                    onSubmit={values => {
-                        this.props.saveSettings(
-                            this.props.dataToEdit,
-                            this.props.settingsEditProp,
-                            this.props.token
-                        );
-                    }}>
-                    {({
-                        handleChange,
-                        handleBlur,
-                        setFieldValue,
-                        handleSubmit,
-                        values,
-                        errors,
-                        touched
-                    }) => (
-                        <View style={styles.container}>
-                            <Body
-                                dictionary={`${lang}.${this.props.dataToEdit.title}`}
-                            />
+        const validationSchema = Yup.object().shape(getSchema(formDataToEdit.key));
 
-                            <CustomTextInput
-                                style={styles.content}
-                                // ref={this.usernameRef}
-                                onChangeText={text => {
-                                    setFieldValue(`${dataToEdit.key}`, text);
-                                    this.props.updateSettingsProp({text});
-                                }}
-                                value={this.props.settingsEditProp}
-                                name={`${dataToEdit.key}`}
-                                autoCapitalize="none"
-                                error={
-                                    errors[`${dataToEdit.key}`] &&
-                                    `${this.props.lang}.auth.${
-                                        errors[`${dataToEdit.key}`]
-                                    }`
-                                }
-                                touched={touched[`${dataToEdit.key}`]}
-                            />
-                        </View>
-                    )}
-                </Formik>
+        // form for name, username, email
+        if (key.includes(formDataToEdit.key))
+        {
+            return (
+                {settingsEditProp} && (
+                    <Formik
+                        initialValues={{ [formDataToEdit.key]: settingsEditProp }}
+                        enableReinitialize={true}
+                        innerRef={formikRef}
+                        validationSchema={validationSchema}
+                        onSubmit={values => {
+                            dispatch(saveSettings({
+                                dataKey: formDataToEdit.key,
+                                dataValue: values[formDataToEdit.key],
+                                token
+                            }));
+                        }}
+                    >
+                        {({
+                              handleChange,
+                              handleBlur,
+                              setFieldValue,
+                              handleSubmit,
+                              values,
+                              errors,
+                              touched
+                        }) => (
+                            <View style={styles.container}>
+                                <Body dictionary={`${formDataToEdit.title}`}/>
+
+                                <CustomTextInput
+                                    style={styles.content}
+                                    onChangeText={text => { setFieldValue(`${formDataToEdit.key}`, text); }}
+                                    value={values[`${formDataToEdit.key}`]}
+                                    name={`${formDataToEdit.key}`}
+                                    autoCapitalize="none"
+                                    error={errors[`${formDataToEdit.key}`] && `auth.${errors[`${formDataToEdit.key}`]}`}
+                                    touched={touched[`${formDataToEdit.key}`]}
+                                />
+                            </View>
+                        )}
+                    </Formik>
+                )
             );
-        } else if (dataToEdit.key === 'social') {
+        }
+        else if (formDataToEdit.key === 'social')
+        {
             const formFields = [
-                'twitter',
-                'facebook',
-                'instagram',
-                'linkedin',
-                'reddit',
-                'personal'
+                'social_twitter',
+                'social_facebook',
+                'social_instagram',
+                'social_linkedin',
+                'social_reddit',
+                'social_personal'
             ];
             const placeholders = [
-                'https://twitter.com/olm',
-                'https://www.facebook.com/olm',
-                'https://www.instagram.com/olm',
-                'https://www.linkedin.com/olm',
-                'https://www.reddit.com/user/olm/',
-                'https://www.openlittermap.com'
+                'https://twitter.com/openlittermap',
+                'https://facebook.com/openlittermap',
+                'https://instagram.com/openlittermap',
+                'https://linkedin.com/openlittermap',
+                'https://reddit.com/r/openlittermap/',
+                'https://openlittermap.com'
             ];
             return (
                 <Formik
                     initialValues={{
-                        twitter: this.props.settingsEditProp?.social_twitter,
-                        facebook: this.props.settingsEditProp?.social_facebook,
-                        instagram:
-                            this.props.settingsEditProp?.social_instagram,
-                        linkedin: this.props.settingsEditProp?.social_linkedin,
-                        reddit: this.props.settingsEditProp?.social_reddit,
-                        personal: this.props.settingsEditProp?.social_personal
+                        social_twitter: settingsEditProp?.social_twitter,
+                        social_facebook: settingsEditProp?.social_facebook,
+                        social_instagram: settingsEditProp?.social_instagram,
+                        social_linkedin: settingsEditProp?.social_linkedin,
+                        social_reddit: settingsEditProp?.social_reddit,
+                        social_personal: settingsEditProp?.social_personal
                     }}
-                    innerRef={this.formikRef}
+                    enableReinitialize={true}
+                    innerRef={formikRef}
                     validationSchema={validationSchema}
                     onSubmit={values => {
-                        this.props.saveSocialAccounts(
-                            this.props.dataToEdit,
-                            this.props.settingsEditProp,
-                            this.props.token
-                        );
-                    }}>
+                        dispatch(saveSocialAccounts({
+                            values,
+                            token
+                        }));
+                    }}
+                >
                     {({setFieldValue, setFieldTouched, errors, touched}) => (
                         <ScrollView
                             alwaysBounceVertical={false}
                             showsVerticalScrollIndicator={false}
-                            style={styles.container}>
+                            style={styles.container}
+                        >
                             {formFields.map((field, index) => (
                                 <View key={field}>
                                     <Body>{field.toLocaleUpperCase()}</Body>
                                     <CustomTextInput
                                         style={styles.content}
-                                        onEndEditing={() =>
-                                            setFieldTouched(`${field}`, true)
-                                        }
+                                        onEndEditing={() => setFieldTouched(`${field}`, true)}
                                         onChangeText={text => {
                                             setFieldValue(`${field}`, text);
-
-                                            this.props.updateSettingsProp(
-                                                {
-                                                    ...this.props
-                                                        .settingsEditProp,
-                                                    [`social_${field}`]: text
-                                                },
-                                                'social'
-                                            );
                                         }}
-                                        value={
-                                            this.props.settingsEditProp &&
-                                            this.props.settingsEditProp[
-                                                `social_${field}`
-                                            ]
-                                        }
+                                        value={settingsEditProp && settingsEditProp[`${field}`]}
                                         name={`${field}`}
                                         autoCapitalize="none"
-                                        error={
-                                            errors[`${field}`] &&
-                                            `${this.props.lang}.settings.${
-                                                errors[`${field}`]
-                                            }`
-                                        }
+                                        error={errors[`${field}`] && `settings.${errors[`${field}`]}`}
                                         touched={touched[`${field}`]}
                                         placeholder={`${placeholders[index]}`}
                                     />
@@ -242,7 +172,9 @@ class SettingsComponent extends Component {
                     )}
                 </Formik>
             );
-        } else if (dataToEdit.key === 'delete-account') {
+        }
+        else if (formDataToEdit.key === 'delete-account')
+        {
             return (
                 <View style={styles.deleteAccountContainer}>
                     <Text style={styles.deleteAccountTitle}>
@@ -264,25 +196,27 @@ class SettingsComponent extends Component {
                             borderWidth: 1,
                             paddingHorizontal: 8
                         }}
-                        onChangeText={this.changeTextHandler}
-                        value={this.state.password}
+                        onChangeText={changeTextHandler}
+                        value={password}
                         secureTextEntry={true}
                     />
 
                     <Pressable
                         style={styles.deleteAccountButton}
-                        onPress={this.submitDeleteAccount}>
+                        onPress={submitDeleteAccount}
+                    >
                         <Text style={styles.deleteButtonText}>
                             Delete account
                         </Text>
                     </Pressable>
 
-                    {this.props.deleteAccountError !== '' ? (
+                    {deleteAccountError !== '' ? (
                         <View>
-                            <TransText
+                            <Text
                                 style={styles.wrongPasswordText}
-                                dictionary={`${lang}.${this.props.deleteAccountError}`}
-                            />
+                            >
+                                t(`${deleteAccountError}`)
+                            </Text>
                         </View>
                     ) : (
                         ''
@@ -292,20 +226,18 @@ class SettingsComponent extends Component {
         }
     };
 
-    changeTextHandler = txt => {
-        this.setState({
-            password: txt
-        });
+    const changeTextHandler = (txt) => {
+        setPassword(txt);
 
-        if (this.props.deleteAccountError !== '') {
-            this.props.setDeleteAccountError('');
+        if (deleteAccountError !== '') {
+            dispatch(setDeleteAccountError(''));
         }
     };
 
     /**
      * Fn to return Validation schema
      */
-    getSchema = key => {
+    const getSchema = (key) => {
         /**
          * Form field validation with keys for translation
          * using Yup for validation
@@ -353,11 +285,19 @@ class SettingsComponent extends Component {
      * render modal messages based on vale of updateSettingsStatusMessage
      * ERROR || SUCCESS
      */
+    const renderStatusMessage = (status) => {
+        const success = status === 'SUCCESS';
+        const error = status === 'ERROR';
 
-    renderStatusMessage(status, lang) {
-        let success = status === 'SUCCESS';
-        let error = status === 'ERROR';
-        if (success || error) {
+        const successTitle = t(`settings.success`);
+        const successMessage = t(`settings.value-updated`);
+        const errorTitle = t(`settings.error`);
+        const errorMessage = t(`settings.value-not-updated`);
+
+        const goBackMessage = t(`settings.go-back`);
+
+        if (success || error)
+        {
             return (
                 <View style={styles.innerModalSuccess}>
                     {/*<ElementIcon*/}
@@ -367,30 +307,24 @@ class SettingsComponent extends Component {
                     {/*    size={40}*/}
                     {/*    containerStyle={styles.iconContainer}*/}
                     {/*/>*/}
-                    <TransText
-                        style={styles.innerModalHeader}
-                        dictionary={
-                            success
-                                ? `${lang}.settings.success`
-                                : `${lang}.settings.error`
-                        }
-                    />
-                    <TransText
-                        dictionary={
-                            success
-                                ? `${lang}.settings.value-updated`
-                                : `${lang}.settings.value-not-updated`
-                        }
-                    />
+
+                    <Text style={styles.innerModalHeader}>
+                        { success ? successTitle : errorTitle }
+                    </Text>
+
+                    <Text>
+                        { success ? successMessage : errorMessage }
+                    </Text>
+
                     <TouchableHighlight
                         style={styles.successButton}
                         activeOpacity={0.9}
                         underlayColor="#00aced"
-                        onPress={() => this._goBack()}>
-                        <TransText
-                            style={styles.buttonText}
-                            dictionary={`${lang}.settings.go-back`}
-                        />
+                        onPress={goBack}
+                    >
+                        <Text style={styles.buttonText}>
+                            { goBackMessage }
+                        </Text>
                     </TouchableHighlight>
                 </View>
             );
@@ -398,11 +332,8 @@ class SettingsComponent extends Component {
         return <></>;
     }
 
-    /**
-     * Custom Functions
-     */
-    _closeModal() {
-        this.props.toggleSettingsModal();
+    const closeModal = () => {
+        dispatch(toggleSettingsModal());
     }
 
     /**
@@ -410,68 +341,111 @@ class SettingsComponent extends Component {
      *
      * eg Edit Name
      */
-    _getHeaderName() {
-        const text = getTranslation(
-            `${this.props.lang}.${this.props.dataToEdit.title}`
-        );
+    const getHeaderName = () => {
+        const text = t(`${dataToEdit.title}`);
 
-        if (this.props.dataToEdit.key === 'delete-account') {
-            return getTranslation(`${this.props.lang}.settings.warning`);
+        if (dataToEdit.key === 'delete-account') {
+            return t(`settings.warning`);
         }
 
-        const edit = getTranslation(`${this.props.lang}.settings.edit`);
+        const edit = t(`settings.edit`);
 
         return edit + ' ' + text;
     }
 
-    /**
-     * Save the settings within a component
-     *
-     * settings_actions.js
-     */
-    _saveSettings() {
-        if (this.formikRef.current) {
-            this.formikRef.current.handleSubmit();
+    const handleSaveSettings = () => {
+        if (formikRef.current) {
+            formikRef.current.handleSubmit();
         }
     }
 
-    _goBack() {
-        this.props.closeSecondSettingModal();
+    const goBack = () => {
+        console.log('go back');
+        dispatch(closeSecondSettingModal());
 
         // Parent modal only closes with timeout
-        setTimeout(() => {
-            this.props.toggleSettingsModal();
-        }, 500);
+        // setTimeout(() => {
+        //     dispatch(toggleSettingsModal());
+        // }, 500);
     }
 
     /**
      * Initialize Settings Value to edit / update
      */
-    _getTextInputValue() {
-        const key = this.props.dataToEdit.key;
+    const initSettingsEditProp = () => {
+        const key = dataToEdit.key;
 
         switch (key) {
             case 'name':
-                return this.props.initalizeSettingsValue(this.props.user.name);
+                return dispatch(settingsInit(user.name));
             case 'username':
-                return this.props.initalizeSettingsValue(
-                    this.props.user.username
-                );
+                return dispatch(settingsInit(user.username));
             case 'email':
-                return this.props.initalizeSettingsValue(this.props.user.email);
+                return dispatch(settingsInit(user.email));
             case 'social':
-                return this.props.initalizeSettingsValue(
-                    this.props.user.settings
-                );
+                return dispatch(settingsInit(user.settings));
         }
     }
 
     /**
      * Send a request to delete the account and all associated data
      */
-    submitDeleteAccount = () => {
-        this.props.deleteAccount(this.state.password, this.props.token);
+    const submitDeleteAccount = async () => {
+        await dispatch(deleteAccount({ password, token }));
     };
+
+
+    return (
+        <>
+            <Header
+                leftContent={
+                    <Pressable onPress={closeModal}>
+                        <Icon
+                            name="close-outline"
+                            size={32}
+                            color="white"
+                        />
+                    </Pressable>
+                }
+                centerContent={
+                    <SubTitle
+                        color="white"
+                        style={{
+                            textAlign: 'center'
+                        }}>
+                        {getHeaderName()}
+                    </SubTitle>
+                }
+                rightContent={
+                    dataToEdit.key !== 'delete-account' ? (
+                        <Pressable onPress={handleSaveSettings}>
+                            <Body
+                                color="white"
+                                dictionary={`settings.save`}
+                            />
+                        </Pressable>
+                    ) : (
+                        ''
+                    )
+                }
+            />
+
+            {getForm(dataToEdit)}
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={secondSettingsModalVisible}
+            >
+                <View style={styles.modalContainer}>
+                    {renderStatusMessage(updateSettingsStatusMessage)}
+                    {updatingSettings && updateSettingsStatusMessage === '' && (
+                        <ActivityIndicator />
+                    )}
+                </View>
+            </Modal>
+        </>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -567,18 +541,4 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = state => {
-    return {
-        dataToEdit: state.settings.dataToEdit,
-        lang: state.auth.lang,
-        secondSettingsModalVisible: state.settings.secondSettingsModalVisible,
-        settingsEditProp: state.settings.settingsEditProp,
-        token: state.auth.token,
-        updatingSettings: state.settings.updatingSettings,
-        updateSettingsStatusMessage: state.settings.updateSettingsStatusMessage,
-        user: state.auth.user,
-        deleteAccountError: state.settings.deleteAccountError
-    };
-};
-
-export default connect(mapStateToProps, actions)(SettingsComponent);
+export default SettingsComponent;

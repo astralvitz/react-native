@@ -9,9 +9,8 @@ import {
     View,
     ViewStyle
 } from 'react-native';
-import {Caption} from '../typography';
-
-import {Colors} from '../theme';
+import { Caption } from '../typography';
+import { Colors } from '../theme';
 
 interface CustomTextInputProps {
     autoCorrect?: boolean;
@@ -30,7 +29,7 @@ interface CustomTextInputProps {
     rightIconName?: string;
     rightContent?: React.ReactElement;
     leftContent?: React.ReactElement;
-    placeholderTextColor?: any; // type pf Color
+    placeholderTextColor?: any; // type of Color
 }
 
 const CustomTextInput: React.ForwardRefRenderFunction<
@@ -61,14 +60,14 @@ const CustomTextInput: React.ForwardRefRenderFunction<
         <>
             <View
                 style={[
-                    styles.textfieldContainer,
+                    styles.textFieldContainer,
                     style
                     // touched && error && styles.errorBorder,
                 ]}>
                 {leftContent}
                 {leftIconName && (
                     <Icon
-                        style={styles.textfieldIcon}
+                        style={styles.textFieldIcon}
                         name={leftIconName}
                         size={28}
                         color={touched && error ? Colors.error : Colors.muted}
@@ -97,7 +96,7 @@ const CustomTextInput: React.ForwardRefRenderFunction<
                 {rightContent}
                 {rightIconName && (
                     <Icon
-                        style={styles.textfieldIcon}
+                        style={styles.textFieldIcon}
                         name={rightIconName}
                         size={28}
                         color={Colors.muted}
@@ -107,7 +106,10 @@ const CustomTextInput: React.ForwardRefRenderFunction<
             <View style={styles.errorMessage}>
                 {touched && error && (
                     <View style={styles.errorContainer}>
-                        <Caption color="white" dictionary={error} />
+                        <Caption
+                            color="white"
+                            dictionary={error}
+                        />
                     </View>
                 )}
             </View>
@@ -120,7 +122,7 @@ export default React.forwardRef<TextInput, CustomTextInputProps>(
 );
 
 const styles = StyleSheet.create({
-    textfieldContainer: {
+    textFieldContainer: {
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'center',
@@ -130,7 +132,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: Colors.white
     },
-    textfieldIcon: {
+    textFieldIcon: {
         padding: 10
     },
     input: {

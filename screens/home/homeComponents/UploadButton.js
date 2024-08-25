@@ -2,20 +2,20 @@ import React from 'react';
 import { StyleSheet, Pressable, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Colors, SubTitle } from '../../components';
-// ios-cloud-upload-outline
 const { width } = Dimensions.get('window');
-const UploadButton = ({ onPress, lang }) => {
+
+const UploadButton = ({ onPress }) => {
     return (
         <Pressable onPress={() => onPress()} style={styles.buttonStyle}>
             <Icon
-                name="ios-cloud-upload-outline"
+                name="cloud-upload-outline"
                 color="white"
                 size={32}
                 style={{ marginRight: 20 }}
             />
             <SubTitle
                 color="white"
-                dictionary={`${lang}.leftpage.upload`}
+                dictionary={'leftpage.upload'}
             />
         </Pressable>
     );

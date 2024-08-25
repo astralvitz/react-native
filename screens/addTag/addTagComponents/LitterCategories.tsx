@@ -1,16 +1,8 @@
-import React, {PureComponent} from 'react';
-import {
-    Dimensions,
-    FlatList,
-    Image,
-    Platform,
-    Pressable,
-    StyleSheet,
-    View
-} from 'react-native';
-import * as actions from '../../../actions';
-import {connect} from 'react-redux';
-import {Body, Colors} from '../../components';
+import React from 'react';
+import { useDispatch } from "react-redux";
+import { Dimensions, FlatList, Image, Platform, Pressable, StyleSheet, View} from 'react-native';
+import { Body, Colors } from '../../components';
+import { changeCategory } from "../../../reducers/litter_reducer";
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -23,25 +15,32 @@ interface Category {
 
 interface Props {
     categories: Category[];
-    category: Category;
+    selectedCategory: Category;
     lang: string;
-    changeCategory: (id: string) => void;
+    changeCategory?: (id: string) => void;
 }
 
-class LitterCategories extends PureComponent<Props> {
+const LitterCategories: React.FC<Props> = ({
+    categories,
+    selectedCategory,
+}) => {
+
+    const dispatch = useDispatch()
+
     /**
      * Change Category
      *
      * litter_actions, litter_reducer
      */
-    changeCategory(id: string) {
-        this.props.changeCategory(id);
+    const handleChangeCategory = (category: string) => {
+        dispatch(changeCategory(category));
     }
 
     /**
      * Each category to display
      */
-    renderCategory(category: Category) {
+    const renderCategory = (category: Category) => {
+
         const cardStyle = Platform.select({
             ios: styles.cardiOS,
             android: styles.cardAndroid
@@ -49,22 +48,22 @@ class LitterCategories extends PureComponent<Props> {
 
         return (
             <Pressable
-                onPress={this.changeCategory.bind(this, category.title)}
-                key={category.id}>
+                onPress={() => handleChangeCategory(category.title)}
+                key={category.id}
+            >
                 <View
                     style={[
                         cardStyle,
-                        category.title === this.props.category.title &&
-                            styles.selectedCard
-                    ]}>
-                    <Image source={category.path} style={styles.image} />
+                        category.title === selectedCategory.title && styles.selectedCard
+                    ]}
+                >
+                    <Image
+                        source={category.path}
+                        style={styles.image}
+                    />
                     <Body
-                        color={
-                            category.title === this.props.category.title
-                                ? 'text'
-                                : 'muted'
-                        }
-                        dictionary={`${this.props.lang}.litter.categories.${category.title}`}
+                        color={category.title === category.title ? 'text' : 'muted'}
+                        dictionary={`litter.categories.${category.title}`}
                     />
                 </View>
             </Pressable>
@@ -74,21 +73,19 @@ class LitterCategories extends PureComponent<Props> {
     /**
      * The list of categories
      */
-    render() {
-        return (
-            <View style={{marginVertical: 20}}>
-                <FlatList
-                    contentContainerStyle={{paddingHorizontal: 10}}
-                    showsHorizontalScrollIndicator={false}
-                    data={this.props.categories}
-                    horizontal={true}
-                    renderItem={({item}) => this.renderCategory(item)}
-                    keyExtractor={category => category.title}
-                    keyboardShouldPersistTaps="handled"
-                />
-            </View>
-        );
-    }
+    return (
+        <View style={{marginVertical: 20}}>
+            <FlatList
+                contentContainerStyle={{paddingHorizontal: 10}}
+                showsHorizontalScrollIndicator={false}
+                data={categories}
+                horizontal={true}
+                renderItem={({item}) => renderCategory(item)}
+                keyExtractor={category => category.title}
+                keyboardShouldPersistTaps="handled"
+            />
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -133,4 +130,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default connect(null, actions)(LitterCategories);
+export default LitterCategories;

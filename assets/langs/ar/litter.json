@@ -271,7 +271,7 @@
     },
     "tags": {
         "type-to-suggest": "اكتب لاقتراح وسوم",
-        "suggested": "{count} الوسوم المقترحة"
+        "suggested": "{{count}} الوسوم المقترحة"
     },
     "dogshit": {
         "poo": "مفاجئة!",
