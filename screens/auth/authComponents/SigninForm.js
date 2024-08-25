@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { useDispatch, useSelector } from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTranslation } from "react-i18next";
-import { userLogin } from '../../../reducers/auth_reducer';
+import { clearStatusText, userLogin } from '../../../reducers/auth_reducer';
 import { Body, Colors, CustomTextInput, SubTitle } from '../../components';
 
 /**
@@ -60,7 +60,14 @@ const SigninForm = ({ changeFormType }) => {
                 touched
             }) => {
 
-                if (serverStatusText !== "") {
+                // Clear status text when email or password is changed
+                useEffect(() => {
+                    dispatch(clearStatusText());
+                }, [values.email, values.password, dispatch]);
+
+                if (serverStatusText === "The user credentials were incorrect.") {
+                    infoMessage = t('auth.invalid-credentials');
+                } else if (serverStatusText !== "") {
                     infoMessage = serverStatusText
                 } else if (errors?.username) {
                     infoMessage = t(`auth.${errors.username}`);
@@ -68,9 +75,9 @@ const SigninForm = ({ changeFormType }) => {
                     infoMessage = t(`auth.${errors.email}`);
                 } else if (errors?.password) {
                     infoMessage = t(`auth.${errors.password}`);
+                } else {
+                    infoMessage = "";
                 }
-
-                const hasErrors = Object.keys(errors).length > 0;
 
                 return (
                     <View style={{ flex: 1, justifyContent: 'center' }}>
@@ -128,17 +135,12 @@ const SigninForm = ({ changeFormType }) => {
                         </Pressable>
 
                         {
-                            hasSubmitted && hasErrors && (
+                            hasSubmitted && infoMessage !== '' && (
                                 <Text style={styles.statusMessageTempFix}>
                                     { infoMessage }
                                 </Text>
                             )
                         }
-
-                        {/*<StatusMessage*/}
-                        {/*    showError={hasSubmitted}*/}
-                        {/*    serverStatusText={infoMessage}*/}
-                        {/*/>*/}
 
                         <Pressable
                             disabled={isSubmitting}

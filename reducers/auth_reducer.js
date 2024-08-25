@@ -221,6 +221,10 @@ const authSlice = createSlice({
         //     state.user.active_team = action.payload;
         // },
 
+        clearStatusText (state) {
+            state.serverStatusText = '';
+        },
+
         /**
          * Logout user
          * reset state to initial
@@ -342,6 +346,7 @@ const authSlice = createSlice({
 export const {
     accountCreated,
     changeActiveTeam,
+    clearStatusText,
     logout,
     loginOrSignupReset,
     tokenIsValid,
