@@ -12,7 +12,9 @@ const UserTeamsList = ({ navigation }) => {
     const token = useSelector(state => state.auth.token);
     const userTeams = useSelector(state => state.teams.userTeams);
     const user = useSelector(state => state.auth.user);
-    const activeTeam = user?.active_team_id;
+
+    const activeTeamId = user?.active_team;
+    console.log({ activeTeamId });
 
     useEffect(() => {
         async function handleGetUserTeams(token) {
@@ -22,51 +24,43 @@ const UserTeamsList = ({ navigation }) => {
         handleGetUserTeams(token);
     }, []);
 
-    const setTeam = team => {
+    const selectTeam = team => {
         dispatch(setSelectedTeam(team));
 
         navigation.navigate('TEAM_DETAILS');
     };
-
-    const navigateToTeamDetails = () => {
-        navigation.navigate('TEAM_DETAILS');
-    }
 
     return (
         <>
             {/* Users Teams */}
             <View style={[styles.headingRow, { marginTop: 20 }]}>
                 <SubTitle>My Teams</SubTitle>
-
-                <Pressable onPress={navigateToTeamDetails}>
-                    <Caption
-                        color="accent"
-                        style={{ backgroundColor: 'red', padding: 5 }}
-                    >View All</Caption>
-                </Pressable>
             </View>
 
             {userTeams?.map((team, index) => (
                 <Pressable
-                    onPress={() => setTeam(team)}
-                    key={`${team.name}${index}`}
+                    onPress={() => selectTeam(team)}
+                    key={`${team?.name}${index}`}
                 >
-                    <TeamListCard
-                        team={team}
-                        index={index}
-                        showRanking={false}
-                        leftContent={
-                            <View style={{ height: 24, width: 24 }}>
-                                {activeTeam === team.id && (
-                                    <Icon
-                                        name="star-sharp"
-                                        size={24}
-                                        color={Colors.accent}
-                                    />
-                                )}
-                            </View>
-                        }
-                    />
+                    { team && (
+                        <TeamListCard
+                            team={team}
+                            index={index}
+                            showRanking={false}
+                            leftContent={
+                                <View style={{ height: 24, width: 24 }}>
+                                    {activeTeamId === team?.id && (
+                                        <Icon
+                                            name="star-sharp"
+                                            size={24}
+                                            color={Colors.accent}
+                                        />
+                                    )}
+                                </View>
+                            }
+                        />
+                        )
+                    }
                 </Pressable>
             ))}
         </>

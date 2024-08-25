@@ -217,9 +217,9 @@ const authSlice = createSlice({
 
     reducers: {
 
-        // changeActiveTeam (state, action) {
-        //     state.user.active_team = action.payload;
-        // },
+        changeUsersActiveTeam (state, action) {
+            state.user.active_team = action.payload;
+        },
 
         clearStatusText (state) {
             state.serverStatusText = '';
@@ -345,7 +345,7 @@ const authSlice = createSlice({
 
 export const {
     accountCreated,
-    changeActiveTeam,
+    changeUsersActiveTeam,
     clearStatusText,
     logout,
     loginOrSignupReset,

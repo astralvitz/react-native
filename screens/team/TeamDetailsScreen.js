@@ -4,31 +4,34 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import ActionSheet from 'react-native-actions-sheet';
 import { Header, Colors, Body, StatsGrid, Button } from '../components';
 import { TeamTitle } from './teamComponents';
-import {useDispatch, useSelector} from "react-redux";
-import {changeActiveTeam, inactivateTeam, leaveTeam} from "../../reducers/team_reducer";
+import { useDispatch, useSelector } from "react-redux";
+import { changeActiveTeam, inactivateTeam, leaveTeam } from "../../reducers/team_reducer";
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const TeamDetailsScreen = ({ navigation }) =>{
+const TeamDetailsScreen = ({ navigation }) => {
 
     const dispatch = useDispatch();
     const actionSheetRef = useRef();
     const [isLoading, setIsLoading] = useState(false);
 
-    const { selectedTeam } = useSelector(state => state.teams.selectedTeam);
-    const { user } = useSelector(state => state.auth.user);
-    const { token } = useSelector(state => state.auth.token);
+    const user = useSelector(state => state.auth.user);
+    const token = useSelector(state => state.auth.token);
+    const selectedTeam = useSelector(state => state.teams.selectedTeam);
 
     /**
      * activate team
      */
     const activateDisableTeam = async (teamId, isActiveTeam) => {
 
+        console.log({ teamId });
+        console.log({ isActiveTeam });
+
         setIsLoading(true);
 
         isActiveTeam
             ? dispatch(inactivateTeam(token))
-            : dispatch(changeActiveTeam(token, teamId));
+            : dispatch(changeActiveTeam({ token, teamId }));
 
         setIsLoading(false);
     };
@@ -42,7 +45,7 @@ const TeamDetailsScreen = ({ navigation }) =>{
         navigation.navigate('TEAM_HOME');
     };
 
-    const isActiveTeam = user.active_team === selectedTeam?.id;
+    const isActiveTeam = user?.active_team === selectedTeam?.id;
 
     const teamStats = [
         {
@@ -87,7 +90,7 @@ const TeamDetailsScreen = ({ navigation }) =>{
             >
                 <TeamTitle
                     teamName={selectedTeam?.name}
-                    identifier={selectedTeam.identifier}
+                    identifier={selectedTeam?.identifier}
                 />
 
                 <StatsGrid
@@ -103,7 +106,7 @@ const TeamDetailsScreen = ({ navigation }) =>{
                         variant="outline"
                         onPress={() => {
                             activateDisableTeam(
-                                selectedTeam.id,
+                                selectedTeam?.id,
                                 isActiveTeam
                             );
                         }}

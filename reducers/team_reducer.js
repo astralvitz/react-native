@@ -1,6 +1,7 @@
 import axios from "axios";
 import { URL } from "../actions/types";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import {changeUsersActiveTeam} from "./auth_reducer";
 
 const initialState = {
     topTeams: [],
@@ -29,15 +30,14 @@ const initialState = {
 
 export const changeActiveTeam = createAsyncThunk(
     'teams/changeActiveTeam',
-    async ({ token, teamId }, { rejectWithValue }) => {
+    async ({ token, teamId }, { rejectWithValue, dispatch }) => {
         try {
             const response = await axios({
                 url: `${URL}/api/teams/active`,
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`,
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json'
+                    Accept: 'application/json'
                 },
                 data: {
                     team_id: teamId
@@ -49,7 +49,12 @@ export const changeActiveTeam = createAsyncThunk(
                 return rejectWithValue('Max teams reached');
             }
 
-            if (response.data?.team?.id) {
+            if (response.data?.team?.id)
+            {
+                dispatch(changeUsersActiveTeam(response.data.team.id));
+
+                // dispatch TeamsFormSuccess
+
                 return response.data.team.id;
             }
 
@@ -102,7 +107,7 @@ export const createTeam = createAsyncThunk(
 
 export const inactivateTeam = createAsyncThunk(
     'teams/inactivateTeam',
-    async (token, { rejectWithValue }) => {
+    async (token, { rejectWithValue, dispatch }) => {
         try {
             const response = await axios({
                 url: `${URL}/api/teams/inactivate`,
@@ -117,6 +122,10 @@ export const inactivateTeam = createAsyncThunk(
             if (!response.data.success) {
                 return rejectWithValue('Max teams reached');
             }
+
+            dispatch(changeUsersActiveTeam(null));
+
+            // dispatch TeamsFormSuccess
 
             return true;
         } catch (error) {
@@ -346,13 +355,12 @@ const teamSlice = createSlice({
         },
 
         /**
-         * set selected team for showing in team details screen
+         * Set selected team for showing in team details screen
          */
         setSelectedTeam (state, action) {
-            state.teamMembers = [];
             state.selectedTeam = action.payload;
-            state.memberNextPage = 1;
             state.teamMembers = [];
+            state.memberNextPage = 1;
         }
     },
 
@@ -364,8 +372,6 @@ const teamSlice = createSlice({
 
             })
             .addCase(changeActiveTeam.fulfilled, (state, action) => {
-
-                // dispatch changeActiveTeam on auth_reducer.js
                 state.userTeams.push(action.payload.team);
 
                 // This was commented out on teams_actions
@@ -404,8 +410,6 @@ const teamSlice = createSlice({
                 // no action yet
             })
             .addCase(inactivateTeam.fulfilled, (state) => {
-                // dispatch changeActiveTeam on auth_reducer.js
-
                 // other code was commented out
             })
             .addCase(inactivateTeam.rejected, (state, action) => {

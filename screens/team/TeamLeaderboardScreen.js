@@ -6,7 +6,7 @@ import { MemberCard, TeamTitle } from './teamComponents';
 import { getTeamMembers } from "../../reducers/team_reducer";
 import { useDispatch, useSelector } from "react-redux";
 
-const TeamLeaderboardScreen = () => {
+const TeamLeaderboardScreen = ({ navigation }) => {
 
     const dispatch = useDispatch();
 

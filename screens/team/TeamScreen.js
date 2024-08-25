@@ -77,7 +77,7 @@ const TeamScreen = ({ navigation }) => {
                     {/* Top Teams */}
                     <View style={styles.headingRow}>
                         <SubTitle>Top Teams</SubTitle>
-                        <Pressable onPress={navigateToTopTeams} style={{ backgroundColor: 'red', padding: 5 }}>
+                        <Pressable onPress={navigateToTopTeams} style={{ padding: 5 }}>
                             <Caption color="accent">View All</Caption>
                         </Pressable>
                     </View>

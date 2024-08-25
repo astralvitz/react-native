@@ -28,7 +28,7 @@ const TopTeamsScreen = ({ navigation }) => {
                         />
                     </Pressable>
                 }
-                centerContent={<Title color="white">Top Teams</Title>}
+                centerContent={<Title color="white">All Teams</Title>}
                 centerContainerStyle={{ flex: 2 }}
             />
 
