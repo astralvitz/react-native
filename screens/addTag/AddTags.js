@@ -4,6 +4,7 @@ import {
     Dimensions,
     Easing,
     Keyboard,
+    KeyboardAvoidingView,
     Platform,
     Pressable,
     StatusBar,
@@ -44,7 +45,6 @@ const AddTags = ({ navigation, lang }) => {
     const [opacityAnimation, setOpacityAnimation] = useState(new Animated.Value(1));
     const [isCategoriesVisible, setIsCategoriesVisible] = useState(true);
     const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-    const [keyboardHeight, setKeyboardHeight] = useState(0);
     const [animation, setAnimation] = useState(new Animated.Value(0));
 
     const actionSheetRef = createRef();
@@ -72,8 +72,7 @@ const AddTags = ({ navigation, lang }) => {
             'keyboardDidShow',
             (e) => {
                 setIsKeyboardOpen(true);
-                setKeyboardHeight(e.endCoordinates.height);
-                keyboardStartAnimation();
+                keyboardStartAnimation(e.endCoordinates.height);
             }
         );
 
@@ -81,7 +80,6 @@ const AddTags = ({ navigation, lang }) => {
             'keyboardDidHide',
             () => {
                 setIsKeyboardOpen(false);
-                setKeyboardHeight(0);
                 startAnimation();
             }
         );
@@ -98,13 +96,11 @@ const AddTags = ({ navigation, lang }) => {
 
     }, []);
 
-    const keyboardStartAnimation = () => {
+    const keyboardStartAnimation = (keyboardHeight) => {
         // Animate keyboard only for ios
         // TODO: need testing on other android devices
 
-        const sheetPosition = -(
-            keyboardHeight + taggingContainerPosition
-        );
+        const sheetPosition = -(keyboardHeight + taggingContainerPosition);
 
         Platform.OS === 'ios' &&
             Animated.timing(sheetAnimation, {
@@ -243,9 +239,10 @@ const AddTags = ({ navigation, lang }) => {
 
     /**
      * Array of images to swipe through
+     *
+     * Returns an aray of all photos
      */
     const renderLitterImage = () => {
-        // Return an array of all photos
         return images.map((image, index) => {
             return (
                 <LitterImage
@@ -324,7 +321,7 @@ const AddTags = ({ navigation, lang }) => {
                         }
                         index={swiperIndex}
                         loop={false}
-                        loadMinimal //
+                        loadMinimal
                         loadMinimalSize={2} // loads only 2 images at a time
                         showsPagination={false}
                         keyboardShouldPersistTaps="handled"
@@ -343,12 +340,12 @@ const AddTags = ({ navigation, lang }) => {
                             flexDirection: 'row',
                             justifyContent: 'space-between',
                             width: SCREEN_WIDTH - 40
-                        }}>
+                        }}
+                    >
                         {/* ImgIndex/Total */}
                         <View style={styles.indexStyle}>
                             <Body color="text">
-                                {swiperIndex + 1}/
-                                {images.length}
+                                {swiperIndex + 1} / {images.length}
                             </Body>
                         </View>
                         {/* Close X */}
@@ -364,9 +361,7 @@ const AddTags = ({ navigation, lang }) => {
                         </Pressable>
                     </View>
 
-                    {/* Category component -- show only if add tag button is clicked
-                        hidden when backdrop is pressed
-                    */}
+                    {/* Categories */}
                     <Animated.View
                         style={[
                             {
@@ -385,17 +380,16 @@ const AddTags = ({ navigation, lang }) => {
                         />
                     </Animated.View>
 
-                    {/* Bottom action sheet with Tags picker and add tags section */}
+                    {/* Add Tags */}
                     <Animated.View
                         style={[
-                            {bottom: -taggingContainerPosition},
+                            { bottom: -taggingContainerPosition },
                             styles.bottomSheet,
                             sheetAnimatedStyle,
                             opacityStyle
-                        ]}>
-                        <TouchableWithoutFeedback
-                            onPress={outerViewClicked}
-                        >
+                        ]}
+                    >
+                        <TouchableWithoutFeedback onPress={outerViewClicked}>
                             <View
                                 style={[
                                     { maxWidth: SCREEN_WIDTH },
@@ -411,7 +405,6 @@ const AddTags = ({ navigation, lang }) => {
 
                                 <LitterTextInput
                                     suggestedTags={suggestedTags}
-                                    // height={height}
                                     lang={lang}
                                     swiperIndex={swiperIndex}
                                     isKeyboardOpen={isKeyboardOpen}
