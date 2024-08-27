@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { URL } from '../actions/types';
 import { createSlice } from '@reduxjs/toolkit';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
@@ -90,6 +91,7 @@ const sharedSlice = createSlice({
         builder
 
             .addCase(checkAppVersion.fulfilled, (state, action) => {
+                console.log('setAppVersion', action.payload);
                 state.appVersion = action.payload;
             });
     }

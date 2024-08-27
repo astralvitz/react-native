@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator, Button,
+    ActivityIndicator,
+    Button,
     Dimensions,
     Modal,
     Platform,
@@ -84,10 +85,12 @@ const HomeScreen = ({ navigation }) => {
             if (!user?.enable_admin_tagging && token) {
                 await dispatch(getUntaggedImages(token));
             }
-
             if (!__DEV__) {
-                const newVersion = await checkNewVersion();
-                console.log('New version', newVersion);
+                console.log('not dev')
+                await checkNewVersion();
+            } else {
+                console.log('is dev');
+                await checkNewVersion();
             }
 
             checkGalleryPermission();
@@ -100,12 +103,6 @@ const HomeScreen = ({ navigation }) => {
     const { t } = useTranslation();
     const cancelText = t('leftpage.cancel');
     const deleteText = t('leftpage.delete');
-
-    // useEffect(() => {
-    //     if (prevAppVersion !== appVersion) {
-    //         checkNewVersion().then(r => console.log('New version', r);
-    //     }
-    // }, [appVersion]);
 
     const cancelUploadWrapper = () => {
         dispatch(cancelUpload());
@@ -124,15 +121,20 @@ const HomeScreen = ({ navigation }) => {
     }
 
     async function checkNewVersion () {
-        const platform = Platform.OS;
-        const version = DeviceInfo.getVersion();
-
         if (appVersion === null) {
-            dispatch(checkAppVersion());
-        } else if (appVersion[platform].version !== version) {
-            navigation.navigate('UPDATE', { url: appVersion[platform].url });
+            await dispatch(checkAppVersion());
         }
     }
+
+    useEffect(() => {
+        const platform = Platform.OS;
+        const latestVersion = DeviceInfo.getVersion();
+
+        if (appVersion && appVersion[platform]?.version !== latestVersion) {
+            // navigation.navigate('UPDATE', { url: appVersion[platform].url });
+            navigation.navigate('UPDATE');
+        }
+    }, [appVersion]);
 
     /**
      * Navigate to album screen
