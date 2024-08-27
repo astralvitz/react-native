@@ -217,8 +217,6 @@ const AddTags = ({ navigation, lang }) => {
     const handleCloseKeyboard = () => {
         setIsKeyboardOpen(false);
 
-        setKeyboardHeight(0);
-
         startAnimation();
 
         Keyboard.dismiss();

@@ -186,31 +186,12 @@ const HomeScreen = ({ navigation }) => {
         }
     }
 
-    /**
-     * Render Upload Button
-     *
-     * ... if images exist and at least 1 image has a tag
-     */
     const renderUploadButton = () => {
         if (images?.length === 0 || isSelectingImagesToDelete) {
             return;
         }
 
-        let hasTags = false;
-
-        images.map(img => {
-            let tagged = isTagged(img);
-
-            if (tagged) {
-                hasTags = true;
-            }
-        });
-
-        if (!hasTags) {
-            return;
-        }
-
-        return <UploadButton lang={lang} onPress={uploadPhotos} />;
+        return <UploadButton onPress={uploadPhotos} />;
     }
 
     /**

@@ -46,6 +46,8 @@ const AnimatedCircle: React.FC<AnimatedCircleProps> = ({
     isValueDisplayed = true
 }) => {
     const animated = React.useRef(new Animated.Value(startPercentage)).current;
+    // need this to stop a warning
+    animated.addListener(() => {return});
     const textAnimated = React.useRef(new Animated.Value(startValue)).current;
     const circleRef = React.useRef<any>();
     const inputRef = React.useRef<any>();

@@ -186,7 +186,7 @@ const GalleryScreen = ({ navigation }) => {
 
                         return (
                             <AnimatedImage
-                                key={image.uri}
+                                key={image.uri + ":"}
                                 onPress={() => isImageGeotagged && selectImage(image)}
                                 image={image}
                                 isImageGeotagged={isImageGeotagged}

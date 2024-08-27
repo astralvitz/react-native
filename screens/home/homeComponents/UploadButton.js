@@ -21,8 +21,6 @@ const UploadButton = ({ onPress }) => {
     );
 };
 
-export default UploadButton;
-
 const styles = StyleSheet.create({
     buttonStyle: {
         position: 'absolute',
@@ -37,3 +35,5 @@ const styles = StyleSheet.create({
         flexDirection: 'row'
     }
 });
+
+export default UploadButton;
