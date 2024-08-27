@@ -85,11 +85,8 @@ const HomeScreen = ({ navigation }) => {
             if (!user?.enable_admin_tagging && token) {
                 await dispatch(getUntaggedImages(token));
             }
+
             if (!__DEV__) {
-                console.log('not dev')
-                await checkNewVersion();
-            } else {
-                console.log('is dev');
                 await checkNewVersion();
             }
 

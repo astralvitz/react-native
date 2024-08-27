@@ -360,7 +360,6 @@ const SettingsComponent = () => {
     }
 
     const goBack = () => {
-        console.log('go back');
         dispatch(closeSecondSettingModal());
 
         // Parent modal only closes with timeout

@@ -91,7 +91,6 @@ const sharedSlice = createSlice({
         builder
 
             .addCase(checkAppVersion.fulfilled, (state, action) => {
-                console.log('setAppVersion', action.payload);
                 state.appVersion = action.payload;
             });
     }

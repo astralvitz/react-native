@@ -14,7 +14,6 @@ const UserTeamsList = ({ navigation }) => {
     const user = useSelector(state => state.auth.user);
 
     const activeTeamId = user?.active_team;
-    console.log({ activeTeamId });
 
     useEffect(() => {
         async function handleGetUserTeams(token) {

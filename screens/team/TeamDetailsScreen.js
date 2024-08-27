@@ -23,10 +23,6 @@ const TeamDetailsScreen = ({ navigation }) => {
      * activate team
      */
     const activateDisableTeam = async (teamId, isActiveTeam) => {
-
-        console.log({ teamId });
-        console.log({ isActiveTeam });
-
         setIsLoading(true);
 
         isActiveTeam

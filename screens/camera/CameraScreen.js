@@ -248,7 +248,7 @@ class CameraScreen extends React.Component {
                 this.camera
                     .takePictureAsync()
                     .then(result => {
-                        console.log('takePicture', result); // height, uri, width
+                        // console.log('takePicture', result); // height, uri, width
 
                         // timestamp in seconds
                         const date = Date.now() / 1000;

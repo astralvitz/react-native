@@ -546,11 +546,7 @@ const imagesSlice = createSlice({
              */
             .addCase(getUntaggedImages.fulfilled, (state, action) => {
 
-                console.log('GetUntaggedImages');
-
                 action.payload.images && action.payload.images.map(image => {
-
-                    console.log({ image });
 
                     let index;
 

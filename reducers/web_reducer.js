@@ -25,7 +25,6 @@ export const loadMoreWebImages = createAsyncThunk(
                 },
                 params: { photo_id }
             });
-            console.log('load_more_web_images', response.data);
 
             if (response.data) {
                 let photos = response.data.map(photo => {
@@ -36,7 +35,7 @@ export const loadMoreWebImages = createAsyncThunk(
                 return { photos }; // Automatically dispatches a fulfilled action if successful
             }
         } catch (err) {
-            console.log('load_more_web_images', err.response ? err.response.data : err);
+            // console.log('load_more_web_images', err.response ? err.response.data : err);
             return rejectWithValue('Failed to load more images'); // Handling errors
         }
     }

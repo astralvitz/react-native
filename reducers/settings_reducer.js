@@ -40,8 +40,6 @@ export const deleteAccount = createAsyncThunk(
                 }
             });
 
-            console.log('DELETE_ACCOUNT', response.data);
-
             if (!response.data.success && response.data.msg === 'password does not match') {
                 return rejectWithValue('settings.password-incorrect');
             } else {
@@ -127,8 +125,6 @@ export const saveSettings = createAsyncThunk(
 export const saveSocialAccounts = createAsyncThunk(
     'settings/saveSocialAccounts',
     async ({ values, token }, { rejectWithValue, dispatch }) => {
-
-        console.log({ values });
         try
         {
             const response = await axios({
@@ -142,8 +138,6 @@ export const saveSocialAccounts = createAsyncThunk(
                     ...values
                 }
             });
-
-            console.log(response.data);
 
             if (response?.data?.message === 'success') {
 
@@ -161,7 +155,7 @@ export const saveSocialAccounts = createAsyncThunk(
         }
         catch (error)
         {
-            console.log('saveSocialAccounts', error);
+            // console.log('saveSocialAccounts', error);
             return rejectWithValue('ERROR');
         }
     }
@@ -191,8 +185,6 @@ export const toggleSettingsSwitch = createAsyncThunk(
                 }
             });
 
-            console.log('Response: toggleSettingsSwitch', response.data);
-
             if (response.status === 200) {
                 const key = Object.keys(response.data)[0];
                 let value = Object.values(response.data)[0];
@@ -215,7 +207,7 @@ export const toggleSettingsSwitch = createAsyncThunk(
                 rejectWithValue('Failed to update settings');
             }
         } catch (error) {
-            console.log('Error: toggleSettingsSwitch', error);
+            // console.log('Error: toggleSettingsSwitch', error);
             return rejectWithValue('Failed to toggle setting');
         }
     }
@@ -256,8 +248,6 @@ const settingsSlice = createSlice({
          * to be used as initial value in textfield in edit modal
          */
         settingsInit (state, action) {
-
-            console.log('settingsInit', action.payload);
             state.settingsEditProp = action.payload;
         },
 
