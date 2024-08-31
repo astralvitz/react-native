@@ -35,11 +35,13 @@ const UploadImagesGrid = ({ images, isSelecting, navigation, uniqueValue }) => {
      *   - isPickedUp
      *   - isSelected: for deletion
      *
-     * Flatlist expects "item" as the first key but it is an image.
+     * Flatlist expects "item" as the first key.
+     * Each "item" is an image.
      */
     const renderImage = ({ item, index }) => {
+
         const imageHasTags = isTagged(item);
-        const isPickedUp = item.picked_up ?? null;
+        const isPickedUp = item.picked_up ?? false;
         const pickedUpIcon = isPickedUp ? '⬆️' : '⬇️';
         const isUploaded = item.hasOwnProperty('uploaded') && item.uploaded;
 

@@ -368,6 +368,10 @@ const imagesSlice = createSlice({
             }
         },
 
+        cancelUploadImages (state) {
+            state.isUploading = false;
+        },
+
         /**
          * Changes litter picked up status of all images
          */
@@ -445,6 +449,8 @@ const imagesSlice = createSlice({
         },
 
         resetUploadState (state) {
+            state.isUploading = false;
+            state.showThankYouMessages = false;
             state.totalToUpload = 0;
             state.uploaded = 0;
             state.uploadFailed = 0;
@@ -639,6 +645,8 @@ const imagesSlice = createSlice({
                 // nothing yet
             })
             .addCase(uploadTagsToWebImage.fulfilled, (state, action) => {
+
+                console.log('uploadTagsToWebImage.fulfilled');
                 // Remove the tagged image
                 state.imagesArray = state.imagesArray.filter(img => img.id !== action.payload);
 
@@ -656,13 +664,12 @@ export const {
     addImages,
     addTagToImage,
     addCustomTagToImage,
+    cancelUploadImages,
     changeLitterStatus,
     clearUploadedWebImages,
-    // decrementSelected,
     deleteImage,
     deleteSelectedImages,
     deselectAllImages,
-    // incrementSelected,
     removeTagFromImage,
     removeCustomTagFromImage,
     resetUploadState,

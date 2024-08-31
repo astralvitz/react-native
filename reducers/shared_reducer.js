@@ -52,7 +52,6 @@ const sharedSlice = createSlice({
          * During upload, the user pressed cancel.
          */
         cancelUpload (state) {
-            state.showModal = false;
             state.isUploading = false;
         },
 
@@ -63,6 +62,10 @@ const sharedSlice = createSlice({
          */
         closeThankYouMessages(state) {
             state.showModal = false;
+            state.showThankYouMessages = false;
+        },
+
+        resetThankYouMessages (state) {
             state.showThankYouMessages = false;
         },
 
@@ -99,6 +102,7 @@ const sharedSlice = createSlice({
 export const {
     cancelUpload,
     closeThankYouMessages,
+    resetThankYouMessages,
     showThankYouMessagesAfterUpload,
     startUploading,
 } = sharedSlice.actions;

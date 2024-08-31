@@ -33,6 +33,12 @@ else if (CURRENT_ENVIRONMENT === 'local') {
     ENDPOINT = 'http://olm.test'; // LOCAL_OLM_ENDPOINT;
 }
 
+if (CURRENT_ENVIRONMENT !== 'production') {
+    console.log('CLIENT', CLIENT);
+    console.log('SECRET', SECRET);
+    console.log('ENDPOINT', ENDPOINT);
+}
+
 export const CLIENT_ID = CLIENT;
 export const CLIENT_SECRET = SECRET;
 export const URL = ENDPOINT;

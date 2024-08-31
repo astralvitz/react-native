@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     ActivityIndicator,
     Button,
@@ -16,10 +16,12 @@ import {
     cancelUpload,
     checkAppVersion,
     closeThankYouMessages,
+    resetThankYouMessages,
     showThankYouMessagesAfterUpload,
     startUploading
 } from '../../reducers/shared_reducer';
 import {
+    cancelUploadImages,
     deleteImage,
     deleteWebImage,
     deselectAllImages,
@@ -49,7 +51,7 @@ const HomeScreen = ({ navigation }) => {
 
     const dispatch = useDispatch();
 
-    const [isUploadCancelled, setIsUploadCancelled] = useState(false);
+    const isUploadCancelled = useRef(false);
     const [isSelectingImagesToDelete, setIsSelectingImagesToDelete] = useState(false);
 
     const appVersion = useSelector(state => state.shared.appVersion);
@@ -58,6 +60,7 @@ const HomeScreen = ({ navigation }) => {
     const showModal = useSelector(state => state.shared.showModal);
     const model = useSelector(state => state.settings.model);
     const showThankYouMessages = useSelector(state => state.shared.showThankYouMessages);
+    console.log({ showThankYouMessages });
     const token = useSelector(state => state.auth.token);
     const user = useSelector(state => state.auth.user);
     const uniqueValue = useSelector(state => state.shared.uniqueValue);
@@ -73,6 +76,10 @@ const HomeScreen = ({ navigation }) => {
     const tagged = useSelector(state => state.images.tagged);
     const taggedFailed = useSelector(state => state.images.taggedFailed);
     const failedCounts = useSelector(state => state.images.failedCounts);
+
+    console.log({ showModal });
+    console.log({ uploaded });
+    console.log({ tagged });
 
     useEffect(() => {
         const getModel = () => {
@@ -102,9 +109,8 @@ const HomeScreen = ({ navigation }) => {
     const deleteText = t('leftpage.delete');
 
     const cancelUploadWrapper = () => {
+        isUploadCancelled.current = true;
         dispatch(cancelUpload());
-
-        setIsUploadCancelled(true)
     }
 
     async function checkGalleryPermission () {
@@ -186,7 +192,13 @@ const HomeScreen = ({ navigation }) => {
     }
 
     const renderUploadButton = () => {
+
         if (images?.length === 0 || isSelectingImagesToDelete) {
+            return;
+        }
+
+        // if all images of type web with no tags, return
+        if (images?.length > 0 && images.every(img => img.type === 'web' && !isTagged(img))) {
             return;
         }
 
@@ -302,23 +314,23 @@ const HomeScreen = ({ navigation }) => {
     const uploadPhotos = async () => {
 
         dispatch(resetUploadState());
+        dispatch(resetThankYouMessages());
+        isUploadCancelled.current = false;
 
-        const numberOfImages = images.length;
-
+        const numberOfImages = images.filter(image => image.type.toLowerCase() !== 'web').length;
         dispatch(setTotalToUpload(numberOfImages));
 
         // shared.js -> showModal = true; isUploading = true;
         dispatch(startUploading());
 
-        if (numberOfImages > 0)
+        if (images.length)
         {
             // async loop
             for (const img of images)
             {
-
-                if (isUploadCancelled) {
-                    dispatch(resetUploadState());
-                    return;
+                if (isUploadCancelled.current) {
+                    dispatch(cancelUploadImages());
+                    break;
                 }
 
                 const [imageData, photoHasTags, isGeoTagged] = getImageDataForUpload(img);
@@ -372,9 +384,14 @@ const HomeScreen = ({ navigation }) => {
 
                             <ActivityIndicator style={{marginBottom: 10}} />
 
-                            <Text style={styles.uploadCount}>
-                                {uploaded} / {totalToUpload}
-                            </Text>
+                            {/* Total of images to upload */}
+                            {
+                                totalToUpload > 0 && (
+                                    <Text style={styles.uploadCount}>
+                                        {uploaded} / {totalToUpload}
+                                    </Text>
+                                )
+                            }
 
                             <Button
                                 onPress={cancelUploadWrapper}
@@ -407,12 +424,9 @@ const HomeScreen = ({ navigation }) => {
 
                                 {uploadFailed > 0 && (
                                     <View>
-                                        <Text
-                                            style={{
-                                                fontSize: SCREEN_HEIGHT * 0.02,
-                                                marginBottom: 5
-                                            }}
-                                        >{uploadFailed} uploads failed</Text>
+                                        <Text style={{ fontSize: SCREEN_HEIGHT * 0.02, marginBottom: 5}}>
+                                            {uploadFailed} uploads failed
+                                        </Text>
 
                                         {failedCounts.alreadyUploaded > 0 && (
                                             <Text>

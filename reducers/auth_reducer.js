@@ -169,6 +169,13 @@ export const userLogin = createAsyncThunk(
     async ({ email, password }, { rejectWithValue, dispatch }) => {
         try
         {
+            console.log('try login');
+            console.log({ email });
+            console.log({ password });
+            console.log({ URL });
+            console.log({ CLIENT_ID });
+            console.log({ CLIENT_SECRET });
+
             const response = await axios({
                 url: `${URL}/oauth/token`,
                 method: 'POST',
@@ -184,6 +191,8 @@ export const userLogin = createAsyncThunk(
                     password: password
                 }
             });
+
+            console.log(response.data);
 
             if (response.status === 200)
             {
@@ -206,6 +215,8 @@ export const userLogin = createAsyncThunk(
             }
         } catch (error) {
             // This handles any network or other errors
+            console.log('ERROR');
+            console.log(error);
             return rejectWithValue(error.response?.data || error.message || 'Network error, please try again');
         }
     }

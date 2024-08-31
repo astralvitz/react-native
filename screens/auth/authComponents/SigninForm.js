@@ -24,6 +24,7 @@ const SigninForm = ({ changeFormType }) => {
 
     const emailRef = useRef(null);
     const passwordRef = useRef(null);
+
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [hasSubmitted, setHasSubmitted] = useState(false);
 
@@ -45,7 +46,7 @@ const SigninForm = ({ changeFormType }) => {
     return (
         <Formik
             initialValues={{ email: '', password: '' }}
-            validationSchema={SigninSchema}
+            validationSchema={__DEV__ ? null : SigninSchema}
             onSubmit={({ email, password }) => {
                 setHasSubmitted(true);
                 dispatch(userLogin({ email, password }));
