@@ -9,7 +9,6 @@ const initialState = {
     appVersion: '',
     isSubmitting: false,
     token: null,
-    tokenIsValid: false,
     user: null,
     serverStatusText: '',
     errors: {}
@@ -28,13 +27,12 @@ const initialState = {
 /**
  * Check if the token is valid
  *
- * It will return "valid" if the user is logged in
- *
+ * The response will return "valid" if the user is logged in
  * Or  "Unauthenticated." if they are logged out / not valid
  */
 export const checkValidToken = createAsyncThunk(
     'auth/checkValidToken',
-    async (jwt, { rejectWithValue }) => {
+    async (jwt, { rejectWithValue, dispatch }) => {
         try {
             const response = await axios({
                 url: `${URL}/api/validate-token`,
@@ -45,7 +43,11 @@ export const checkValidToken = createAsyncThunk(
                 }
             });
 
-            return (response.data.hasOwnProperty('message') && response.data.message === 'valid');
+            if (response.data.hasOwnProperty('message') && response.data.message === 'valid') {
+                dispatch(fetchUser(jwt));
+            } else {
+                dispatch(logout());
+            }
         }
         catch (error) {
             return rejectWithValue('Please login again.');
@@ -254,14 +256,6 @@ const authSlice = createSlice({
     extraReducers: (builder) => {
 
         builder
-
-            // Check Valid Token
-            .addCase(checkValidToken.fulfilled, (state) => {
-                state.isValidToken = true;
-            })
-            .addCase(checkValidToken.rejected, (state) => {
-                state.isValidToken = false;
-            })
 
             // Create Account
             .addCase(createAccount.pending, (state) => {
