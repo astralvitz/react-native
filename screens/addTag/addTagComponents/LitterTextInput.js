@@ -156,7 +156,7 @@ const LitterTextInput = ({ swiperIndex, lang, suggestedTags, isKeyboardOpen }) =
     // @ts-ignore
     return (
         <View>
-            <View style={{ paddingHorizontal: 20, marginBottom: 10 }}>
+            <View style={{ paddingHorizontal: 20, marginBottom: 5 }}>
                 <CustomTextInput
                     autoCorrect={false}
                     style={styles.textFieldStyle}

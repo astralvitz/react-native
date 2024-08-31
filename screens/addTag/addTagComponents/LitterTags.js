@@ -25,7 +25,7 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 // }
 
 // Tags not being deleted when using PureComponent
-const LitterTags = ({ tags, customTags, lang, swiperIndex }) => {
+const LitterTags = ({ tags, customTags, swiperIndex }) => {
 
     const dispatch = useDispatch();
     const scrollRef = useRef(null);
@@ -34,11 +34,9 @@ const LitterTags = ({ tags, customTags, lang, swiperIndex }) => {
      * Display a card for each tag
      */
     const renderTags = () => {
-        if (tags)
-        {
+        if (tags) {
             return Object.keys(tags).map(category => {
-                if (tags[category])
-                {
+                if (tags[category]) {
                     return Object.keys(tags[category]).map(tag => {
                         const value = tags[category][tag];
 
@@ -46,16 +44,14 @@ const LitterTags = ({ tags, customTags, lang, swiperIndex }) => {
                             <Pressable
                                 key={tag}
                                 onPress={() => removeTag(category, tag)}
-                                onLayout={event => scrollTo(event)}>
+                                onLayout={event => scrollTo(event)}
+                            >
                                 <View style={styles.card}>
-                                    <Caption
-                                        dictionary={`litter.categories.${category}`}
-                                    />
+                                    <Caption dictionary={`litter.categories.${category}`} />
 
                                     <View style={{ flexDirection: 'row' }}>
-                                        <Body
-                                            dictionary={`litter.${category}.${tag}`}
-                                        />
+                                        <Body dictionary={`litter.${category}.${tag}`} />
+
                                         <Body>&nbsp; ({value})</Body>
                                     </View>
                                 </View>
@@ -92,12 +88,12 @@ const LitterTags = ({ tags, customTags, lang, swiperIndex }) => {
                 return (
                     <Pressable
                         key={customTag}
-                        onPress={() =>
+                        onPress={(event) => {
                             dispatch(removeCustomTagFromImage({
                                 tagIndex: index,
                                 currentIndex: swiperIndex
                             }))
-                        }
+                        }}
                         onLayout={event => scrollTo(event)}
                     >
                         <View style={styles.card}>
@@ -128,12 +124,9 @@ const LitterTags = ({ tags, customTags, lang, swiperIndex }) => {
      * Loop over each category, and loop over each item in each category
      */
     return (
-        <View style={{ width: SCREEN_WIDTH}}>
+        <View style={{ width: SCREEN_WIDTH }}>
             <ScrollView
-                contentContainerStyle={{
-                    paddingLeft: 20,
-                    marginBottom: 10
-                }}
+                contentContainerStyle={{ paddingLeft: 20, marginBottom: 10 }}
                 ref={scrollRef}
                 bounces={false}
                 horizontal={true}
@@ -151,9 +144,10 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderWidth: 1,
         padding: 10,
-        marginRight: 10,
+        marginRight: 5,
         borderRadius: 12,
-        borderColor: Colors.muted
+        borderColor: Colors.muted,
+        marginBottom: -5
     }
 });
 

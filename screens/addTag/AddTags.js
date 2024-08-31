@@ -209,6 +209,7 @@ const AddTags = ({ navigation, lang }) => {
     };
 
     const outerViewClicked = () => {
+        console.log('outerViewClicked');
         if (isKeyboardOpen) {
             handleCloseKeyboard();
         }
@@ -391,7 +392,6 @@ const AddTags = ({ navigation, lang }) => {
                                 <LitterTags
                                     tags={images[swiperIndex]?.tags}
                                     customTags={images[swiperIndex]?.customTags}
-                                    lang={lang}
                                     swiperIndex={swiperIndex}
                                 />
 
