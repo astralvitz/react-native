@@ -10,6 +10,8 @@ const TopTeamsScreen = ({ navigation }) => {
     const [isLoading, setIsLoading] = useState(true);
     const topTeams = useSelector(state => state.teams.topTeams);
 
+    console.log({ topTeams });
+
     useEffect(() => {
         setTimeout(() => {
             setIsLoading(false);

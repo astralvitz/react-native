@@ -88,7 +88,7 @@ const LitterTags = ({ tags, customTags, swiperIndex }) => {
                 return (
                     <Pressable
                         key={customTag}
-                        onPress={(event) => {
+                        onPress={() => {
                             dispatch(removeCustomTagFromImage({
                                 tagIndex: index,
                                 currentIndex: swiperIndex

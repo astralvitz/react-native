@@ -7,7 +7,7 @@ const TopTeamsList = ({ topTeams }) => {
             {topTeams.map((team, index) => (
                 <TeamListCard
                     team={team}
-                    key={`${team.name}${index}`}
+                    key={`${team?.name}${index}`}
                     index={index}
                 />
             ))}
