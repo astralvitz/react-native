@@ -108,20 +108,3 @@ export const {
 } = sharedSlice.actions;
 
 export default sharedSlice.reducer;
-
-// /**
-//  * Toggles thank you modal after image uploaded
-//  */
-// case TOGGLE_THANK_YOU:
-//     draft.showModal = !draft.showModal;
-//     draft.thankYouVisible = !draft.thankYouVisible;
-//     break;
-
-// /**
-//  * Toggle the modal and the upload component
-//  */
-// case TOGGLE_UPLOAD:
-//     draft.showModal = !draft.showModal;
-//     draft.isUploading = !draft.isUploading;
-//     break;
-

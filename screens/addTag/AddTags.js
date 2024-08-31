@@ -331,21 +331,15 @@ const AddTags = ({ navigation, lang }) => {
                     {/* Top nav */}
                     {/* index/total && Close X */}
                     <View
-                        style={{
-                            position: 'absolute',
-                            top: 20,
-                            left: 20,
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            width: SCREEN_WIDTH - 40
-                        }}
+                        style={styles.topNav}
                     >
-                        {/* ImgIndex/Total */}
+                        {/* ImgIndex / Total */}
                         <View style={styles.indexStyle}>
                             <Body color="text">
                                 {swiperIndex + 1} / {images.length}
                             </Body>
                         </View>
+
                         {/* Close X */}
                         <Pressable
                             onPress={() => navigation.navigate('HOME') }
@@ -540,6 +534,14 @@ const styles = StyleSheet.create({
         paddingVertical: 20,
         borderTopLeftRadius: 8,
         borderTopRightRadius: 8
+    },
+    topNav: {
+        position: 'absolute',
+        top: 20,
+        left: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: SCREEN_WIDTH - 40
     }
 });
 

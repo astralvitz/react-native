@@ -60,7 +60,6 @@ const HomeScreen = ({ navigation }) => {
     const showModal = useSelector(state => state.shared.showModal);
     const model = useSelector(state => state.settings.model);
     const showThankYouMessages = useSelector(state => state.shared.showThankYouMessages);
-    console.log({ showThankYouMessages });
     const token = useSelector(state => state.auth.token);
     const user = useSelector(state => state.auth.user);
     const uniqueValue = useSelector(state => state.shared.uniqueValue);
@@ -76,10 +75,6 @@ const HomeScreen = ({ navigation }) => {
     const tagged = useSelector(state => state.images.tagged);
     const taggedFailed = useSelector(state => state.images.taggedFailed);
     const failedCounts = useSelector(state => state.images.failedCounts);
-
-    console.log({ showModal });
-    console.log({ uploaded });
-    console.log({ tagged });
 
     useEffect(() => {
         const getModel = () => {
