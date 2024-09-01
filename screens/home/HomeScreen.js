@@ -88,9 +88,10 @@ const HomeScreen = ({ navigation }) => {
                 await dispatch(getUntaggedImages(token));
             }
 
-            if (!__DEV__) {
-                await checkNewVersion();
-            }
+            // Commented out for now
+            // if (!__DEV__) {
+            //     await checkNewVersion();
+            // }
 
             checkGalleryPermission();
         };
@@ -129,7 +130,6 @@ const HomeScreen = ({ navigation }) => {
         const latestVersion = DeviceInfo.getVersion();
 
         if (appVersion && appVersion[platform]?.version !== latestVersion) {
-            // navigation.navigate('UPDATE', { url: appVersion[platform].url });
             navigation.navigate('UPDATE');
         }
     }, [appVersion]);

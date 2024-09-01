@@ -1,7 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ActivityIndicator, FlatList, Pressable, SafeAreaView, StyleSheet, View } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+    ActivityIndicator,
+    Animated,
+    Dimensions,
+    FlatList,
+    Pressable,
+    SafeAreaView,
+    StyleSheet,
+    View
+} from 'react-native';
 import moment from 'moment';
 import _ from 'lodash';
+import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { useSelector, useDispatch } from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Body, Caption, Colors, Header, SubTitle } from '../components';
@@ -40,6 +50,18 @@ export const placeInTime = date => {
 
 const GalleryScreen = ({ navigation }) => {
 
+    const dispatch = useDispatch();
+
+    // For selecting images with swipe gesture
+    const IMAGE_PER_ROW = 3;
+    const { width } = Dimensions.get('window');
+    const IMAGE_SIZE = (width / IMAGE_PER_ROW) - 2;
+    const IMAGE_MARGIN = 1;
+    const ROW_HEIGHT = IMAGE_SIZE + (IMAGE_MARGIN * 2);
+    const lastGesturePosition = useRef({ x: 0, y: 0 });
+    const flatListRef = useRef();
+    const scrollOffset = useRef(0);
+
     const [selectedImages, setSelectedImages] = useState([]);
     const [sortedData, setSortedData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -47,7 +69,6 @@ const GalleryScreen = ({ navigation }) => {
 
     const geotaggedImages = useSelector(state => state.gallery.geotaggedImages);
     const { user } = useSelector(state => state.auth);
-    const dispatch = useDispatch();
 
     useEffect(() => {
         checkGalleryPermission();
@@ -58,6 +79,68 @@ const GalleryScreen = ({ navigation }) => {
             splitIntoRows(geotaggedImages);
         }
     }, [geotaggedImages]);
+
+    const onGestureEvent = event => {
+        const { x, y } = event.nativeEvent;
+
+        selectItems(x, y);
+
+        lastGesturePosition.current = { x, y };
+    };
+
+    const processedImages = useRef(new Set());
+
+    const selectItems = (x, y) => {
+
+        const adjustedY = y + scrollOffset.current;
+        const column = Math.floor(x / (IMAGE_SIZE + IMAGE_MARGIN * 2));
+
+        let accumulatedHeight = 0;
+
+        for (let sectionIndex = 0; sectionIndex < sortedData.length; sectionIndex++) {
+            const section = sortedData[sectionIndex];
+            const rowsInSection = Math.ceil(section.data.length / IMAGE_PER_ROW);
+            const sectionHeight = rowsInSection * ROW_HEIGHT;
+
+            if (adjustedY >= accumulatedHeight && adjustedY < accumulatedHeight + sectionHeight) {
+                const sectionRelativeY = adjustedY - accumulatedHeight;
+                const row = Math.floor(sectionRelativeY / ROW_HEIGHT);
+                const index = row * IMAGE_PER_ROW + column;
+
+                if (index >= 0 && index < section.data.length) {
+                    const image = section.data[index];
+                    if (image && !processedImages.current.has(image.uri)) {
+                        processedImages.current.add(image.uri);
+                        toggleSelection(image);
+                    }
+                }
+
+                break;
+            }
+
+            accumulatedHeight += sectionHeight;
+        }
+    };
+
+    const toggleSelection = (image) => {
+        const isSelected = selectedImages.some(selected => selected.uri === image.uri);
+
+        if (isSelected) {
+            setSelectedImages(selectedImages => selectedImages.filter(selected => selected.uri !== image.uri));
+        } else {
+            setSelectedImages(selectedImages => [...selectedImages, image]);
+        }
+    };
+
+    const onHandlerStateChange = ({ nativeEvent }) => {
+        if (nativeEvent.state === State.END) {
+            processedImages.current.clear();
+        }
+    };
+
+    const handleScroll = event => {
+        scrollOffset.current = event.nativeEvent.contentOffset.y;
+    };
 
     const checkGalleryPermission = async () => {
 
@@ -237,8 +320,7 @@ const GalleryScreen = ({ navigation }) => {
 
             {hasPermission && !loading ? (
                 <View style={{ flex: 1 }}>
-                    <View
-                        style={{ flexDirection: 'row', marginTop: 4, justifyContent: 'center' }}>
+                    <View style={{ flexDirection: 'row', marginTop: 4, justifyContent: 'center' }}>
                         <Icon
                             name="information-circle-outline"
                             style={{color: Colors.muted}}
@@ -248,18 +330,27 @@ const GalleryScreen = ({ navigation }) => {
                     </View>
 
                     <SafeAreaView style={{ flexDirection: 'row',  flex: 1 }}>
-                        <FlatList
-                            contentContainerStyle={{paddingBottom: 40}}
-                            style={{flexDirection: 'column'}}
-                            alwaysBounceVertical={false}
-                            showsVerticalScrollIndicator={false}
-                            data={sortedData}
-                            renderItem={renderSection}
-                            extraData={selectedImages}
-                            keyExtractor={item => `${item.title}`}
-                            onEndReached={() => dispatch(getPhotosFromCameraroll('LOAD'))}
-                            onEndReachedThreshold={0.05}
-                        />
+                        <PanGestureHandler
+                            onGestureEvent={onGestureEvent}
+                            onHandlerStateChange={onHandlerStateChange}
+                            simultaneousHandlers={flatListRef}
+                        >
+                            <FlatList
+                                ref={flatListRef}
+                                contentContainerStyle={{ paddingBottom: 40 }}
+                                style={{ flexDirection: 'column' }}
+                                alwaysBounceVertical={false}
+                                data={sortedData}
+                                showsVerticalScrollIndicator={false}
+                                renderItem={renderSection}
+                                extraData={selectedImages}
+                                keyExtractor={item => `${item.title}`}
+                                onEndReached={() => dispatch(getPhotosFromCameraroll('LOAD'))}
+                                onEndReachedThreshold={0.05}
+                                onScroll={handleScroll}
+                                scrollEventThrottle={16}
+                            />
+                        </PanGestureHandler>
                     </SafeAreaView>
                 </View>
             ) : (

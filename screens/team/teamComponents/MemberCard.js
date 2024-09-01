@@ -13,15 +13,21 @@ const MemberCard = ({ data, teamId, index }) => {
 
     return (
         <View
-            style={styles.memberCardContainer}>
-            <View
-                style={{ flexDirection: 'row', justifyContent: 'space-between'}}
-            >
+            style={styles.memberCardContainer}
+        >
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
                 <View style={{flexDirection: 'row'}}>
                     <RankingMedal index={index} />
+
                     <View style={{marginLeft: 10}}>
-                        <SubTitle>{data?.name || 'Anonymous'}</SubTitle>
-                        <Caption>{data?.username}</Caption>
+                        {data?.name ? (
+                            <>
+                                <SubTitle>{data.name}</SubTitle>
+                                {data.username && <Caption>{data.username}</Caption>}
+                            </>
+                        ) : (
+                            <SubTitle>{data?.username || 'Anonymous'}</SubTitle>
+                        )}
                     </View>
                 </View>
                 <Body color={isActiveTeam ? 'accent' : 'warn'}>
@@ -47,7 +53,6 @@ const MemberCard = ({ data, teamId, index }) => {
 };
 
 const styles = StyleSheet.create({
-
     memberCardContainer: {
         borderWidth: 1,
         borderColor: '#eee',
@@ -56,7 +61,6 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         backgroundColor: 'white'
     }
-
 });
 
 export default MemberCard;

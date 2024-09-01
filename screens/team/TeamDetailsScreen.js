@@ -38,6 +38,7 @@ const TeamDetailsScreen = ({ navigation }) => {
         dispatch(leaveTeam(token, selectedTeam.id));
 
         actionSheetRef.current.hide();
+
         navigation.navigate('TEAM_HOME');
     };
 
@@ -125,9 +126,7 @@ const TeamDetailsScreen = ({ navigation }) => {
                         buttonColor="info"
                         onPress={
                             () => {
-                                navigation.navigate(
-                                    'TEAM_LEADERBOARD'
-                                );
+                                navigation.navigate('TEAM_LEADERBOARD');
                             }
                             // getTeamMembers(
                             //     token,
@@ -155,7 +154,8 @@ const TeamDetailsScreen = ({ navigation }) => {
                             onPress={() =>
                                 actionSheetRef.current?.hide()
                             }
-                            style={[styles.actionButtonStyle]}>
+                            style={[styles.actionButtonStyle]}
+                        >
                             <Body dictionary={`tag.cancel`} />
                         </Pressable>
                         <Pressable
