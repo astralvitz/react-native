@@ -19,6 +19,9 @@ const ActionButton = ({ status, onPress }) => {
         case 'SELECTED':
             iconName = 'trash-outline';
             break;
+        case 'FILTER':
+            iconName = 'funnel-outline';
+            break;
         default:
             iconName = 'camera-outline';
             break;

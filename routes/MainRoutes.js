@@ -10,6 +10,7 @@ import TabRoutes from './TabRoutes';
 import PermissionStack from './PermissionStack';
 import { GalleryScreen, NewUpdateScreen,  SettingScreen } from '../screens';
 import AddTags from '../screens/addTag/AddTags';
+import MyUploads from "../screens/userStats/userComponents/MyUploads";
 
 const Stack = createStackNavigator();
 
@@ -55,6 +56,8 @@ const MainRoutes = () => {
                         <Stack.Screen name="ALBUM" component={GalleryScreen} />
                         <Stack.Screen name="SETTING" component={SettingScreen} />
                         <Stack.Screen name="UPDATE" component={NewUpdateScreen} />
+
+                        <Stack.Screen name="MY_UPLOADS" component={MyUploads} />
                     </>
                 )}
             </Stack.Navigator>

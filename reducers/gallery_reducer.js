@@ -166,7 +166,15 @@ const gallerySlice = createSlice({
             })
 
             .addCase(getPhotosFromCameraroll.fulfilled, (state, action) => {
-                state.geotaggedImages = [...state.geotaggedImages, ...action.payload.geotagged];
+                const newImages = action.payload.geotagged;
+                const existingImages = state.geotaggedImages;
+
+                // Filter out new images that are already in existingImages
+                const uniqueNewImages = newImages.filter(
+                    newImage => !existingImages.some(existingImage => existingImage.uri === newImage.uri)
+                );
+
+                state.geotaggedImages = [...existingImages, ...uniqueNewImages];
                 state.camerarollImageFetched = true;
                 state.lastFetchTime = Math.floor(new Date().getTime());
                 state.hasNextPage = action.payload.hasNextPage;

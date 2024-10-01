@@ -25,7 +25,7 @@ const GalleryPermissionScreen = ({ navigation }) => {
         const subscription = AppState.addEventListener('change', handleAppStateChange);
 
         return () => subscription.remove();
-    }, []); // Note: This effect does not depend on `appState`.
+    }, []);
 
     useEffect(() => {
         const subscription = AppState.addEventListener('change', handleAppStateChange);

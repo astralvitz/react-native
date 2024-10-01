@@ -18,10 +18,10 @@
 		14940D412C7CB61E003A5B71 /* Poppins-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 14940D322C7CB3F4003A5B71 /* Poppins-Regular.ttf */; };
 		14940D422C7CB61E003A5B71 /* Poppins-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 14940D392C7CB3F4003A5B71 /* Poppins-SemiBold.ttf */; };
 		14940D432C7CB61E003A5B71 /* Poppins-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 14940D3A2C7CB3F4003A5B71 /* Poppins-Thin.ttf */; };
+		598FF5589CFA55D03E14E925 /* libPods-openlittermap.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 683C394F7A147877464DF75A /* libPods-openlittermap.a */; };
 		734B02ABE6122562E23CB5AF /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F40DDBB2CDA31652126E4F50 /* PrivacyInfo.xcprivacy */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		B99F503C1887429339DB2C82 /* libPods-openlittermap-openlittermapTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CFC084FB414CDC2B2526429 /* libPods-openlittermap-openlittermapTests.a */; };
-		E8E9EBCF91459F8B6BF3C0FD /* libPods-openlittermap.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D49CADA14BF627606A64598C /* libPods-openlittermap.a */; };
+		8FE5F779FF3905FAAB6C61A4 /* libPods-openlittermap-openlittermapTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C00EE3D5F37B95C458733085 /* libPods-openlittermap-openlittermapTests.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,14 +54,14 @@
 		14940D382C7CB3F4003A5B71 /* Poppins-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Poppins-Medium.ttf"; path = "../../assets/fonts/Poppins-Medium.ttf"; sourceTree = "<group>"; };
 		14940D392C7CB3F4003A5B71 /* Poppins-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Poppins-SemiBold.ttf"; path = "../../assets/fonts/Poppins-SemiBold.ttf"; sourceTree = "<group>"; };
 		14940D3A2C7CB3F4003A5B71 /* Poppins-Thin.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Poppins-Thin.ttf"; path = "../../assets/fonts/Poppins-Thin.ttf"; sourceTree = "<group>"; };
-		199F032F1F51C35E16DEA30C /* Pods-openlittermap-openlittermapTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openlittermap-openlittermapTests.release.xcconfig"; path = "Target Support Files/Pods-openlittermap-openlittermapTests/Pods-openlittermap-openlittermapTests.release.xcconfig"; sourceTree = "<group>"; };
-		5E2F4A12CA5504A23EF83C85 /* Pods-openlittermap-openlittermapTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openlittermap-openlittermapTests.debug.xcconfig"; path = "Target Support Files/Pods-openlittermap-openlittermapTests/Pods-openlittermap-openlittermapTests.debug.xcconfig"; sourceTree = "<group>"; };
-		68C0E3C2FDC171969E7B4C4B /* Pods-openlittermap.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openlittermap.release.xcconfig"; path = "Target Support Files/Pods-openlittermap/Pods-openlittermap.release.xcconfig"; sourceTree = "<group>"; };
-		7CFC084FB414CDC2B2526429 /* libPods-openlittermap-openlittermapTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-openlittermap-openlittermapTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		21F7781C7479BA53899C2EC7 /* Pods-openlittermap-openlittermapTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openlittermap-openlittermapTests.release.xcconfig"; path = "Target Support Files/Pods-openlittermap-openlittermapTests/Pods-openlittermap-openlittermapTests.release.xcconfig"; sourceTree = "<group>"; };
+		67AC9636F2517A6FDC2B2C91 /* Pods-openlittermap.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openlittermap.release.xcconfig"; path = "Target Support Files/Pods-openlittermap/Pods-openlittermap.release.xcconfig"; sourceTree = "<group>"; };
+		683C394F7A147877464DF75A /* libPods-openlittermap.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-openlittermap.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = openlittermap/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		D49CADA14BF627606A64598C /* libPods-openlittermap.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-openlittermap.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		DCAB80DBAA0B8FA5BD819155 /* Pods-openlittermap.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openlittermap.debug.xcconfig"; path = "Target Support Files/Pods-openlittermap/Pods-openlittermap.debug.xcconfig"; sourceTree = "<group>"; };
+		A8002AA5136658D34894D7E2 /* Pods-openlittermap.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openlittermap.debug.xcconfig"; path = "Target Support Files/Pods-openlittermap/Pods-openlittermap.debug.xcconfig"; sourceTree = "<group>"; };
+		C00EE3D5F37B95C458733085 /* libPods-openlittermap-openlittermapTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-openlittermap-openlittermapTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F305B10C9F7F1D15ECA6EAF5 /* Pods-openlittermap-openlittermapTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openlittermap-openlittermapTests.debug.xcconfig"; path = "Target Support Files/Pods-openlittermap-openlittermapTests/Pods-openlittermap-openlittermapTests.debug.xcconfig"; sourceTree = "<group>"; };
 		F40DDBB2CDA31652126E4F50 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = openlittermap/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -70,7 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B99F503C1887429339DB2C82 /* libPods-openlittermap-openlittermapTests.a in Frameworks */,
+				8FE5F779FF3905FAAB6C61A4 /* libPods-openlittermap-openlittermapTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,7 +78,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E8E9EBCF91459F8B6BF3C0FD /* libPods-openlittermap.a in Frameworks */,
+				598FF5589CFA55D03E14E925 /* libPods-openlittermap.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,8 +137,8 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				D49CADA14BF627606A64598C /* libPods-openlittermap.a */,
-				7CFC084FB414CDC2B2526429 /* libPods-openlittermap-openlittermapTests.a */,
+				683C394F7A147877464DF75A /* libPods-openlittermap.a */,
+				C00EE3D5F37B95C458733085 /* libPods-openlittermap-openlittermapTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -178,10 +178,10 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				DCAB80DBAA0B8FA5BD819155 /* Pods-openlittermap.debug.xcconfig */,
-				68C0E3C2FDC171969E7B4C4B /* Pods-openlittermap.release.xcconfig */,
-				5E2F4A12CA5504A23EF83C85 /* Pods-openlittermap-openlittermapTests.debug.xcconfig */,
-				199F032F1F51C35E16DEA30C /* Pods-openlittermap-openlittermapTests.release.xcconfig */,
+				A8002AA5136658D34894D7E2 /* Pods-openlittermap.debug.xcconfig */,
+				67AC9636F2517A6FDC2B2C91 /* Pods-openlittermap.release.xcconfig */,
+				F305B10C9F7F1D15ECA6EAF5 /* Pods-openlittermap-openlittermapTests.debug.xcconfig */,
+				21F7781C7479BA53899C2EC7 /* Pods-openlittermap-openlittermapTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -193,12 +193,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "openlittermapTests" */;
 			buildPhases = (
-				41925DD1D653513FD1676D67 /* [CP] Check Pods Manifest.lock */,
+				C8387A5CB196250C98FAED7C /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
-				37F1BF3ABA9305A528B32DB6 /* [CP] Embed Pods Frameworks */,
-				6594D80747A40546686006B8 /* [CP] Copy Pods Resources */,
+				5F88BD470D05C4701E600BAA /* [CP] Embed Pods Frameworks */,
+				97173319DE991DA59982F1D4 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -214,13 +214,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "openlittermap" */;
 			buildPhases = (
-				84EC33B522A8FEBD2BBE331E /* [CP] Check Pods Manifest.lock */,
+				A70B9731DFE3A902E71CD4CB /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				D85D37796BD92208887D484F /* [CP] Embed Pods Frameworks */,
-				5C2AEF4725231223807904C9 /* [CP] Copy Pods Resources */,
+				347FF7F058210AA3D2D2501E /* [CP] Embed Pods Frameworks */,
+				8726F891015615EBC002C04C /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -312,7 +312,24 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
-		37F1BF3ABA9305A528B32DB6 /* [CP] Embed Pods Frameworks */ = {
+		347FF7F058210AA3D2D2501E /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-openlittermap/Pods-openlittermap-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-openlittermap/Pods-openlittermap-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-openlittermap/Pods-openlittermap-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5F88BD470D05C4701E600BAA /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -329,29 +346,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-openlittermap-openlittermapTests/Pods-openlittermap-openlittermapTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		41925DD1D653513FD1676D67 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-openlittermap-openlittermapTests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		5C2AEF4725231223807904C9 /* [CP] Copy Pods Resources */ = {
+		8726F891015615EBC002C04C /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -368,7 +363,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-openlittermap/Pods-openlittermap-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		6594D80747A40546686006B8 /* [CP] Copy Pods Resources */ = {
+		97173319DE991DA59982F1D4 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -385,7 +380,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-openlittermap-openlittermapTests/Pods-openlittermap-openlittermapTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		84EC33B522A8FEBD2BBE331E /* [CP] Check Pods Manifest.lock */ = {
+		A70B9731DFE3A902E71CD4CB /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -407,21 +402,26 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		D85D37796BD92208887D484F /* [CP] Embed Pods Frameworks */ = {
+		C8387A5CB196250C98FAED7C /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-openlittermap/Pods-openlittermap-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			name = "[CP] Embed Pods Frameworks";
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-openlittermap/Pods-openlittermap-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-openlittermap-openlittermapTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-openlittermap/Pods-openlittermap-frameworks.sh\"\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -457,7 +457,7 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5E2F4A12CA5504A23EF83C85 /* Pods-openlittermap-openlittermapTests.debug.xcconfig */;
+			baseConfigurationReference = F305B10C9F7F1D15ECA6EAF5 /* Pods-openlittermap-openlittermapTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -485,7 +485,7 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 199F032F1F51C35E16DEA30C /* Pods-openlittermap-openlittermapTests.release.xcconfig */;
+			baseConfigurationReference = 21F7781C7479BA53899C2EC7 /* Pods-openlittermap-openlittermapTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -510,11 +510,11 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DCAB80DBAA0B8FA5BD819155 /* Pods-openlittermap.debug.xcconfig */;
+			baseConfigurationReference = A8002AA5136658D34894D7E2 /* Pods-openlittermap.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 65;
 				DEVELOPMENT_TEAM = QWDQLVZP87;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = openlittermap/Info.plist;
@@ -525,7 +525,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 6.0.1;
+				MARKETING_VERSION = 6.1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -541,11 +541,11 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 68C0E3C2FDC171969E7B4C4B /* Pods-openlittermap.release.xcconfig */;
+			baseConfigurationReference = 67AC9636F2517A6FDC2B2C91 /* Pods-openlittermap.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 65;
 				DEVELOPMENT_TEAM = QWDQLVZP87;
 				INFOPLIST_FILE = openlittermap/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = OpenLitterMap;
@@ -555,7 +555,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 6.0.1;
+				MARKETING_VERSION = 6.1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -642,7 +642,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
@@ -715,7 +718,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
