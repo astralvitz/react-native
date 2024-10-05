@@ -1,4 +1,4 @@
-import React, {ReactElement} from 'react';
+import React from 'react';
 import {
     Platform,
     SafeAreaView,
@@ -10,17 +10,17 @@ import {Colors} from './theme';
 
 // const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 
-interface HeaderProps {
-    leftContent?: ReactElement;
-    rightContent?: ReactElement;
-    centerContent?: ReactElement;
-    containerStyle?: React.CSSProperties | React.CSSProperties[];
-    leftContainerStyle?: React.CSSProperties | React.CSSProperties[];
-    rightContainerStyle?: React.CSSProperties | React.CSSProperties[];
-    centerContainerStyle?: React.CSSProperties | React.CSSProperties[];
-}
+// interface HeaderProps {
+//     leftContent?: ReactElement;
+//     rightContent?: ReactElement;
+//     centerContent?: ReactElement;
+//     containerStyle?: React.CSSProperties | React.CSSProperties[];
+//     leftContainerStyle?: React.CSSProperties | React.CSSProperties[];
+//     rightContainerStyle?: React.CSSProperties | React.CSSProperties[];
+//     centerContainerStyle?: React.CSSProperties | React.CSSProperties[];
+// }
 
-const Header: React.FC<HeaderProps> = ({
+const Header = ({
     leftContent,
     centerContent,
     rightContent,

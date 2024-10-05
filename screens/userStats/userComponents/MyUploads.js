@@ -11,16 +11,20 @@ import {
     KeyboardAvoidingView,
     ScrollView,
     Platform,
-    ActivityIndicator,
+    ActivityIndicator, Linking,
 } from 'react-native';
 import { Body, Header } from "../../components";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUploads } from "../../../reducers/my_uploads_reducer";
+import { clearUploads, fetchUploads } from "../../../reducers/my_uploads_reducer";
 import ActionButton from "../../home/homeComponents/ActionButton";
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
+import { Swipeable } from 'react-native-gesture-handler';
+import { URL } from '../../../actions/types';
+import Clipboard from '@react-native-clipboard/clipboard';
+import moment from 'moment';
 
 const MyUploads = ({ navigation }) => {
 
@@ -28,6 +32,7 @@ const MyUploads = ({ navigation }) => {
     const { t } = useTranslation();
     const [uploads, setUploads] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [filters, setFilters] = useState({
         filterCountry: 'all',
@@ -36,7 +41,6 @@ const MyUploads = ({ navigation }) => {
         filterTag: '',
         filterCustomTag: ''
     });
-    const [page, setPage] = useState(1);
     const [paginationAmount, setPaginationAmount] = useState(25);
     const token = useSelector(state => state.auth.token);
     const myUploads = useSelector(state => state.my_uploads_reducer.uploads);
@@ -49,6 +53,7 @@ const MyUploads = ({ navigation }) => {
 
             setLoading(false);
         }
+
         fetchUploadsWrapper();
     }, []);
 
@@ -73,7 +78,8 @@ const MyUploads = ({ navigation }) => {
     };
 
     const applyFilters = () => {
-        setPage(1);
+
+        dispatch(clearUploads());
 
         dispatch(fetchUploads({
             token,
@@ -83,13 +89,12 @@ const MyUploads = ({ navigation }) => {
             filterDateFrom: filters.filterDateFrom,
             filterDateTo: filters.filterDateTo,
             filterTag: filters.filterTag,
-            filterCustomTag: filters.filter
+            filterCustomTag: filters.filter,
+            append: false
         }));
 
         closeFilterModal();
     };
-
-    const loadMoreUploads = () => setPage(page + 1);
 
     const parseTags = (tagsString, customTags, isTrustedUser) => {
         if (!tagsString && !customTags) {
@@ -124,15 +129,93 @@ const MyUploads = ({ navigation }) => {
         return tags;
     }
 
+    const renderRightActions = (progress, dragX, item) => {
+        return (
+            <View style={styles.actionsContainer}>
+                <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => handleCopyLink(item)}
+                >
+                    <Icon name="link" size={16} color="#000000" />
+
+                    <Text style={styles.actionText}>Copy Link</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => handleOpen(item)}
+                >
+                    <Icon name="map" size={16} color="#000000" />
+
+                    <Text style={styles.actionText}>Show on Map</Text>
+                </TouchableOpacity>
+                {/*<TouchableOpacity*/}
+                {/*    style={styles.actionButton}*/}
+                {/*    onPress={() => handleEdit(item)}*/}
+                {/*>*/}
+                {/*    <Icon name="pencil" size={16} color="#000000" />*/}
+
+                {/*    <Text style={styles.actionText}>Edit</Text>*/}
+                {/*</TouchableOpacity>*/}
+            </View>
+        );
+    };
+
+    const generateLink = (item) => {
+        const year = new Date(item.datetime).getFullYear();
+
+        return `${URL}/global?year=${year}&lat=${item.lat}&lon=${item.lon}&zoom=14.59&photo=${item.id}`;
+    }
+
+    const handleCopyLink = (item) => {
+
+        const link = generateLink(item);
+
+        Clipboard.setString(link);
+    };
+
+    const handleOpen = (item) => {
+
+        const link = generateLink(item);
+
+        Linking.openURL(link);
+    };
+
+    // const handleEdit = (item) => {
+    //     // Your logic to edit the item
+    //     console.log('Edit', item);
+    // };
+
     // Render each upload item
     const renderItem = ({ item }) => (
-        <View style={styles.uploadItem}>
-            <View style={styles.details}>
-                {parseTags(item.result_string).map((tag, index) => (
-                    <View key={index}>{tag}</View>
-                ))}
+        <Swipeable
+            renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item)}
+        >
+            <View style={styles.uploadItem}>
+                <View style={styles.details}>
+
+                    {parseTags(item.result_string).map((tag, index) => (
+                        <View key={index}>
+                            <Text>{tag}</Text>
+                        </View>
+                    ))}
+
+                    {
+                        item.custom_tags && item.custom_tags.length > 0 && (
+                            <View>
+                                {
+                                    item.custom_tags.map((customTag, index) => (
+                                        <Text key={index}>{customTag.tag}</Text>
+                                    ))
+                                }
+                            </View>
+                        )
+                    }
+
+                    <Text style={{ marginTop: 5 }}>Taken: {moment(item.datetime).format("h:mma Do MMM. YYYY")}</Text>
+                    <Text>Uploaded: {moment(item.created_at).format("h:mma Do MMM. YYYY")}</Text>
+                </View>
             </View>
-        </View>
+        </Swipeable>
     );
 
     return (
@@ -169,20 +252,20 @@ const MyUploads = ({ navigation }) => {
                             <View style={styles.modalContent}>
                                 <Text style={styles.modalTitle}>Filter Uploads</Text>
 
-                                <Text style={styles.label}>Country</Text>
-                                <View style={styles.pickerContainer}>
-                                    <Picker
-                                        selectedValue={filters.filterCountry}
-                                        onValueChange={(itemValue) => setFilters({ ...filters, filterCountry: itemValue })}
-                                        style={styles.picker}
-                                        itemStyle={styles.pickerItem}
-                                        mode="dropdown"
-                                    >
-                                        <Picker.Item label="All Countries" value="all" />
-                                        <Picker.Item label="USA" value="usa" />
-                                        <Picker.Item label="Canada" value="canada" />
-                                    </Picker>
-                                </View>
+                                {/*<Text style={styles.label}>Country</Text>*/}
+                                {/*<View style={styles.pickerContainer}>*/}
+                                {/*    <Picker*/}
+                                {/*        selectedValue={filters.filterCountry}*/}
+                                {/*        onValueChange={(itemValue) => setFilters({ ...filters, filterCountry: itemValue })}*/}
+                                {/*        style={styles.picker}*/}
+                                {/*        itemStyle={styles.pickerItem}*/}
+                                {/*        mode="dropdown"*/}
+                                {/*    >*/}
+                                {/*        <Picker.Item label="All Countries" value="all" />*/}
+                                {/*        <Picker.Item label="USA" value="usa" />*/}
+                                {/*        <Picker.Item label="Canada" value="canada" />*/}
+                                {/*    </Picker>*/}
+                                {/*</View>*/}
 
                                 <Text style={styles.label}>Tag</Text>
                                 <TextInput
@@ -245,30 +328,61 @@ const MyUploads = ({ navigation }) => {
                     <>
                         {/* Show what filters are selected */}
                         <View>
-                            <Text style={styles.title}>Filters</Text>
-                            <Text style={styles.date}>Country: {filters.filterCountry}</Text>
-                            <Text style={styles.date}>Tag: {filters.filterTag}</Text>
-                            <Text style={styles.date}>Custom Tag: {filters.filterCustomTag}</Text>
-                            <Text style={styles.date}>From Date: {filters.filterDateFrom ? filters.filterDateFrom.toDateString() : 'Not set'}</Text>
-                            <Text style={styles.date}>To Date: {filters.filterDateTo ? filters.filterDateTo.toDateString() : 'Not set'}</Text>
+                            <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                <Text style={styles.title}>Filters</Text>
+
+                                <View>
+                                    <Text>Total uploads: {uploads.total}</Text>
+
+                                    {
+                                        uploads?.data?.length > 0 && (
+                                            <Text style={{ textAlign: 'right' }}>Showing: {uploads.data.length}</Text>
+                                        )
+                                    }
+                                </View>
+                            </View>
+                            <Text style={styles.date}>Tag: {filters.filterTag ? filters.filterTag : 'None selected'}</Text>
+                            <Text style={styles.date}>Custom Tag: {filters.filterCustomTag ? filters.filterCustomTag : 'None selected'}</Text>
+                            <Text style={styles.date}>From Date: {filters.filterDateFrom ? filters.filterDateFrom.toDateString() : 'None selected'}</Text>
+                            <Text style={styles.date}>To Date: {filters.filterDateTo ? filters.filterDateTo.toDateString() : 'None selected'}</Text>
                         </View>
 
                         <FlatList
-                            data={uploads}
+                            data={uploads.data}
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={renderItem}
                             ListEmptyComponent={<Text style={styles.emptyListText}>No uploads to display.</Text>}
+                            onEndReached={() => {
+                                if (!loadingMore && uploads.next_page_url) {
+                                    setLoadingMore(true);
+
+                                    const nextPage = uploads.current_page + 1;
+
+                                    dispatch(fetchUploads({
+                                        token,
+                                        page: nextPage,
+                                        paginationAmount,
+                                        filterCountry: filters.filterCountry,
+                                        filterDateFrom: filters.filterDateFrom,
+                                        filterDateTo: filters.filterDateTo,
+                                        filterTag: filters.filterTag,
+                                        filterCustomTag: filters.filterCustomTag,
+                                        append: true
+                                    })).then(() => {
+                                        setLoadingMore(false);
+                                    });
+                                }
+                            }}
+                            onEndReachedThreshold={0.5} // Trigger the event when 50% of the list is left
+                            ListFooterComponent={loadingMore && <ActivityIndicator size="small" color="#ccc" />}
+                        />
+
+                        <ActionButton
+                            onPress={loadFilterModal}
+                            status="FILTER"
                         />
                     </>
-
-
                 )}
-
-                <ActionButton
-                    onPress={loadFilterModal}
-                    status="FILTER"
-                />
-
             </View>
         </>
     );
@@ -284,6 +398,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 5,
+        flex: 1
     },
     date: {
         fontSize: 14,
@@ -388,6 +503,23 @@ const styles = StyleSheet.create({
     dateText: {
         fontSize: 16,
         color: '#333',
+    },
+    actionsContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    actionButton: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 'auto',
+        height: 'auto',
+        paddingLeft: 20,
+        paddingRight: 20
+    },
+    actionText: {
+        color: '#000000',
+        fontSize: 16,
+        textAlign: 'center',
     },
 });
 

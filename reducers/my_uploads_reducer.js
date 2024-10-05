@@ -12,13 +12,14 @@ export const fetchUploads = createAsyncThunk(
     'myUploads/fetchUploads',
     async ({
        token,
-       page,
+       page = 1,
        paginationAmount,
        filterCountry,
        filterDateFrom,
        filterDateTo,
        filterTag,
-       filterCustomTag
+       filterCustomTag,
+       append = false
     }, { rejectWithValue }
     ) => {
         try {
@@ -29,7 +30,7 @@ export const fetchUploads = createAsyncThunk(
                     Authorization: `Bearer ${token}`
                 },
                 params: {
-                    page,
+                    loadPage: page,
                     paginationAmount,
                     filterCountry,
                     filterTag,
@@ -39,10 +40,11 @@ export const fetchUploads = createAsyncThunk(
                 }
             });
 
-            console.log('response', response.data.photos.data.length);
-            console.log('response', response.data.photos.data[0]);
+            // if (response.data.photos.data?.length > 5) {
+            //     console.log('response', response.data.photos.data[0]);
+            // }
 
-            return response.data.photos.data;
+            return { data: response.data.photos, append };
         } catch (error) {
             return rejectWithValue(error.response?.data || 'Failed to load uploads');
         }
@@ -57,7 +59,7 @@ const myUploadsSlice = createSlice({
 
     reducers: {
         clearUploads: (state) => {
-            state.uploads = [];
+            state.uploads = { data: [] };
         }
     },
 
@@ -72,7 +74,26 @@ const myUploadsSlice = createSlice({
             .addCase(fetchUploads.fulfilled, (state, action) => {
                 state.loading = false;
                 state.error = null;
-                state.uploads = action.payload;
+
+                if (action.payload.append) {
+                    const existingIds = new Set(state.uploads.data.map(item => item.id));
+                    const newData = action.payload.data.data.filter(item => !existingIds.has(item.id));
+
+                    state.uploads = {
+                        ...action.payload.data,
+                        data: [...state.uploads.data, ...newData],
+                        total: action.payload.data.total,
+                        per_page: action.payload.data.per_page,
+                        current_page: action.payload.data.current_page,
+                        last_page: action.payload.data.last_page,
+                        next_page_url: action.payload.data.next_page_url,
+                        prev_page_url: action.payload.data.prev_page_url,
+                        from: action.payload.data.from,
+                        to: action.payload.data.to
+                    };
+                } else {
+                    state.uploads = action.payload.data;
+                }
             })
             .addCase(fetchUploads.rejected, (state, action) => {
                 state.loading = false;
