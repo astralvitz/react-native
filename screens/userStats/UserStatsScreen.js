@@ -6,6 +6,7 @@ import { Body, Colors, Header, StatsGrid, Title } from '../components';
 import { ProgressCircleCard } from './userComponents';
 import { fetchUser } from "../../reducers/auth_reducer";
 import { useDispatch, useSelector } from "react-redux";
+import ShowMyUploadsButton from "./userComponents/ShowMyUploadsButton";
 
 const UserStatsScreen = ({ navigation }) => {
 
@@ -181,6 +182,10 @@ const UserStatsScreen = ({ navigation }) => {
 
                     <StatsGrid
                         statsData={statsData}
+                    />
+
+                    <ShowMyUploadsButton
+                        navigation={navigation}
                     />
                 </ScrollView>
             )}

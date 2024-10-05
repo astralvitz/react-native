@@ -357,11 +357,7 @@ const AddTags = ({ navigation, lang }) => {
                     {/* Categories */}
                     <Animated.View
                         style={[
-                            {
-                                position: 'absolute',
-                                top: -categoryContainerPosition,
-                                zIndex: 2
-                            },
+                            { position: 'absolute', top: -categoryContainerPosition, zIndex: 2 },
                             categoryAnimatedStyle,
                             opacityStyle
                         ]}

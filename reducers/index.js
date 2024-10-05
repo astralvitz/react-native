@@ -4,6 +4,7 @@ import auth from './auth_reducer';
 import camera from './camera_reducer';
 import gallery from './gallery_reducer';
 import images from './images_reducer';
+import my_uploads_reducer from "./my_uploads_reducer";
 import leaderboard from './leaderboards_reducer';
 import litter from './litter_reducer';
 import shared from './shared_reducer';
@@ -17,6 +18,7 @@ export const rootReducer = combineReducers({
     camera,
     gallery,
     images,
+    my_uploads_reducer,
     leaderboard,
     litter,
     shared,
