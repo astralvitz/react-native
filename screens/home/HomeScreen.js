@@ -90,7 +90,7 @@ const HomeScreen = ({ navigation }) => {
 
             // Commented out for now
             // if (!__DEV__) {
-            //     await checkNewVersion();
+                await checkNewVersion();
             // }
 
             checkGalleryPermission();
@@ -128,6 +128,9 @@ const HomeScreen = ({ navigation }) => {
     useEffect(() => {
         const platform = Platform.OS;
         const latestVersion = DeviceInfo.getVersion();
+
+        console.log({ appVersion });
+        console.log({ latestVersion });
 
         if (appVersion && appVersion[platform]?.version !== latestVersion) {
             navigation.navigate('UPDATE');
