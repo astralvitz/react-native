@@ -88,10 +88,9 @@ const HomeScreen = ({ navigation }) => {
                 await dispatch(getUntaggedImages(token));
             }
 
-            // Commented out for now
-            // if (!__DEV__) {
+            if (!__DEV__) {
                 await checkNewVersion();
-            // }
+            }
 
             checkGalleryPermission();
         };
