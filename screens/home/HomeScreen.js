@@ -88,10 +88,9 @@ const HomeScreen = ({ navigation }) => {
                 await dispatch(getUntaggedImages(token));
             }
 
-            // Commented out for now
-            // if (!__DEV__) {
-            //     await checkNewVersion();
-            // }
+            if (!__DEV__) {
+                await checkNewVersion();
+            }
 
             checkGalleryPermission();
         };
@@ -112,7 +111,7 @@ const HomeScreen = ({ navigation }) => {
     async function checkGalleryPermission () {
         const result = await checkCameraRollPermission();
 
-        if (result === 'granted') {
+        if (result === 'granted' || 'limited') {
             await dispatch(getPhotosFromCameraroll());
         } else {
             navigation.navigate('PERMISSION', { screen: 'GALLERY_PERMISSION' });
@@ -125,12 +124,40 @@ const HomeScreen = ({ navigation }) => {
         }
     }
 
+    const compareVersions = (latestVersion, currentVersion) => {
+        const latest = latestVersion.split('.');
+        const current = currentVersion.split('.');
+
+        for (let i = 0; i < latest.length; i++) {
+            const latestPart = parseInt(latest[i], 10);
+            const currentPart = parseInt(current[i], 10);
+
+            if (latestPart > currentPart) {
+                return 1;
+            } else if (latestPart < currentPart) {
+                return -1;
+            }
+        }
+
+        return 0;
+    };
+
     useEffect(() => {
         const platform = Platform.OS;
-        const latestVersion = DeviceInfo.getVersion();
+        const currentVersion = DeviceInfo.getVersion();
 
-        if (appVersion && appVersion[platform]?.version !== latestVersion) {
-            navigation.navigate('UPDATE');
+        if (appVersion)
+        {
+            const latestVersion = appVersion[platform]?.version;
+
+            if (latestVersion)
+            {
+                const comparisonResult = compareVersions(latestVersion, currentVersion);
+
+                if (comparisonResult > 0) {
+                    navigation.navigate('UPDATE');
+                }
+            }
         }
     }, [appVersion]);
 
